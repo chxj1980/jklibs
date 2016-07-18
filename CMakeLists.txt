@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.3)
 project(jklibs)
 
+if(EXTERN)
 set(BASE_DIR "/home/v/jkdata/work/source/openwrt/staging_dir/target-x86_64-linux-gnu")
+include_directories(${BASE_DIR}/usr/include)
+link_directories(${BASE_DIR}/usr/lib)
+endif()
 
 set(JKTEST ON)
 set(JSONC ON)
@@ -13,9 +17,6 @@ if(JKTEST)
 else()
     message(STATUS "JKTest is OFF")
 endif()
-
-include_directories(${BASE_DIR}/usr/include)
-link_directories(${BASE_DIR}/usr/lib)
 
 add_subdirectory(demo)
 
