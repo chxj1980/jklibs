@@ -1,16 +1,12 @@
 cmake_minimum_required(VERSION 3.3)
 project(jklibs)
 
-set(JKUTILS ON)
-set(JKNET ON)
-set(JKLISTS OFF)
+set(BASE_DIR "/home/v/jkdata/work/source/openwrt/staging_dir/target-x86_64-linux-gnu")
+
 set(JKTEST ON)
+set(JSONC ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-if(JKLISTS)
-    include_directories(lists)
-endif()
 
 if(JKTEST)
     message(STATUS "JKTest is ON")
@@ -18,16 +14,12 @@ else()
     message(STATUS "JKTest is OFF")
 endif()
 
-if(JKUTILS)
-    include_directories(utils)
-    add_subdirectory(utils)
-endif()
+include_directories(${BASE_DIR}/usr/include)
+link_directories(${BASE_DIR}/usr/lib)
 
-if(JKNET)
-    add_subdirectory(net)
-endif()
+add_subdirectory(demo)
 
 #add_library(jklibs STATIC)
-add_library(jklibs SHARED net utils lists)
+add_library(jklibs SHARED)
 set_target_properties(jklibs PROPERTIES LINKER_LANGUAGE C)
-target_link_libraries(jklibs net utils lists)
+target_link_libraries(jklibs)
