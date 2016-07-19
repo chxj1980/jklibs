@@ -24,3 +24,5 @@ add_subdirectory(demo)
 add_library(jklibs SHARED)
 set_target_properties(jklibs PROPERTIES LINKER_LANGUAGE C)
 target_link_libraries(jklibs)
+
+install(FILES demo/jsonc_demo DESTINATION /usr/bin)
