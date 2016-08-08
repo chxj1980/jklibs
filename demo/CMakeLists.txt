@@ -12,4 +12,7 @@ if(JKTEST)
 
     add_executable(list_demo list_demo.c)
     target_link_libraries(list_demo ubox)
+
+    add_executable(base_demo base_demo.c)
+    target_link_libraries(base_demo kfcommon)
 endif()
