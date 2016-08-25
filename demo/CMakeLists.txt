@@ -15,4 +15,7 @@ if(JKTEST)
 
     add_executable(base_demo base_demo.c)
     target_link_libraries(base_demo kfcommon)
+
+    add_executable(netlink_demo netlink_demo.c)
+    target_link_libraries(netlink_demo kfcommon)
 endif()
