@@ -1,5 +1,5 @@
 
-project(kfcommon)
+project(common)
 
 set(SOURCE_COMMON_FILE
         bvpu_utils.c
@@ -31,7 +31,6 @@ set(SOURCE_JSON_FILE
 set(BASE_FILES
         ${SOURCE_COMMON_FILE} ${SOURCE_CRYPTO_FILE} ${SOURCE_JSON_FILE} jk_conn_udp.c jk_conn_udp.h)
 
-
 set(DEMO_CONN_FILE
         demo/demo_conn.c)
 
@@ -61,6 +60,7 @@ target_link_libraries(kfcommon m libzlog)
 
 link_directories(${CMAKE_BINARY_DIR}/common)
 
+if(JKTEST)
 add_executable(demo_conn ${DEMO_CONN_FILE})
 target_link_libraries(demo_conn kfcommon)
 
@@ -86,6 +86,7 @@ add_executable(kfclientping ${KFCLIENTPING})
 target_link_libraries(kfclientping kfcommon)
 
 add_executable(demo_remove_m demo_remove_m.c)
+endif()
 
 add_subdirectory(unixsocket)
 add_subdirectory(libconfig)

@@ -7,8 +7,9 @@ include_directories(${BASE_DIR}/usr/include)
 link_directories(${BASE_DIR}/usr/lib)
 endif()
 
-set(JKTEST ON)
-set(JSONC ON)
+option(JKTEST "Build Test demos" ON)
+option(JSONC "Json c use" ON)
+option(POKY "Poky embbed" OFF)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
@@ -19,6 +20,7 @@ else()
 endif()
 
 include_directories(common)
+include_directories(common/json)
 include_directories(kfmd5)
 
 add_subdirectory(demo)
@@ -26,11 +28,11 @@ add_subdirectory(demo)
 add_subdirectory(common)
 add_subdirectory(kfmd5)
 add_subdirectory(jkprotocol)
+add_subdirectory(jni)
 
-#add_library(jklibs STATIC)
-add_library(jklibs SHARED)
+add_library(jklibs STATIC common kfmd5 jkprotocol)
 set_target_properties(jklibs PROPERTIES LINKER_LANGUAGE C)
-target_link_libraries(jklibs kfcommon kfmd5 jkprotocol)
+target_link_libraries(jklibs common kfmd5 jkprotocol)
 
 install(FILES demo/jsonc_demo DESTINATION /usr/bin)
 install(FILES libjklibs.so DESTINATION /usr/lib)

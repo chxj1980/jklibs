@@ -32,8 +32,11 @@ if(JKTEST)
         target_link_libraries(demo_opengles Common GLESv2 EGL SM ICE X11 Xext)
         endif(POKY)
 
-        add_executable(demo_psstream psstream/demo_psstream.cpp psstream/PSPacket.h
+        add_executable(demo_psstream psstream/demo_psstream.cpp
+                psstream/PSPacket.h
                 psstream/streamdef.h)
+        add_executable(demo_ps_es psstream/demo_ps_es.cpp
+                psstream/PS2ES.cpp psstream/PS2ES.h)
 
 #    add_executable(demo_ncurses demo_ncurses.c)
 endif()
