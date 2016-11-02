@@ -139,24 +139,52 @@ int process(PS2ES_HANDLE handle) {
         memset(&nu, 0, sizeof(nu));
         int nalhead_pos = 0;
 
-        for (;;) {
-            nalhead_pos = ReadNaluFromBuf(&nu, idata, ilen, nalhead_pos);
-            if (nalhead_pos < 0) break;
+        char *start_nal = idata;
+        char *end_nal = NULL;
 
+        int first = 0;
+
+        int over = 0;
+
+        for (;;) {
+            for (;;) {
+                nalhead_pos = ReadNaluFromBuf(&nu, idata, ilen, nalhead_pos);
+                if (nalhead_pos < 0) {
+                    over = 1;
+                    break;
+                }
+//                debug_data((char*)nu.data, nu.size);
+                if (nu.data[0] == 0xBA) {
+                    if (first == 0) {
+                        first = 1;
+                        continue;
+                    } else {
+                        end_nal = idata + nalhead_pos - nu.size + 1-3;
+                        first = 0;
+                        break;
+                    }
+                }
+            }
+
+            if (over) break;
+
+            int nal_size = end_nal - start_nal;
+            LOG("nal_size = %d", nal_size);
+//            debug_data(end_nal, 20);
 //            debug_data((char *) (nu.data - 3), (unsigned int) nu.size + 3);
 
 //            int ret = PS2ES_PushIn(handle, (unsigned char*)idata, in);
             int ret = 0;
-            if ((unsigned char)nu.data[0] == 0x61) {
-                ret = PS2ES_PushIn(handle, nu.data-4, nu.size+4);
-            } else {
-                ret = PS2ES_PushIn(handle, nu.data-3, nu.size+3);
-            }
+            ret = PS2ES_PushIn(handle, (unsigned char*)start_nal, end_nal - start_nal);
             if (ret < 0) {
                 LOG("Push in data failed %d", ret);
+                start_nal = idata + nalhead_pos -nu.size + 1 -3;
+                nalhead_pos = nalhead_pos - nu.size +1-3;
                 continue;
 //            break;
             }
+            start_nal = idata + nalhead_pos -nu.size + 1 -3;
+            nalhead_pos = nalhead_pos - nu.size +1-3;
             int out = 0;
 
             for (;;) {
