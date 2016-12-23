@@ -40,3 +40,10 @@ if(JKTEST)
 
 #    add_executable(demo_ncurses demo_ncurses.c)
 endif()
+
+include_directories(op_stream)
+
+set(OP_STREAM_FILE
+        op_stream/h264.cpp)
+
+add_executable(h264_parse op_stream/h264_parse.cpp ${OP_STREAM_FILE})
