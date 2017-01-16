@@ -49,3 +49,5 @@ set(OP_STREAM_FILE
 add_executable(h264_parse op_stream/h264_parse.cpp ${OP_STREAM_FILE})
 
 add_executable(demo_cplus_list demo_cplusplus_list.cpp)
+
+add_executable(demo_media_option media_option.c)
