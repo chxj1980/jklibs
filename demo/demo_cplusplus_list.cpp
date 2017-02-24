@@ -9,6 +9,62 @@ typedef struct {
     int       iParam;
 } ListInfo;
 
+class DemoA {
+public:
+    DemoA();
+    virtual ~DemoA();
+
+    int hello();
+    virtual int dosome() = 0;
+};
+
+DemoA::DemoA() {
+
+}
+
+DemoA::~DemoA() {
+
+}
+
+int DemoA::hello() {
+    printf("--- demoA \n");
+    dosome();
+    return 0;
+}
+
+class DemoB : public DemoA {
+public:
+    DemoB();
+    ~DemoB();
+
+    int hello();
+
+    virtual int dosome();
+};
+
+DemoB::DemoB() {
+
+}
+DemoB::~DemoB() {
+
+}
+
+int DemoB::hello() {
+    printf("------hello\n");
+    return 0;
+}
+
+int DemoB::dosome() {
+    printf("hello b\n");
+    return 0;
+}
+
+int demo() {
+
+    DemoB * b = new DemoB();
+    b->hello();
+    return 0;
+}
 
 int list_test() {
 
@@ -31,5 +87,6 @@ int list_test() {
 }
 
 int main() {
-    list_test();
+//    list_test();
+    demo();
 }
