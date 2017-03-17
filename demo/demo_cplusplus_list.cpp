@@ -4,6 +4,8 @@
 
 #include <cstdio>
 #include <list>
+#include <pthread.h>
+#include <unistd.h>
 
 typedef struct {
     int       iParam;
@@ -86,7 +88,57 @@ int list_test() {
     return 0;
 }
 
+class TBase {
+public:
+    TBase();
+    ~TBase();
+
+    void output();
+    int test_args(int i, int j, bool value = false);
+
+private:
+    int         value;
+};
+
+TBase::TBase() {
+     value = 8;
+}
+
+TBase::~TBase() {
+
+}
+
+void TBase::output() {
+    printf("yes, tbas %d e\n", value);
+}
+
+int TBase::test_args(int i, int j, bool value) {
+    printf("-------- ok : %d, %d\n", i,j );
+}
+
+TBase **gbase;
+
+void set_tbase(TBase **base) {
+    gbase = base;
+}
+
+void *base_test(void *arges)
+{
+    printf("before gbase %p\n", gbase);
+//    gbase->output();
+    sleep(4);
+    printf("gbase %p\n", gbase);
+    (*gbase)->output();
+}
+
 int main() {
 //    list_test();
-    demo();
+//    demo();
+
+    TBase *base = new TBase();
+    base->test_args(1, 2);
+
+    sleep(10);
+
+    return 0;
 }

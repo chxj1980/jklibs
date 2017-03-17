@@ -35,13 +35,28 @@ void findsome() {
     printf("-------- hello length: %d\n", length);
 }
 
+void format_arges(int n) {
+    char *data = "839281211";
+    char fmt[8];
+    sprintf(fmt, "%%%dd", n);
+    printf("fmt: %s\n", fmt);
+    int save = 0;
+    sscanf(data, fmt, &save);
+    printf("give out %d\n", save);
+}
+
+void test_cmp() {
+
+}
+
 int main() {
 //    TestLongConvert();
 
 //    hello_test();
 //    printf("------ heloo %d\n", *(int*)hello);
 
-    findsome();
+//    findsome();
 
+    format_arges(4);
     return 0;
 }
