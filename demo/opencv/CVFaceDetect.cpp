@@ -142,6 +142,7 @@ int CVFaceDetect::face_detect_draw_video(const char *filename, Size size) {
 
         imshow("video", cvarrToMat(do_image));
         cvWaitKey(10);
+        cvReleaseImage(&do_image);
     }
     cvDestroyWindow("video");
     delete []frame;

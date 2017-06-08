@@ -66,6 +66,9 @@ target_link_libraries(opencv_image opencv_core opencv_highgui opencv_imgproc ope
 add_executable(opencv_video opencv/play_video.cpp)
 target_link_libraries(opencv_video opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_videoio)
 
+add_executable(opencv_video_from_capture opencv/play_video_from_capture.cpp)
+target_link_libraries(opencv_video_from_capture opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_videoio)
+
 add_executable(opencv_face_detect opencv/face_detect.cpp
         opencv/CVFaceDetect.cpp)
 target_link_libraries(opencv_face_detect opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_objdetect)

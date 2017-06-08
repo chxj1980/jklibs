@@ -2,35 +2,42 @@
 // Created by jmdvirus on 2017/6/8.
 //
 
-#include<cstring>
 #include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include <stdio.h>
-
-using namespace std;
-using namespace cv;
-
-double tmp;
-
-int main(int argc, char **argv){
-    Mat frame;
-    bool stop(false);
-
-    VideoCapture capture(argv[1]);
-    if (!capture.isOpened()){
-        return 0;
+int gSliderPos = 0;
+CvCapture* gCapture = NULL;
+void showPosFrame(int pos) {
+    /*show the pos of frame*/
+    cvSetCaptureProperty(gCapture, CV_CAP_PROP_POS_FRAMES, pos);
+}
+int main(int argc, char ** argv) {
+    char* fileName = argv[1];
+    char* windowTitle = (char*)"video";
+    int ESC_KEY = 27;
+    cvNamedWindow(windowTitle, CV_WINDOW_AUTOSIZE);
+    CvCapture *capture = cvCreateFileCapture(fileName);
+    gCapture = capture;
+    int frameCount = (int) cvGetCaptureProperty(capture,
+                                                CV_CAP_PROP_FRAME_COUNT);
+    if (frameCount != 0) {
+        cvCreateTrackbar("Track Bar", windowTitle, &gSliderPos, frameCount,
+                         showPosFrame);
     }
-
-    while(!stop){
-        if (!capture.read(frame)){
+    IplImage* frame;
+    while (1) {
+        frame = cvQueryFrame(capture);
+        if (!frame) {
             break;
         }
-        // show foreground
-        imshow("Video", frame);
-        if (waitKey(50) == 'q'){
-            stop = true;
+        cvShowImage(windowTitle, frame);
+        gSliderPos++;
+        if (gSliderPos % 150 == 0)
+            cvSetTrackbarPos("Track Bar", windowTitle, gSliderPos);
+        int c = cvWaitKey(50);
+        if (c == ESC_KEY) {
+            break;
         }
     }
-
+    cvReleaseCapture(&capture);
+    cvDestroyWindow(windowTitle);
     return 0;
 }
