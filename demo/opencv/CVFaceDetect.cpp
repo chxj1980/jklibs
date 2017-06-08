@@ -32,7 +32,7 @@
 #elif __MACOS__
 #define OPENCV_FONTFACE_PATH "/Users/jmdvirus/jmd/proj/app/source/opencv-3.2.0/data/haarcascades/"
 #else
-#define OPENCV_FONTFACE_PATH "/opt/Arges/etc/conf/haarcascades/"
+#define OPENCV_FONTFACE_PATH "/svn/public/lib/opencv-3.2.0/x64/share/OpenCV/haarcascades/"
 //#define OPENCV_FONTFACE_PATH "/opt/Arges/conf/hogcascades/"
 #endif
 #define OPENCV_FONTFACE_FILE "haarcascade_frontalface_alt.xml"
@@ -97,7 +97,7 @@ int CVFaceDetect::face_detect_draw_image(const char *filename) {
 
     IplImage* image = cvLoadImage( filename, 1);
 
-    static CvScalar colors = { 100, 100, 100};
+    static CvScalar colors(100, 100, 100);
     std::vector<Rect> ret = detect_face_image(filename);
     for (int i = 0; i < ret.size(); i++) {
         Rect dr = ret[i];
@@ -120,7 +120,7 @@ int CVFaceDetect::face_detect_draw_video(const char *filename, Size size) {
     FILE * file = fopen(filename, "rb");
     if (!file) return -1;
 
-    static CvScalar colors = { 100, 100, 100};
+    static CvScalar colors(100, 100, 100);
     namedWindow("video");
 
     while (true) {

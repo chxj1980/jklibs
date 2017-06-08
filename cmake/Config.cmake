@@ -55,6 +55,7 @@ option(WINDOWS "windows platform" OFF)
 option(LINUX "linux platform" ON)
 option(COREI7 "corei7 platform" OFF)
 
+message(STATUS "PLATFORM ${PLATFORM}")
 if ("${PLATFORM}" STREQUAL "x64")
     set(LINUX ON)
 elseif ("${PLATFORM}" STREQUAL "CentOS-x64")

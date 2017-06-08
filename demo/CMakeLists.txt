@@ -1,6 +1,8 @@
 
 project(demo)
 
+include(../cmake/Config.cmake)
+
 if(JKTEST)
     include_directories(/usr/include)
 #    set(ULOOP_DEMO_FILE uloop_demo.c)
