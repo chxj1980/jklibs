@@ -71,7 +71,7 @@ std::vector<Rect> CVFaceDetect::detectFaces(Mat img_gray){
 }
 
 std::vector<Rect> CVFaceDetect::detect_face(const char *buffer, int len, Size size) {
-    Mat l_image(size.height + size.width/2, size.width, CV_8UC1, (char*)buffer);
+    Mat l_image(size.height + size.height/2, size.width, CV_8UC1, (char*)buffer);
     Mat l_img_gray;
     cvtColor(l_image, l_img_gray, COLOR_YUV420p2GRAY);
     equalizeHist(l_img_gray, l_img_gray);
@@ -109,6 +109,43 @@ int CVFaceDetect::face_detect_draw_image(const char *filename) {
     waitKey(0);
     cvReleaseImage(&image);
     cvDestroyWindow("face detect");
+
+    return 0;
+}
+
+int CVFaceDetect::face_detect_draw_video(const char *filename, Size size) {
+
+    int frame_size = (size.height * size.width) * 3 /2;
+    char *frame = new char[frame_size];
+    FILE * file = fopen(filename, "rb");
+    if (!file) return -1;
+
+    static CvScalar colors = { 100, 100, 100};
+    namedWindow("video");
+
+    while (true) {
+        int n = fread(frame, 1, frame_size, file);
+        if (n <= 0) {
+            LOG_DEBUG("read data failed ret %d\n", n);
+            break;
+        }
+        Mat l_image(size.height + size.height/2, size.width, CV_8UC1, (char*)frame);
+        IplImage *do_image = cvCreateImage(size, IPL_DEPTH_8U, 1);
+        do_image->imageData = (char *) l_image.data;
+        std::vector<Rect> ret = detect_face(frame, frame_size, size);
+        for (int i = 0; i < ret.size(); i++) {
+            Rect dr = ret[i];
+            CvRect cr(dr.x, dr.y, dr.width, dr.height);
+            LOG_DEBUG("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
+            cvRectangleR(do_image, cr, colors);
+        }
+
+        imshow("video", cvarrToMat(do_image));
+        cvWaitKey(10);
+    }
+    cvDestroyWindow("video");
+    delete []frame;
+    fclose(file);
 
     return 0;
 }

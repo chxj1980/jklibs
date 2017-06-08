@@ -28,6 +28,7 @@ public:
 
     // Debug for view
     int face_detect_draw_image(const char *filename);
+    int face_detect_draw_video(const char *filename, Size size);
 
     std::vector<Rect>    face_rects() {
         return detect_face_rects_;
