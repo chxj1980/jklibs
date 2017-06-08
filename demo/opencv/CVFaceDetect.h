@@ -13,16 +13,31 @@
 using namespace cv;
 using namespace std;
 
+#ifndef WIN32
+#define DEBUG_DURATION
+#endif
+
 class CVFaceDetect {
 public:
+    // Parse YUV frame
+    // size: YUV size of video
     std::vector<Rect> detect_face(const char *buffer, int len, Size size);
+
+    // Parse one image
     std::vector<Rect> detect_face_image(const char *filename);
 
     // Debug for view
     int face_detect_draw_image(const char *filename);
 
+    std::vector<Rect>    face_rects() {
+        return detect_face_rects_;
+    }
+
 protected:
     std::vector<Rect> detectFaces(Mat img_gray);
+
+private:
+    std::vector<Rect>    detect_face_rects_;
 
 };
 
