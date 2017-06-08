@@ -1,0 +1,4 @@
+
+set(CMAKE_C_COMPILER ${CC})
+set(CMAKE_CXX_COMPILER ${CXX})
+set(PLATFORM corei7)
