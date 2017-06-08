@@ -51,3 +51,13 @@ add_executable(h264_parse op_stream/h264_parse.cpp ${OP_STREAM_FILE})
 add_executable(demo_cplus_list demo_cplusplus_list.cpp)
 
 add_executable(demo_media_option media_option.c)
+
+if (APPLE)
+    include_directories(/Users/jmdvirus/jmd/proj/app/source/opencv-3.2.0/libs/include)
+    link_directories(/Users/jmdvirus/jmd/proj/app/source/opencv-3.2.0/libs/lib)
+endif ()
+
+add_executable(opencv_tutorial opencv/tutorial.cpp)
+target_link_libraries(opencv_tutorial opencv_core opencv_highgui opencv_imgcodecs)
+add_executable(opencv_image opencv/image_tool.cpp)
+target_link_libraries(opencv_image opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs)
