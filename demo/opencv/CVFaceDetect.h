@@ -10,35 +10,32 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/objdetect/objdetect.hpp"
 
-using namespace cv;
 using namespace std;
 
-#ifndef _WIN32
 #define DEBUG_DURATION
-#endif
 
 class CVFaceDetect {
 public:
     // Parse YUV frame
     // size: YUV size of video
-    std::vector<Rect> detect_face(const char *buffer, int len, Size size);
+    std::vector<cv::Rect> detect_face(const char *buffer, int len, cv::Size size);
 
     // Parse one image
-    std::vector<Rect> detect_face_image(const char *filename);
+    std::vector<cv::Rect> detect_face_image(const char *filename);
 
     // Debug for view
     int face_detect_draw_image(const char *filename);
-    int face_detect_draw_video(const char *filename, Size size);
+    int face_detect_draw_video(const char *filename, cv::Size size);
 
-    std::vector<Rect>    face_rects() {
+    std::vector<cv::Rect>    face_rects() {
         return detect_face_rects_;
     }
 
 protected:
-    std::vector<Rect> detectFaces(Mat img_gray);
+    std::vector<cv::Rect> detectFaces(cv::Mat img_gray);
 
 private:
-    std::vector<Rect>    detect_face_rects_;
+    std::vector<cv::Rect>    detect_face_rects_;
 
 };
 

@@ -62,7 +62,7 @@ if (APPLE)
 elseif (WINDOWS)
     include_directories("C:\\proj\\code\\opencv-3.2.0\\opencv\\build\\include")
     link_directories("C:\\proj\\code\\opencv-3.2.0\\opencv\\build\\x64\\vc14\\lib")
-    set(OPENCV_LINK_LIBS opencv_world320)
+    set(OPENCV_LINK_LIBS opencv_world320d)
 endif ()
 
 add_executable(opencv_tutorial opencv/tutorial.cpp)
