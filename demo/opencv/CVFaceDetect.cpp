@@ -47,7 +47,7 @@ time_t get_time_ms() {
 #else
 	SYSTEMTIME st;
 	GetLocalTime(&st);
-	return st.wMilliseconds / 1000;
+	return st.wSecond*1000 + st.wMilliseconds;
 #endif
 }
 #endif
@@ -71,7 +71,7 @@ std::vector<cv::Rect> CVFaceDetect::detectFaces(cv::Mat img_gray){
     faces_cascade.detectMultiScale(img_gray,detect_face_rects_,1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
 #ifdef DEBUG_DURATION
     time_t end = get_time_ms();
-    LOG_DEBUG("detect multi scale time %ld ms\n", end - start);
+    LOG_DEBUG("detect multi scale time %ld ms (%ld, %ld)\n", end - start, end, start);
 #endif
     return detect_face_rects_;
 }

@@ -11,7 +11,7 @@ int main(int argc, char **args) {
     CVFaceDetect fd;
     fd.face_detect_draw_image(img);
 
-//    Size size(1280, 720);
-//    fd.face_detect_draw_video(img, size);
+//    cv::Size size(1280, 720);
+ //   fd.face_detect_draw_video(img, size);
     return 0;
 }
