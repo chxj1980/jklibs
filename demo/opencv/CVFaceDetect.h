@@ -13,7 +13,7 @@
 using namespace cv;
 using namespace std;
 
-#ifndef WIN32
+#ifndef _WIN32
 #define DEBUG_DURATION
 #endif
 

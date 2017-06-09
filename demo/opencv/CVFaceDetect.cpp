@@ -19,16 +19,12 @@
         printf(fmt, ##args); \
     } while(0)
 #else
-#define LOG_DEBUG(fmt, args...) \
-    do {    \
-    } while(0)
-#define LOG_ERROR(fmt, args...) \
-    do {    \
-    } while(0)
+#define LOG_DEBUG printf
+#define LOG_ERROR printf
 #endif
 
 #ifdef _WIN32
-#define OPENCV_FONTFACE_PATH "./"
+#define OPENCV_FONTFACE_PATH "C:\\proj\\code\\opencv-3.2.0\\opencv\\build\\etc\\haarcascades\\"
 #elif __MACOS__
 #define OPENCV_FONTFACE_PATH "/Users/jmdvirus/jmd/proj/app/source/opencv-3.2.0/data/haarcascades/"
 #else
