@@ -7,7 +7,6 @@
 using namespace cv;
 using namespace std;
 
-
     int main( int argc, char** argv )
     {
         if( argc != 2)
@@ -25,7 +24,7 @@ using namespace std;
             return -1;
         }
 
-        namedWindow( "Display window", WINDOW_OPENGL );// Create a window for display.
+        namedWindow( "Display window", WINDOW_NORMAL );// Create a window for display.
         imshow( "Display window", image );                   // Show our image inside it.
 
         waitKey(0);                                          // Wait for a keystroke in the window

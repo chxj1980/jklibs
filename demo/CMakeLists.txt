@@ -1,6 +1,8 @@
 
 project(demo)
 
+include(../cmake/Config.cmake)
+
 if(JKTEST)
     include_directories(/usr/include)
 #    set(ULOOP_DEMO_FILE uloop_demo.c)
@@ -56,19 +58,26 @@ if (APPLE)
     add_definitions(-D__MACOS__)
     include_directories(/Users/jmdvirus/jmd/proj/work/source/public/lib/opencv-3.2.0/-x64/include)
     link_directories(/Users/jmdvirus/jmd/proj/work/source/public/lib/opencv-3.2.0/-x64/lib)
+    set(OPENCV_LINK_LIBS opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_objdetect opencv_videoio)
+elseif (WINDOWS)
+    include_directories("J:\\proj\\app\\opencv-3.2.0\\opencv\\build\\include")
+    link_directories("J:\\proj\\app\\opencv-3.2.0\\opencv\\build\\x64\\vc14\\lib")
+    set(OPENCV_LINK_LIBS opencv_world320d)
 endif ()
 
 add_executable(opencv_tutorial opencv/tutorial.cpp)
-target_link_libraries(opencv_tutorial opencv_core opencv_highgui opencv_imgcodecs)
+target_link_libraries(opencv_tutorial ${OPENCV_LINK_LIBS})
 add_executable(opencv_image opencv/image_tool.cpp)
-target_link_libraries(opencv_image opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs)
+target_link_libraries(opencv_image ${OPENCV_LINK_LIBS})
 
 add_executable(opencv_video opencv/play_video.cpp)
-target_link_libraries(opencv_video opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_videoio)
+target_link_libraries(opencv_video ${OPENCV_LINK_LIBS})
 
 add_executable(opencv_video_from_capture opencv/play_video_from_capture.cpp)
-target_link_libraries(opencv_video_from_capture opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_videoio)
+target_link_libraries(opencv_video_from_capture ${OPENCV_LINK_LIBS})
 
 add_executable(opencv_face_detect opencv/face_detect.cpp
-        opencv/CVFaceDetect.cpp)
-target_link_libraries(opencv_face_detect opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_objdetect)
+        opencv/CVFaceDetect.cpp
+        opencv/CVFaceDetect.h
+        )
+target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS})
