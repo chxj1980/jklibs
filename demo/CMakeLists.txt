@@ -54,8 +54,8 @@ add_executable(demo_media_option media_option.c)
 
 if (APPLE)
     add_definitions(-D__MACOS__)
-    include_directories(/Users/jmdvirus/jmd/proj/app/source/opencv-3.2.0/libs/include)
-    link_directories(/Users/jmdvirus/jmd/proj/app/source/opencv-3.2.0/libs/lib)
+    include_directories(/Users/jmdvirus/jmd/proj/work/source/public/lib/opencv-3.2.0/-x64/include)
+    link_directories(/Users/jmdvirus/jmd/proj/work/source/public/lib/opencv-3.2.0/-x64/lib)
 endif ()
 
 add_executable(opencv_tutorial opencv/tutorial.cpp)
