@@ -10,7 +10,7 @@ int face_detect_from_video() {
 
 	CvScalar colors(10, 10, 200);
 	cv::Size size(640, 480);
-	cv::Mat frame;
+	cv::UMat frame;
 	CVFaceDetect fd;
 	while (1) {
 		vcap >> frame;
@@ -20,7 +20,7 @@ int face_detect_from_video() {
 			cv::Rect dr = ret[i];
 			CvRect cr(dr.x, dr.y, dr.width, dr.height);
 			printf("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
-			cv::rectangle(frame, cr, colors, 4);
+//			cvRectangleR(frame, cr, colors, 4);
 		}
 #endif
 		cv::imshow("video", frame);
@@ -36,11 +36,11 @@ int face_detect_from_video() {
 int main(int argc, char **args) {
     const char *img = args[1];
 
-	face_detect_from_video();
-    //CVFaceDetect fd;
+//	face_detect_from_video();
+    CVFaceDetect fd;
     //fd.face_detect_draw_image(img);
 
-//    cv::Size size(1280, 720);
- //   fd.face_detect_draw_video(img, size);
+    cv::Size size(1280, 720);
+    fd.face_detect_draw_video(img, size);
     return 0;
 }

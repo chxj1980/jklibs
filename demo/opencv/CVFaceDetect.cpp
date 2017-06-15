@@ -56,7 +56,7 @@ time_t get_time_ms() {
 检测灰度图片中的人脸，返回人脸矩形坐标(x,y,width,height)
 因为可能检测出多个人脸，所以返回类型为vetor<Rect>
 ------------------------------------------------------*/
-std::vector<cv::Rect> CVFaceDetect::detectFaces(cv::Mat img_gray){
+std::vector<cv::Rect> CVFaceDetect::detectFaces(cv::UMat img_gray){
     cv::CascadeClassifier faces_cascade;
     int ret = faces_cascade.load(OPENCV_FONTFACE_PATH OPENCV_FONTFACE_FILE);
 
@@ -77,8 +77,11 @@ std::vector<cv::Rect> CVFaceDetect::detectFaces(cv::Mat img_gray){
 }
 
 std::vector<cv::Rect> CVFaceDetect::detect_face(const char *buffer, int len, cv::Size size) {
+
     cv::Mat l_image(size.height + size.height/2, size.width, CV_8UC1, (char*)buffer);
-    cv::Mat l_img_gray;
+    cv::Mat l_image2;
+    l_image.copyTo(l_image2);
+    cv::UMat l_img_gray;
     cv::cvtColor(l_image, l_img_gray, cv::COLOR_YUV420p2GRAY);
     cv::equalizeHist(l_img_gray, l_img_gray);
     return detectFaces(l_img_gray);
@@ -88,7 +91,7 @@ std::vector<cv::Rect> CVFaceDetect::detect_face_image(const char *filename) {
     IplImage* image = cvLoadImage( filename, 1 );
 
     cv::Mat l_image = cv::cvarrToMat(image, false);
-    cv::Mat l_img_gray;
+    cv::UMat l_img_gray;
     cv::cvtColor(l_image, l_img_gray, cv::COLOR_BGR2GRAY);
     cv::equalizeHist(l_img_gray, l_img_gray);
     vector<cv::Rect> faces = detectFaces(l_img_gray);
