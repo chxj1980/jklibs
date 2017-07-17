@@ -78,6 +78,9 @@ target_link_libraries(opencv_video ${OPENCV_LINK_LIBS})
 add_executable(opencv_video_from_capture opencv/play_video_from_capture.cpp)
 target_link_libraries(opencv_video_from_capture ${OPENCV_LINK_LIBS})
 
+add_executable(fd_video opencv/fd_video.cpp)
+target_link_libraries(fd_video ${OPENCV_LINK_LIBS})
+
 add_executable(opencv_face_detect opencv/face_detect.cpp
         opencv/CVFaceDetect.cpp
         opencv/CVFaceDetect.h
