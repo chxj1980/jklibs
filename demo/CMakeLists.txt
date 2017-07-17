@@ -63,6 +63,8 @@ elseif (WINDOWS)
     include_directories("J:\\proj\\app\\opencv-3.2.0\\opencv\\build\\include")
     link_directories("J:\\proj\\app\\opencv-3.2.0\\opencv\\build\\x64\\vc14\\lib")
     set(OPENCV_LINK_LIBS opencv_world320d)
+else()
+    set(OPENCV_LINK_LIBS opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_objdetect opencv_videoio)
 endif ()
 
 add_executable(opencv_tutorial opencv/tutorial.cpp)
@@ -81,3 +83,15 @@ add_executable(opencv_face_detect opencv/face_detect.cpp
         opencv/CVFaceDetect.h
         )
 target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS})
+
+include_directories(/opt/intel/opencl/include)
+link_directories(/opt/intel/opencl/lib64/)
+
+add_executable(opencv_withcl opencv/opencl-opencv-interop.cpp)
+target_link_libraries(opencv_withcl ${OPENCV_LINK_LIBS} OpenCL)
+
+add_executable(opencv_withgl opencv/opengl_interop.cpp opencv/winapp.hpp)
+target_link_libraries(opencv_withgl ${OPENCV_LINK_LIBS} GL X11)
+
+add_executable(demo_readdata readdata/demo_readdata.cpp ../common/unixsocket/rt_unixsocket.c)
+target_link_libraries(demo_readdata kfcommon)

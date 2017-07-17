@@ -6,6 +6,10 @@
 #ifndef RTPROGRAM_RT_UNIXSOCKET_H_H
 #define RTPROGRAM_RT_UNIXSOCKET_H_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct tagRTUnixSocketServerHandle *RTUnixSocketServerHandle;
 typedef struct tagRTUnixSocketClientHandle *RTUnixSocketClientHandle;
 
@@ -30,5 +34,9 @@ int rt_unixsocket_client_deinit(RTUnixSocketClientHandle *h);
 int rt_unixsocket_client_send(RTUnixSocketClientHandle h, char *data, int len);
 
 int rt_unixsocket_client_recv(RTUnixSocketClientHandle h, char *data, int *len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //RTPROGRAM_RT_UNIXSOCKET_H_H
