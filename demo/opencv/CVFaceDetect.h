@@ -31,7 +31,8 @@ public:
         return detect_face_rects_;
     }
 
-    std::vector<cv::Rect> detectFaces(cv::UMat img_gray);
+	std::vector<cv::Rect> detectFaces(cv::UMat img_gray);
+	std::vector<cv::Rect> detectFaces2(cv::Mat img_gray);
 
 private:
     std::vector<cv::Rect>    detect_face_rects_;

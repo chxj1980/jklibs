@@ -68,12 +68,33 @@ std::vector<cv::Rect> CVFaceDetect::detectFaces(cv::UMat img_gray){
 #ifdef DEBUG_DURATION
     time_t start = get_time_ms();
 #endif
-    faces_cascade.detectMultiScale(img_gray,detect_face_rects_,1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
+    faces_cascade.detectMultiScale(img_gray,detect_face_rects_,1.2, 2, 
+		0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
 #ifdef DEBUG_DURATION
     time_t end = get_time_ms();
     LOG_DEBUG("detect multi scale time %ld ms (%ld, %ld)\n", end - start, end, start);
 #endif
     return detect_face_rects_;
+}
+
+std::vector<cv::Rect> CVFaceDetect::detectFaces2(cv::Mat img_gray) {
+	cv::CascadeClassifier faces_cascade;
+	int ret = faces_cascade.load(OPENCV_FONTFACE_PATH OPENCV_FONTFACE_FILE);
+
+	detect_face_rects_.clear();
+	if (!ret) {
+		LOG_ERROR("local frontface file failed [ %s ]\n", OPENCV_FONTFACE_PATH OPENCV_FONTFACE_FILE);
+		return detect_face_rects_;
+	}
+#ifdef DEBUG_DURATION
+	time_t start = get_time_ms();
+#endif
+	faces_cascade.detectMultiScale(img_gray, detect_face_rects_, 1.1, 2, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
+#ifdef DEBUG_DURATION
+	time_t end = get_time_ms();
+	LOG_DEBUG("detect multi scale time %ld ms (%ld, %ld)\n", end - start, end, start);
+#endif
+	return detect_face_rects_;
 }
 
 std::vector<cv::Rect> CVFaceDetect::detect_face(const char *buffer, int len, cv::Size size) {

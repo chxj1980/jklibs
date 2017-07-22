@@ -14,16 +14,19 @@ int face_detect_from_video() {
 	CVFaceDetect fd;
 	while (1) {
 		vcap >> frame;
+		cv::Mat showframe;
+		frame.copyTo(showframe);
 #if 1
 		std::vector<cv::Rect> ret = fd.detectFaces(frame);
 		for (int i = 0; i < ret.size(); i++) {
 			cv::Rect dr = ret[i];
 			CvRect cr(dr.x, dr.y, dr.width, dr.height);
 			printf("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
-//			cvRectangleR(frame, cr, colors, 4);
+		
+			rectangle(showframe, cr, colors, 4);
 		}
 #endif
-		cv::imshow("video", frame);
+		cv::imshow("video", showframe);
 
 		char keycode = cvWaitKey(30);
 		if (keycode == 27) {
@@ -36,7 +39,7 @@ int face_detect_from_video() {
 int main(int argc, char **args) {
     const char *img = args[1];
 
-//	face_detect_from_video();
+	face_detect_from_video();
     CVFaceDetect fd;
     //fd.face_detect_draw_image(img);
 

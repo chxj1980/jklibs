@@ -26,6 +26,7 @@ int face_detect_from_video() {
 
 	CvScalar colors(10, 10, 200);
 	cv::Size size(640, 480);
+	cv::Mat gray;
 	cv::Mat frame;
 
 	int doLandmark = true;
@@ -34,15 +35,18 @@ int face_detect_from_video() {
 	int *pResults = NULL;
 	while (true) {
 		vcap >> frame;
+		
+		Mat result_frontal;
 
-		Mat result_frontal = frame.clone();
+		cvtColor(frame, gray, CV_BGR2GRAY);
+		frame.copyTo(result_frontal);
 
-		cv::Mat gray;
-		cv::cvtColor(frame, gray, cv::COLOR_YUV420p2GRAY);
+		//cv::Mat gray;
 
 		time_t start_t = get_time_ms();
 
-		pResults = facedetect_frontal((unsigned char*)pbuffer, (unsigned char*)(gray.ptr(0)), gray.cols, gray.rows, (int)gray.step,
+		pResults = facedetect_frontal((unsigned char*)pbuffer, (unsigned char*)(gray.ptr(0)), 
+			gray.cols, gray.rows, (int)gray.step,
 			1.2f, 2, 48, 0, doLandmark);
 
 		time_t stop_t = get_time_ms();
