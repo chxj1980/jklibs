@@ -123,8 +123,9 @@ std::vector<cv::Rect> CVFaceDetect::detect_face_image(const char *filename) {
 }
 
 int CVFaceDetect::face_detect_draw_image(const char *filename) {
-
+#ifndef __NO_HIGHGUI
     cv::namedWindow("face detect");
+#endif
 
     IplImage* image = cvLoadImage( filename, 1);
 
@@ -136,10 +137,14 @@ int CVFaceDetect::face_detect_draw_image(const char *filename) {
         LOG_DEBUG("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
         cvRectangleR(image, cr, colors);
     }
+#ifndef __NO_HIGHGUI
     cvShowImage("face detect", image);
     cv::waitKey(0);
+#endif
     cvReleaseImage(&image);
+#ifndef __NO_HIGHGUI
     cvDestroyWindow("face detect");
+#endif
 
     return 0;
 }
@@ -152,7 +157,9 @@ int CVFaceDetect::face_detect_draw_video(const char *filename, cv::Size size) {
     if (!file) return -1;
 
     static CvScalar colors(100, 100, 100);
+#ifndef __NO_HIGHGUI
     cv::namedWindow("video");
+#endif
 
     while (true) {
         int n = fread(frame, 1, frame_size, file);
@@ -170,12 +177,15 @@ int CVFaceDetect::face_detect_draw_video(const char *filename, cv::Size size) {
             LOG_DEBUG("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
             cvRectangleR(do_image, cr, colors);
         }
-
+#ifndef __NO_HIGHGUI
         cv::imshow("video", cv::cvarrToMat(do_image));
         cvWaitKey(10);
+#endif
         cvReleaseImage(&do_image);
     }
+#ifndef __NO_HIGHGUI
     cvDestroyWindow("video");
+#endif
     delete []frame;
     fclose(file);
 

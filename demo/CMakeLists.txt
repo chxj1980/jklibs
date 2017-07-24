@@ -24,7 +24,7 @@ if(JKTEST)
 
     add_executable(demo_small demo_small.c)
 
-        if (POKY)
+        if (NOT COREI7)
     add_executable(demo_opengl demo_opengl.c)
     target_link_libraries(demo_opengl glut GL)
 
@@ -32,7 +32,7 @@ if(JKTEST)
         link_directories(/opt/data/data/source/opengl/opengles3-book/build/Common)
             add_executable(demo_opengles demo_opengles.c)
         target_link_libraries(demo_opengles Common GLESv2 EGL SM ICE X11 Xext)
-        endif(POKY)
+        endif()
 
         add_executable(demo_psstream psstream/demo_psstream.cpp
                 psstream/PSPacket.h
@@ -65,8 +65,14 @@ elseif (WINDOWS)
     set(OPENCV_LINK_LIBS opencv_world320d)
 else()
     set(OPENCV_LINK_LIBS opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_objdetect opencv_videoio)
+    if (COREI7)
+        message(INFO "Poky version")
+        set(OPENCV_LINK_LIBS opencv_core opencv_imgproc opencv_imgcodecs opencv_objdetect opencv_videoio)
+        add_definitions(-D__NO_HIGHGUI)
+    endif()
 endif ()
 
+if (NOT COREI7)
 add_executable(opencv_tutorial opencv/tutorial.cpp)
 target_link_libraries(opencv_tutorial ${OPENCV_LINK_LIBS})
 add_executable(opencv_image opencv/image_tool.cpp)
@@ -77,9 +83,12 @@ target_link_libraries(opencv_video ${OPENCV_LINK_LIBS})
 
 add_executable(opencv_video_from_capture opencv/play_video_from_capture.cpp)
 target_link_libraries(opencv_video_from_capture ${OPENCV_LINK_LIBS})
+endif()
 
+if (WINDOWS)
 add_executable(fd_video opencv/fd_video.cpp)
 target_link_libraries(fd_video ${OPENCV_LINK_LIBS})
+endif()
 
 add_executable(opencv_face_detect opencv/face_detect.cpp
         opencv/CVFaceDetect.cpp
@@ -90,11 +99,15 @@ target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS})
 include_directories(/opt/intel/opencl/include)
 link_directories(/opt/intel/opencl/lib64/)
 
+if (NOT COREI7)
+
 add_executable(opencv_withcl opencv/opencl-opencv-interop.cpp)
 target_link_libraries(opencv_withcl ${OPENCV_LINK_LIBS} OpenCL)
 
 add_executable(opencv_withgl opencv/opengl_interop.cpp opencv/winapp.hpp)
 target_link_libraries(opencv_withgl ${OPENCV_LINK_LIBS} GL X11)
+
+endif ()
 
 add_executable(demo_readdata readdata/demo_readdata.cpp ../common/unixsocket/rt_unixsocket.c)
 target_link_libraries(demo_readdata kfcommon)

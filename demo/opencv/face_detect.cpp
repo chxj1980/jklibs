@@ -27,12 +27,14 @@ int face_detect_from_video() {
 			rectangle(showframe, cr, colors, 4);
 		}
 #endif
+#ifndef __NO_HIGHGUI
 		cv::imshow("video", showframe);
 
 		char keycode = cvWaitKey(30);
 		if (keycode == 27) {
 			break;
 		}
+#endif
 	}
 	return 0;
 }
@@ -44,7 +46,7 @@ int main(int argc, char **args) {
     CVFaceDetect fd;
     //fd.face_detect_draw_image(img);
 
-    cv::Size size(1280, 720);
+    cv::Size size(384, 288);
     fd.face_detect_draw_video(img, size);
     return 0;
 }
