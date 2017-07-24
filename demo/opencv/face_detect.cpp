@@ -4,6 +4,7 @@
 
 #include "CVFaceDetect.h"
 
+
 int face_detect_from_video() {
 
 	cv::VideoCapture vcap(0);
@@ -39,7 +40,7 @@ int face_detect_from_video() {
 int main(int argc, char **args) {
     const char *img = args[1];
 
-	face_detect_from_video();
+//	face_detect_from_video();
     CVFaceDetect fd;
     //fd.face_detect_draw_image(img);
 

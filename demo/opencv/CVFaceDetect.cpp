@@ -68,7 +68,7 @@ std::vector<cv::Rect> CVFaceDetect::detectFaces(cv::UMat img_gray){
 #ifdef DEBUG_DURATION
     time_t start = get_time_ms();
 #endif
-    faces_cascade.detectMultiScale(img_gray,detect_face_rects_,1.2, 2, 
+    faces_cascade.detectMultiScale(img_gray,detect_face_rects_,1.2, 2,
 		0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
 #ifdef DEBUG_DURATION
     time_t end = get_time_ms();
@@ -100,12 +100,13 @@ std::vector<cv::Rect> CVFaceDetect::detectFaces2(cv::Mat img_gray) {
 std::vector<cv::Rect> CVFaceDetect::detect_face(const char *buffer, int len, cv::Size size) {
 
     cv::Mat l_image(size.height + size.height/2, size.width, CV_8UC1, (char*)buffer);
-    cv::Mat l_image2;
-    l_image.copyTo(l_image2);
+    cv::UMat ori_img;
+    l_image.copyTo(ori_img);
     cv::UMat l_img_gray;
-    cv::cvtColor(l_image, l_img_gray, cv::COLOR_YUV420p2GRAY);
+    cv::cvtColor(ori_img, l_img_gray, cv::COLOR_YUV420p2GRAY);
     cv::equalizeHist(l_img_gray, l_img_gray);
     return detectFaces(l_img_gray);
+//    return detectFaces2(l_img_gray);
 }
 
 std::vector<cv::Rect> CVFaceDetect::detect_face_image(const char *filename) {
