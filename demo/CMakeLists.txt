@@ -59,10 +59,12 @@ if (APPLE)
     include_directories(/Users/jmdvirus/jmd/proj/work/source/public/lib/opencv-3.2.0/-x64/include)
     link_directories(/Users/jmdvirus/jmd/proj/work/source/public/lib/opencv-3.2.0/-x64/lib)
     set(OPENCV_LINK_LIBS opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_objdetect opencv_videoio)
+    set(OPENCL_LINK_LIBS OpenCL)
 elseif (WINDOWS)
     include_directories("J:\\proj\\app\\opencv-3.2.0\\opencv\\build\\include")
     link_directories("J:\\proj\\app\\opencv-3.2.0\\opencv\\build\\x64\\vc14\\lib")
     set(OPENCV_LINK_LIBS opencv_world320d)
+    set(OPENCL_LINK_LIBS OpenCL)
 else()
     set(OPENCV_LINK_LIBS opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_objdetect opencv_videoio)
     if (COREI7)
@@ -70,6 +72,7 @@ else()
         set(OPENCV_LINK_LIBS opencv_core opencv_imgproc opencv_imgcodecs opencv_objdetect opencv_videoio)
         add_definitions(-D__NO_HIGHGUI)
     endif()
+    set(OPENCL_LINK_LIBS OpenCL)
 endif ()
 
 if (NOT COREI7)
@@ -111,3 +114,18 @@ endif ()
 
 add_executable(demo_readdata readdata/demo_readdata.cpp ../common/unixsocket/rt_unixsocket.c)
 target_link_libraries(demo_readdata kfcommon)
+
+option(WITH_OPENCL "opencl function" ON)
+
+if (WITH_OPENCL)
+    set(SOURCE_FILE
+            opencl/Base.cpp opencl/Base.h
+            )
+
+    add_executable(opencl opencl/main.cpp
+            ${SOURCE_FILE}
+            )
+    target_link_libraries(opencl OpenCL)
+endif()
+
+
