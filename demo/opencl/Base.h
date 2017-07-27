@@ -9,6 +9,7 @@
 #ifdef __MACOS__
 #include <OpenCL/CL.h>
 #else
+#include <CL/cl.h>
 #endif
 
 #define LOG printf
