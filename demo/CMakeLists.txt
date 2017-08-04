@@ -75,6 +75,8 @@ else()
         add_definitions(-D__NO_HIGHGUI)
     endif()
     set(OPENCL_LINK_LIBS OpenCL)
+    include_directories(/opt/intel/opencl/include)
+    link_directories(/opt/intel/opencl/lib64)
 endif ()
 
 if (NOT COREI7)
@@ -99,7 +101,7 @@ add_executable(opencv_face_detect opencv/face_detect.cpp
         opencv/CVFaceDetect.cpp
         opencv/CVFaceDetect.h
         )
-target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS})
+target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS} OpenCL)
 
 include_directories(/opt/intel/opencl/include)
 link_directories(/opt/intel/opencl/lib64/)
