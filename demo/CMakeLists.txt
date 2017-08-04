@@ -3,6 +3,8 @@ project(demo)
 
 include(../cmake/Config.cmake)
 
+option(WITH_OPENGL "OpenGL" ON)
+
 if(JKTEST)
     include_directories(/usr/include)
 #    set(ULOOP_DEMO_FILE uloop_demo.c)
@@ -117,15 +119,29 @@ target_link_libraries(demo_readdata kfcommon)
 
 option(WITH_OPENCL "opencl function" ON)
 
-if (WITH_OPENCL)
-    set(SOURCE_FILE
-            opencl/Base.cpp opencl/Base.h
-            )
+macro(add_program dir)
+    aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/${dir} ${dir}_SOURCE_FILE)
+    add_executable(${dir} ${${dir}_SOURCE_FILE})
+endmacro()
 
-    add_executable(opencl opencl/main.cpp
-            ${SOURCE_FILE}
-            )
+if (WITH_OPENCL)
+    add_program(opencl)
     target_link_libraries(opencl OpenCL)
 endif()
 
+if (WITH_OPENGL)
+    add_program(opengl)
+    find_library(OPENGL_LIB OpenGL)
+    if (NOT OPENGL_LIB)
+        message(FATAL_ERROR "No OpenGL, please install")
+    endif()
+    find_library(GLUT_LIB GLUT)
+    if (NOT GLUT_LIB)
+        message(FATAL_ERROR "No GLUT, please install")
+    endif()
+    target_link_libraries(opengl ${OPENGL_LIB} ${GLUT_LIB})
+endif()
 
+#target_link_libraries(program "-framework CoreFoundation")
+#target_link_libraries(program "-framework your_frame_work_name)
+#set_target_properties(program PROPERTIES LINK_FLAGS "-Wl,-F/Library/Frameworks")
