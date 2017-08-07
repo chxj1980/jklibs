@@ -62,7 +62,13 @@
 
 #include <stdio.h>
 
+#ifdef __DARWIN
 #include "GLUT/glut.h"
+#elif LINUX
+
+#include <GL/glew.h>
+#include <GL/glut.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -151,8 +157,8 @@ void InitShaders()
 {
     GLint vertCompiled, fragCompiled, linked;
 
-    GLint v, f;
-    const char *vs,*fs;
+    GLint v = 0, f = 0;
+    const char *vs = NULL,*fs = NULL;
     //Shader: step1
     v = glCreateShader(GL_VERTEX_SHADER);
     f = glCreateShader(GL_FRAGMENT_SHADER);
@@ -257,8 +263,14 @@ void InitShaders()
 
 int main(int argc, char* argv[])
 {
+    char *filename = NULL;
+#ifdef __DARWIN
+    filename = "/Users/jmdvirus/other/1.yuv";
+#elif LINUX
+    filename = "/opt/data/public/video/1.yuv";
+#endif
     //Open YUV420P file
-    if((infile=fopen("/Users/jmdvirus/other/1.yuv", "rb"))==NULL){
+    if((infile=fopen(filename, "rb"))==NULL){
         printf("cannot open this file\n");
         return -1;
     }
