@@ -1,6 +1,3 @@
-//
-// Created by jmdvirus on 2017/8/4.
-//
 /**
  * 最简单的OpenGL播放视频的例子（OpenGL播放YUV）[Texture]
  * Simplest Video Play OpenGL (OpenGL play YUV) [Texture]
@@ -16,25 +13,25 @@
  * 技术，例如Texture，Shader等，是一个相对比较复杂的例子。
  * 适合有一定OpenGL基础的初学者学习。
  *
- * 函数调用步骤如下:
+ * 函数调用步骤如下：
  *
  * [初始化]
- * glutInit(): 初始化glut库。
- * glutInitDisplayMode(): 设置显示模式。
- * glutCreateWindow(): 创建一个窗口。
- * glewInit(): 初始化glew库。
- * glutDisplayFunc(): 设置绘图函数（重绘的时候调用）。
- * glutTimerFunc(): 设置定时器。
- * InitShaders(): 设置Shader。包含了一系列函数，暂不列出。
- * glutMainLoop(): 进入消息循环。
+ * glutInit()：初始化glut库。
+ * glutInitDisplayMode()：设置显示模式。
+ * glutCreateWindow()：创建一个窗口。
+ * glewInit()：初始化glew库。
+ * glutDisplayFunc()：设置绘图函数（重绘的时候调用）。
+ * glutTimerFunc()：设置定时器。
+ * InitShaders()：设置Shader。包含了一系列函数，暂不列出。
+ * glutMainLoop()：进入消息循环。
  *
  * [循环渲染数据]
- * glActiveTexture(): 激活纹理单位。
- * glBindTexture(): 绑定纹理
- * glTexImage2D(): 根据像素数据，生成一个2D纹理。
- * glUniform1i():
- * glDrawArrays(): 绘制。
- * glutSwapBuffers(): 显示。
+ * glActiveTexture()：
+ * glBindTexture()：
+ * glTexImage2D()：
+ * glUniform1i()：
+ * glDrawArrays():绘制。
+ * glutSwapBuffers()：显示。
  *
  * This software plays YUV raw video data using OpenGL.
  * It support read YUV420P raw file and show it on the screen.
@@ -55,9 +52,9 @@
  * glutMainLoop(): Start message loop.
  *
  * [Loop to Render data]
- * glActiveTexture(): Active a Texture unit
+ * glActiveTexture(): Active a Texture
  * glBindTexture(): Bind Texture
- * glTexImage2D(): Specify pixel data to generate 2D Texture
+ * glTexImage2D():
  * glUniform1i():
  * glDrawArrays(): draw.
  * glutSwapBuffers(): show.
@@ -65,8 +62,9 @@
 
 #include <stdio.h>
 
-#include <GLUT/GLUT.h>
+#include "GLUT/glut.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -78,7 +76,7 @@
 #define TEXTURE_HALF      0
 
 const int screen_w=500,screen_h=500;
-const int pixel_w = 1920, pixel_h = 1080;
+const int pixel_w = 1280, pixel_h = 720;
 //YUV file
 FILE *infile = NULL;
 unsigned char buf[pixel_w*pixel_h*3/2];
@@ -210,17 +208,17 @@ void InitShaders()
 
 #if TEXTURE_HALF
     static const GLfloat textureVertices[] = {
-            0.0f,  1.0f,
-            0.5f,  1.0f,
-            0.0f,  0.0f,
-            0.5f,  0.0f,
-    };
+		0.0f,  1.0f,
+		0.5f,  1.0f,
+		0.0f,  0.0f,
+		0.5f,  0.0f,
+	};
 #else
     static const GLfloat textureVertices[] = {
-        0.0f,  1.0f,
-        1.0f,  1.0f,
-        0.0f,  0.0f,
-        1.0f,  0.0f,
+            0.0f,  1.0f,
+            1.0f,  1.0f,
+            0.0f,  0.0f,
+            1.0f,  0.0f,
     };
 #endif
     //Set Arrays
@@ -276,7 +274,7 @@ int main(int argc, char* argv[])
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA /*| GLUT_STENCIL | GLUT_DEPTH*/);
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(screen_w, screen_h);
-    glutCreateWindow("Simplest Video Play OpenGL (Texture)");
+    glutCreateWindow("Simplest Video Play OpenGL");
     printf("Lei Xiaohua\n");
     printf("http://blog.csdn.net/leixiaohua1020\n");
     printf("Version: %s\n", glGetString(GL_VERSION));
@@ -292,3 +290,9 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+
+
+
+
+
+
