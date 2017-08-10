@@ -5,6 +5,11 @@ include(../cmake/Config.cmake)
 
 option(WITH_OPENGL "OpenGL" ON)
 
+if(WINDOWS)
+include_directories(D:/data/proj/jklibs/windows/include)
+link_directories(D:/data/proj/jklibs/windows/lib)
+endif()
+
 if(JKTEST)
     include_directories(/usr/include)
 #    set(ULOOP_DEMO_FILE uloop_demo.c)
@@ -136,7 +141,9 @@ if (WITH_OPENCL)
 endif()
 
 if (WITH_OPENGL)
-    add_program(opengl)
+    add_program(opengl opengl/main.cpp)
+    
+if (NOT WINDOWS)
     find_library(OPENGL_LIB GL)
     if (NOT OPENGL_LIB)
         message(FATAL_ERROR "No OpenGL, please install")
@@ -150,6 +157,7 @@ if (WITH_OPENGL)
         message(FATAL_ERROR "No GLEW, please install")
     endif()
     target_link_libraries(opengl ${OPENGL_LIB} ${GLUT_LIB} ${GLEW_LIB})
+endif()
 endif()
 
 #target_link_libraries(program "-framework CoreFoundation")
