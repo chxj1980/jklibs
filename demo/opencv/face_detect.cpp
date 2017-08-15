@@ -114,6 +114,73 @@ int face_detect_from_video() {
 	return 0;
 }
 
+int face_detect_with_split(const char *filename)
+{
+	int len = 1024 * 1024 * 10;
+	char *data = new char[len];
+
+	FILE *file = NULL;
+#ifdef _WIN32
+	fopen_s(&file, filename, "rb");
+#else
+	file = fopen(filename, "r");
+#endif
+	if (file)
+	{
+		len = fread(data, 1, len, file);
+		fclose(file);
+	}
+
+	CVFaceDetect fd;
+	CvScalar colors(10, 10, 200);
+
+	cv::Size fsize(768, 304);
+	NaluUnit nu;
+	int position = 0;
+	char *fdata = NULL;
+	for (;;)
+	{
+		position = ReadNaluFromBuf(&nu, data, len, position);
+		if (position < 0) break;
+		nu.data -= 4;
+		nu.size += 4;
+		printf("-------------- len [%d] [%x, %x, %x, %x, %x, %x]\n", nu.size, nu.data[0], nu.data[1], nu.data[2], nu.data[3], nu.data[4], nu.data[5]);
+		if (fdata) delete fdata;
+		fdata = new char[nu.size];
+		memcpy(fdata, nu.data, nu.size);
+
+		cv::Mat fsrc(fsize, CV_LOAD_IMAGE_ANYDEPTH, fdata);
+		cv::UMat src;
+		fsrc.copyTo(src);
+		if (src.empty()) break;
+
+		cv::Mat showframe;
+		src.copyTo(showframe);
+		std::vector<cv::Rect> ret = fd.detectFaces(src);
+		for (int i = 0; i < ret.size(); i++) {
+			cv::Rect dr = ret[i];
+			CvRect cr(dr.x, dr.y, dr.width, dr.height);
+			printf("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
+
+			rectangle(showframe, cr, colors, 4);
+		}
+#ifndef __NO_HIGHGUI
+		cv::imshow("video", showframe);
+
+		char keycode = cvWaitKey(30);
+		if (keycode == 27) {
+			break;
+		}
+#endif
+	}
+	if (data)
+	{
+		delete data;
+	}
+	
+	return 0;
+}
+
 int face_detect_from_file(const char *filename)
 {
 	cv::VideoCapture inputVideo(filename);
@@ -160,7 +227,8 @@ int main(int argc, char **args) {
     CVFaceDetect fd;
     //fd.face_detect_draw_image(img);
 
-	face_detect_from_file(img);
+	//face_detect_from_file(img);
+	face_detect_with_split(img);
 //    cv::Size size(384, 288);
 //    fd.face_detect_draw_video(img, size);
     return 0;
