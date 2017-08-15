@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "CVFaceDetect.h"
-
+#include "BaseOperation.h"
 
 /**
 * _NaluUnit
@@ -220,16 +220,81 @@ int face_detect_from_file(const char *filename)
 	return 0;
 }
 
+#include "DrawSomething.h"
+#include "map"
+
+std::map<std::string, std::string> cfg_data;
+
+int read_config(const char *file, std::map<std::string, std::string> &data)
+{
+	FILE *f = NULL;
+#ifdef _WIN32
+	fopen_s(&f, file, "rb");
+#else
+	f = fopen(file, "r");
+#endif
+	if (f)
+	{
+		char line[128] = { 0 };
+		while (true)
+		{
+			if (feof(f)) break;
+			char *p = fgets(line, 128, f);
+			if (!p)
+			{
+				break;
+			}
+			char key[64] = { 0 };
+			char value[128] = { 0 };
+#ifdef _WIN32
+			char *sl = line;
+			char *tosave = key;
+			while(true)
+			{
+				if (*sl == '\0') break;
+				if (*sl == '=')
+				{
+					tosave = value;
+					sl++;
+				}
+				*tosave++ = *sl++;
+
+			}
+			int ret = 2;
+//			int ret = sscanf_s(line, "%[^=]=%s", key, value);
+#else
+			int ret = sscanf(line, "%[^=]=%s", key, value);
+#endif
+			if (ret == 2)
+			{
+				data.insert(std::make_pair(key, value));
+			}
+		}
+	}
+
+	return 0;
+}
+
+
 int main(int argc, char **args) {
     const char *img = args[1];
+
+	printf("----------- config file : %s\n", img);
+
+	read_config(img, cfg_data);
 
 //	face_detect_from_video();
     CVFaceDetect fd;
     //fd.face_detect_draw_image(img);
 
 	//face_detect_from_file(img);
-	face_detect_with_split(img);
+	//face_detect_with_split(img);
 //    cv::Size size(384, 288);
 //    fd.face_detect_draw_video(img, size);
+
+	// test
+	DrawSomething ds;
+	//ds.make_one_draw();
+	ds.make_img_reduce(cfg_data["reduce_img"].c_str());
     return 0;
 }

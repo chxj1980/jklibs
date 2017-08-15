@@ -5,29 +5,7 @@
 #ifndef JKLIBS_CVFACEDETECT_H
 #define JKLIBS_CVFACEDETECT_H
 
-
-#ifdef _WIN32
-#ifdef _DEBUG
-#pragma comment(lib, "opencv_core320d.lib")
-#pragma comment(lib, "opencv_highgui320d.lib")
-#pragma comment(lib, "opencv_videoio320d.lib")
-#pragma comment(lib, "opencv_imgproc320d.lib")
-#pragma comment(lib, "opencv_imgcodecs320d.lib")
-#pragma comment(lib, "opencv_objdetect320d.lib")
-#else
-#pragma comment(lib, "opencv_core320d.lib")
-#pragma comment(lib, "opencv_highgui320d.lib")
-#pragma comment(lib, "opencv_videoio320d.lib")
-#pragma comment(lib, "opencv_imgproc320d.lib")
-#pragma comment(lib, "opencv_imgcodecs320d.lib")
-#pragma comment(lib, "opencv_objdetect320d.lib")
-#endif
-#endif
-
-#include "opencv2/core/core.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
+#include <vector>
 
 using namespace std;
 
