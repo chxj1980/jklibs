@@ -1,12 +1,14 @@
 //
 // Created by jmdvirus on 2017/6/8.
 //
+#include "stdafx.h"
 #include "CVFaceDetect.h"
 
 #ifdef DEBUG_DURATION
 #ifndef _WIN32
 #include <sys/time.h>
 #else
+#include <Windows.h>
 #endif
 #endif
 
@@ -28,7 +30,7 @@
 
 #ifdef _WIN32
 #include <Windows.h>
-#define OPENCV_FONTFACE_PATH "J:\\proj\\app\\opencv-3.2.0\\opencv\\build\\etc\\haarcascades\\"
+#define OPENCV_FONTFACE_PATH "D:\\data\\work\\source\\library\\opencv-3.2.0\\data\\haarcascades\\"
 #elif __MACOS__
 #define OPENCV_FONTFACE_PATH "/Users/jmdvirus/jmd/proj/app/source/opencv-3.2.0/data/haarcascades/"
 #else
@@ -109,6 +111,14 @@ std::vector<cv::Rect> CVFaceDetect::detect_face(const char *buffer, int len, cv:
 //    return detectFaces2(l_img_gray);
 }
 
+std::vector<cv::Rect> CVFaceDetect::detect_face_h264(cv::UMat frame) {
+
+	cv::UMat l_img_gray;
+	cv::cvtColor(frame, l_img_gray, cv::COLOR_RGB2GRAY);
+	cv::equalizeHist(l_img_gray, l_img_gray);
+	return detectFaces(l_img_gray);
+}
+
 std::vector<cv::Rect> CVFaceDetect::detect_face_image(const char *filename) {
     IplImage* image = cvLoadImage( filename, 1 );
 
@@ -153,7 +163,8 @@ int CVFaceDetect::face_detect_draw_video(const char *filename, cv::Size size) {
 
     int frame_size = (size.height * size.width) * 3 /2;
     char *frame = new char[frame_size];
-    FILE * file = fopen(filename, "rb");
+	FILE * file = NULL;
+	fopen_s(&file, filename, "rb");
     if (!file) return -1;
 
     static CvScalar colors(100, 100, 100);
@@ -191,3 +202,48 @@ int CVFaceDetect::face_detect_draw_video(const char *filename, cv::Size size) {
 
     return 0;
 }
+
+int CVFaceDetect::face_detect_draw_video_h264(const char *filename, cv::Size size) {
+
+	int frame_size = 1024 * 1024 * 8;
+	char *frame = new char[frame_size];
+	FILE * file = NULL;
+	fopen_s(&file, filename, "rb");
+	if (!file) return -1;
+
+	static CvScalar colors(100, 100, 100);
+#ifndef __NO_HIGHGUI
+	cv::namedWindow("video");
+#endif
+
+	while (true) {
+		int n = fread(frame, 1, frame_size, file);
+		if (n <= 0) {
+			LOG_DEBUG("read data failed ret %d\n", n);
+			break;
+		}
+		cv::Mat l_image(size.height + size.height / 2, size.width, CV_8UC1, (char*)frame);
+		IplImage *do_image = cvCreateImage(size, IPL_DEPTH_8U, 1);
+		do_image->imageData = (char *)l_image.data;
+		std::vector<cv::Rect> ret = detect_face(frame, frame_size, size);
+		for (int i = 0; i < ret.size(); i++) {
+			cv::Rect dr = ret[i];
+			CvRect cr(dr.x, dr.y, dr.width, dr.height);
+			LOG_DEBUG("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
+			cvRectangleR(do_image, cr, colors);
+		}
+#ifndef __NO_HIGHGUI
+		cv::imshow("video", cv::cvarrToMat(do_image));
+		cvWaitKey(10);
+#endif
+		cvReleaseImage(&do_image);
+	}
+#ifndef __NO_HIGHGUI
+	cvDestroyWindow("video");
+#endif
+	delete[]frame;
+	fclose(file);
+
+	return 0;
+}
+
