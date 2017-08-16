@@ -138,18 +138,96 @@ int face_detect_with_split(const char *filename)
 	NaluUnit nu;
 	int position = 0;
 	char *fdata = NULL;
+	char *p = data;
+	int scan_len = 0;
 	for (;;)
 	{
+#if 0
 		position = ReadNaluFromBuf(&nu, data, len, position);
 		if (position < 0) break;
 		nu.data -= 4;
 		nu.size += 4;
+#else
+		
+		p = data + scan_len;
+		char *start = p;
+		char *end = data + len -1;
+		int goon_find = -1;
+		bool find_key = false;
+		bool find_one = false;
+		do {
+			if ( (*p == 0x0 && *(p + 1) == 0x0 && *(p + 2) == 0x0 && *(p + 3) == 0x1))
+			{
+				if (*(p + 4) == 0x67)
+				{
+					start = p;
+					goon_find = 1;
+					p++;
+				}
+				else
+				{
+					// skip this one, go to find new one
+				
+					if (goon_find == 4)
+					{
+						goon_find = -1;
+						end = (p - 1);
+						break;
+					}
+					else if (goon_find++ > 0)
+					{
+						p++;
+						continue;
+					}
+
+					if (find_one)
+					{
+						end = (p - 1);
+						find_one = false;
+						break;
+					}
+					// just think it is valid other frame
+					start = p;
+					find_one = true;
+					p++;
+				}
+			} 
+			else
+			{
+				p++;
+			}
+		} while (1);
+
+		int reallen = end - start;
+		if (reallen <= 0) continue;
+		char *realdata = (char*)malloc(reallen);
+		memcpy(realdata, start, reallen);
+		scan_len += reallen;
+		LOG("------------- frame len [%d]\n", reallen);
+#endif
+
+		char *t_file = "D:\\hello.h264";
+		FILE *file = NULL;
+		fopen_s(&file, t_file, "wb+");
+		fwrite(realdata, 1, reallen, file);
+		fclose(file);
+
+#if 0
 		printf("-------------- len [%d] [%x, %x, %x, %x, %x, %x]\n", nu.size, nu.data[0], nu.data[1], nu.data[2], nu.data[3], nu.data[4], nu.data[5]);
 		if (fdata) delete fdata;
 		fdata = new char[nu.size];
 		memcpy(fdata, nu.data, nu.size);
+#endif
 
-		cv::Mat fsrc(fsize, CV_LOAD_IMAGE_ANYDEPTH, fdata);
+		cv::VideoCapture inputVideo(t_file);
+		if (!inputVideo.isOpened())
+		{
+			LOG("Error open [%s]\n", t_file);
+			continue;
+		}
+
+		cv::Mat fsrc; // (fsize, CV_LOAD_IMAGE_ANYDEPTH, realdata);
+		inputVideo >> fsrc;
 		cv::UMat src;
 		fsrc.copyTo(src);
 		if (src.empty()) break;
@@ -168,6 +246,7 @@ int face_detect_with_split(const char *filename)
 		cv::imshow("video", showframe);
 
 		char keycode = cvWaitKey(30);
+
 		if (keycode == 27) {
 			break;
 		}
@@ -292,8 +371,8 @@ int main(int argc, char **args) {
     CVFaceDetect fd;
     //fd.face_detect_draw_image(img);
 
-	//face_detect_from_file(img);
-	//face_detect_with_split(img);
+	face_detect_from_file(cfg_data["h264_file"].c_str());
+//	face_detect_with_split(cfg_data["h264_file"].c_str());
 //    cv::Size size(384, 288);
 //    fd.face_detect_draw_video(img, size);
 
@@ -305,7 +384,7 @@ int main(int argc, char **args) {
 //	ds.make_add_weighted(cfg_data["img1"].c_str(), cfg_data["img2"].c_str());
 //	ds.make_split_merge(cfg_data["img1"].c_str(), cfg_data["img2"].c_str(), cfg_data["img3"].c_str());
 //	ds.make_control_image(cfg_data["img1"].c_str());
-	ds.make_dft(cfg_data["img1"].c_str());
+//	ds.make_dft(cfg_data["img1"].c_str());
 	getchar();
     return 0;
 }
