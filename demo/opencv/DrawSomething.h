@@ -15,6 +15,16 @@ public:
 
 	void make_img_reduce(const char *imgname);
 
+	void make_add_roi(const char *img1, const char *img2);
+
+	void make_add_weighted(const char *img1, const char *img2);
+
+	void make_split_merge(const char *img1, const char *img2, const char *img3);
+
+	void make_control_image(const char *img);
+
+	void make_dft(const char *img);
+
 private:
 
 };

@@ -252,6 +252,11 @@ int read_config(const char *file, std::map<std::string, std::string> &data)
 			while(true)
 			{
 				if (*sl == '\0') break;
+				if (*sl == '\r' || *sl == '\n')
+				{
+					sl++;
+					continue;
+				}
 				if (*sl == '=')
 				{
 					tosave = value;
@@ -279,7 +284,7 @@ int read_config(const char *file, std::map<std::string, std::string> &data)
 int main(int argc, char **args) {
     const char *img = args[1];
 
-	printf("----------- config file : %s\n", img);
+	LOG("config file : %s\n", img);
 
 	read_config(img, cfg_data);
 
@@ -295,6 +300,12 @@ int main(int argc, char **args) {
 	// test
 	DrawSomething ds;
 	//ds.make_one_draw();
-	ds.make_img_reduce(cfg_data["reduce_img"].c_str());
+//	ds.make_img_reduce(cfg_data["reduce_img"].c_str());
+//	ds.make_add_roi(cfg_data["img1"].c_str(), cfg_data["img2"].c_str());
+//	ds.make_add_weighted(cfg_data["img1"].c_str(), cfg_data["img2"].c_str());
+//	ds.make_split_merge(cfg_data["img1"].c_str(), cfg_data["img2"].c_str(), cfg_data["img3"].c_str());
+//	ds.make_control_image(cfg_data["img1"].c_str());
+	ds.make_dft(cfg_data["img1"].c_str());
+	getchar();
     return 0;
 }

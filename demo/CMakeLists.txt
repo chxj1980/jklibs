@@ -104,11 +104,16 @@ endif()
 if (WINDOWS)
 add_executable(fd_video opencv/fd_video.cpp)
 target_link_libraries(fd_video ${OPENCV_LINK_LIBS})
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../windows/jklibs/opencv)
 endif()
 
 add_executable(opencv_face_detect opencv/face_detect.cpp
         opencv/CVFaceDetect.cpp
         opencv/CVFaceDetect.h
+        opencv/BaseOperation.cpp
+        opencv/BaseOperation.h
+        opencv/DrawSomething.cpp
+        opencv/DrawSomething.h
         )
 target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS} OpenCL)
 

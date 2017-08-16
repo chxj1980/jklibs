@@ -164,7 +164,11 @@ int CVFaceDetect::face_detect_draw_video(const char *filename, cv::Size size) {
     int frame_size = (size.height * size.width) * 3 /2;
     char *frame = new char[frame_size];
 	FILE * file = NULL;
+#ifdef _WIN32
 	fopen_s(&file, filename, "rb");
+#else
+    file = fopen(filename, "r");
+#endif
     if (!file) return -1;
 
     static CvScalar colors(100, 100, 100);
@@ -208,7 +212,11 @@ int CVFaceDetect::face_detect_draw_video_h264(const char *filename, cv::Size siz
 	int frame_size = 1024 * 1024 * 8;
 	char *frame = new char[frame_size];
 	FILE * file = NULL;
+#ifdef _WIN32
 	fopen_s(&file, filename, "rb");
+#else
+    file = fopen(filename, "rb");
+#endif
 	if (!file) return -1;
 
 	static CvScalar colors(100, 100, 100);

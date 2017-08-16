@@ -7,6 +7,8 @@ if(NOT PLATFORM)
     set(PLATFORM x64)
 endif()
 
+message(STATUS "system name: ${CMAKE_SYSTEM_NAME}")
+
 ## This structure like this
 ## -
 ## |x64
@@ -48,8 +50,10 @@ else()
     set(PJ_SUFFIX -x86_64-unknown-linux-gnu)
 endif()
 
+if (NOT MINGW)
 set(CMAKE_C_FLAGS -fPIC)
 set(CMAKE_CXX_FLAGS -fPIC)
+endif()
 
 option(WINDOWS "windows platform" OFF)
 option(LINUX "linux platform" ON)
@@ -88,6 +92,16 @@ elseif(DARWIN)
     add_definitions(-D__APPLE)
 endif()
 
+if (MINGW)
+    add_definitions(-D_MINGW)
+    add_definitions(-DLINUX -Wreturn-type)
+    set(OPENCV_INCLUDE_DIR D:\\data\\work\\source\\library\\opencv-3.2.0\\libs\\include)
+    set(OPENCV_LIB_DIR D:\\data\\work\\source\\library\\opencv-3.2.0\\lib\\Debug)
+endif()
+
+include_directories(${OPENCV_INCLUDE_DIR})
+link_directories(${OPENCV_LIB_DIR})
+
 option(CONCLUDE_STATIC "if conclude static to static libs" ON)
 
 ### Comment it only when we know where will get harm
@@ -107,7 +121,9 @@ macro(find_qt)
         message(STATUS "Qt Window platform")
         set(CUSTOM_QT_BASE_PATH "C:/Qt/Qt5.5.1/5.5/msvc2012/lib/cmake")
 
-        add_definitions(-DWIN32)
+        if (NOT MINGW)
+            add_definitions(-DWIN32)
+        endif()
     elseif(LINUX)
         message(STATUS "Qt linux platform")
         set(CUSTOM_QT_BASE_PATH "/opt/data/data/work/Qt5.5.1/5.5/gcc_64")
