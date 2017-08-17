@@ -6,6 +6,8 @@
 #include "CVFaceDetect.h"
 #include "BaseOperation.h"
 
+#include "DrawSomething.h"
+
 /**
 * _NaluUnit
 * 内部结构体。该结构体主要用于存储和传递Nal单元的类型、大小和数据
@@ -312,7 +314,37 @@ int face_detect_from_file(const char *filename)
 	return 0;
 }
 
-#include "DrawSomething.h"
+int video_rotate_play(const char *filename)
+{
+	cv::VideoCapture inputVideo(filename);
+	if (!inputVideo.isOpened())
+	{
+		return -1;
+	}
+
+	CVFaceDetect fd;
+	CvScalar colors(10, 10, 200);
+	DrawSomething ds;
+	cv::Mat src;
+	for (;;)
+	{
+		inputVideo >> src;
+		if (src.empty()) break;
+
+		ds.make_rotate_image_i(src);
+#ifndef __NO_HIGHGUI
+		cv::imshow("video", src);
+
+		char keycode = cv::waitKey(30);
+		if (keycode == 27) {
+			break;
+		}
+#endif
+	}
+
+	return 0;
+}
+
 #include "map"
 
 std::map<std::string, std::string> cfg_data;
@@ -336,7 +368,7 @@ int read_config(const char *file, std::map<std::string, std::string> &data)
 			{
 				break;
 			}
-			if (line[0] == '\0')
+			if (line[0] == '\0' || line[0] == '#')
 			{
 				continue;
 			}
@@ -408,6 +440,10 @@ int main(int argc, char **args) {
 	{
 		face_detect_with_split(cfg_data["h264_file"].c_str());
 	}
+	else if (strcmp(cmd, "rotate_play") == 0)
+	{
+		video_rotate_play(cfg_data["h264_file"].c_str());
+	}
 	else if (strcmp(cmd, "imgproc") == 0)
 	{
 		// test
@@ -419,6 +455,7 @@ int main(int argc, char **args) {
 		//	ds.make_split_merge(cfg_data["img1"].c_str(), cfg_data["img2"].c_str(), cfg_data["img3"].c_str());
 		//	ds.make_control_image(cfg_data["img1"].c_str());
 		//	ds.make_dft(cfg_data["img1"].c_str());
+		ds.make_rotate_image(cfg_data["img1"].c_str());
 	}
 
 	getchar();

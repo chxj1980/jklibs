@@ -25,6 +25,10 @@ public:
 
 	void make_dft(const char *img);
 
+	void make_rotate_image(const char *img);
+
+	void make_rotate_image_i(cv::Mat &img);
+
 private:
 
 };

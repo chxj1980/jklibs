@@ -231,3 +231,78 @@ void DrawSomething::make_dft(const char *img)
 	cv::imshow("phase image", magnitudeImage);
 	cv::waitKey(0);
 }
+
+
+void DrawSomething::make_rotate_image(const char *img)
+{
+	cv::Point2f srcTriange[3];
+	cv::Point2f dstTriange[3];
+
+	cv::Mat rotMat(2, 3, CV_32FC1);
+	cv::Mat warpMat(2, 3, CV_32FC1);
+	cv::Mat srcImage, dstImage_warp, dstImage_warp_rotate;
+
+	srcImage = cv::imread(img, 1);
+	if (!srcImage.data)
+	{
+		LOG("Error load image\n");
+		return;
+	}
+
+	dstImage_warp = cv::Mat::zeros(srcImage.rows, srcImage.cols, srcImage.type());
+
+	srcTriange[0] = cv::Point2f(0, 0);
+	srcTriange[1] = cv::Point2f(static_cast<float>(srcImage.cols - 1), 0);
+	srcTriange[2] = cv::Point2f(0, static_cast<float>(srcImage.rows - 1));
+
+	dstTriange[0] = cv::Point2f(static_cast<float>(srcImage.cols*0.0), static_cast<float>(srcImage.rows*0.33));
+	dstTriange[1] = cv::Point2f(static_cast<float>(srcImage.cols*0.65), static_cast<float>(srcImage.rows*0.35));
+	dstTriange[2] = cv::Point2f(static_cast<float>(srcImage.cols*0.15), static_cast<float>(srcImage.rows*0.6));
+
+	warpMat = cv::getAffineTransform(srcTriange, dstTriange);
+
+	cv::warpAffine(srcImage, dstImage_warp, warpMat, dstImage_warp.size());
+
+	cv::Point center = cv::Point(dstImage_warp.cols / 2, dstImage_warp.rows / 2);
+	double angle = -30.0;
+	double scale = 0.8;
+
+	rotMat = cv::getRotationMatrix2D(center, angle, scale);
+	cv::warpAffine(dstImage_warp, dstImage_warp_rotate, rotMat, dstImage_warp.size());
+
+	cv::imshow("x", dstImage_warp);
+	cv::waitKey(0);
+}
+
+void DrawSomething::make_rotate_image_i(cv::Mat& img)
+{
+	cv::Point2f srcTriange[3];
+	cv::Point2f dstTriange[3];
+
+	cv::Mat rotMat(2, 3, CV_32FC1);
+	cv::Mat warpMat(2, 3, CV_32FC1);
+	cv::Mat dstImage_warp, dstImage_warp_rotate;
+
+	dstImage_warp = cv::Mat::zeros(img.rows, img.cols, img.type());
+
+	srcTriange[0] = cv::Point2f(0, 0);
+	srcTriange[1] = cv::Point2f(static_cast<float>(img.cols - 1), 0);
+	srcTriange[2] = cv::Point2f(0, static_cast<float>(img.rows - 1));
+
+	dstTriange[0] = cv::Point2f(static_cast<float>(img.cols*0.0), static_cast<float>(img.rows*0.33));
+	dstTriange[1] = cv::Point2f(static_cast<float>(img.cols*0.75), static_cast<float>(img.rows*0.25));
+	dstTriange[2] = cv::Point2f(static_cast<float>(img.cols*0.15), static_cast<float>(img.rows*0.6));
+
+	warpMat = cv::getAffineTransform(srcTriange, dstTriange);
+
+	cv::warpAffine(img, dstImage_warp, warpMat, dstImage_warp.size());
+
+	cv::Point center = cv::Point(dstImage_warp.cols / 2, dstImage_warp.rows / 2);
+	double angle = -30.0;
+	double scale = 0.8;
+
+	rotMat = cv::getRotationMatrix2D(center, angle, scale);
+	cv::warpAffine(dstImage_warp, dstImage_warp_rotate, rotMat, dstImage_warp.size());
+
+	dstImage_warp.copyTo(img);
+}
