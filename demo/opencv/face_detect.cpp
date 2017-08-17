@@ -142,7 +142,7 @@ int face_detect_with_split(const char *filename)
 	int scan_len = 0;
 	for (;;)
 	{
-#if 0
+#if 1
 		position = ReadNaluFromBuf(&nu, data, len, position);
 		if (position < 0) break;
 		nu.data -= 4;
@@ -206,11 +206,13 @@ int face_detect_with_split(const char *filename)
 		LOG("------------- frame len [%d]\n", reallen);
 #endif
 
+#if 0
 		char *t_file = "D:\\hello.h264";
 		FILE *file = NULL;
 		fopen_s(&file, t_file, "wb+");
 		fwrite(realdata, 1, reallen, file);
 		fclose(file);
+#endif
 
 #if 0
 		printf("-------------- len [%d] [%x, %x, %x, %x, %x, %x]\n", nu.size, nu.data[0], nu.data[1], nu.data[2], nu.data[3], nu.data[4], nu.data[5]);
@@ -219,18 +221,27 @@ int face_detect_with_split(const char *filename)
 		memcpy(fdata, nu.data, nu.size);
 #endif
 
+		cv::Mat fsrc; // (fsize, CV_LOAD_IMAGE_ANYDEPTH, realdata);
+		std::vector<char> videodata;
+		for (int i = 0; i < nu.size; i++)
+		{
+			videodata.push_back(nu.data[i]);
+		}
+	
+		fsrc = cv::imdecode(videodata, CV_LOAD_IMAGE_ANYDEPTH | CV_LOAD_IMAGE_COLOR);
+#if 0
 		cv::VideoCapture inputVideo(t_file);
 		if (!inputVideo.isOpened())
 		{
 			LOG("Error open [%s]\n", t_file);
 			continue;
 		}
-
-		cv::Mat fsrc; // (fsize, CV_LOAD_IMAGE_ANYDEPTH, realdata);
 		inputVideo >> fsrc;
+#endif
+
 		cv::UMat src;
 		fsrc.copyTo(src);
-		if (src.empty()) break;
+		if (src.empty()) continue;
 
 		cv::Mat showframe;
 		src.copyTo(showframe);
@@ -278,6 +289,7 @@ int face_detect_from_file(const char *filename)
 
 		cv::Mat showframe;
 		src.copyTo(showframe);
+#if 1
 		std::vector<cv::Rect> ret = fd.detectFaces(src);
 		for (int i = 0; i < ret.size(); i++) {
 			cv::Rect dr = ret[i];
@@ -286,10 +298,11 @@ int face_detect_from_file(const char *filename)
 
 			rectangle(showframe, cr, colors, 4);
 		}
+#endif
 #ifndef __NO_HIGHGUI
 		cv::imshow("video", showframe);
 
-		char keycode = cvWaitKey(30);
+		char keycode = cv::waitKey(30);
 		if (keycode == 27) {
 			break;
 		}
@@ -322,6 +335,10 @@ int read_config(const char *file, std::map<std::string, std::string> &data)
 			if (!p)
 			{
 				break;
+			}
+			if (line[0] == '\0')
+			{
+				continue;
 			}
 			char key[64] = { 0 };
 			char value[128] = { 0 };
@@ -367,24 +384,43 @@ int main(int argc, char **args) {
 
 	read_config(img, cfg_data);
 
-//	face_detect_from_video();
+	const char *cmd = cfg_data["cmd"].c_str();
     CVFaceDetect fd;
-    //fd.face_detect_draw_image(img);
 
-	face_detect_from_file(cfg_data["h264_file"].c_str());
-//	face_detect_with_split(cfg_data["h264_file"].c_str());
-//    cv::Size size(384, 288);
-//    fd.face_detect_draw_video(img, size);
+	if (strcmp(cmd, "yuv") == 0)
+	{
+		cv::Size size(atoi(cfg_data["yuv_width"].c_str()), atoi(cfg_data["yuv_height"].c_str()));
+		fd.face_detect_draw_video(cfg_data["yuv_file"].c_str(), size);
+	}
+	else if (strcmp(cmd, "camera") == 0)
+	{
+		face_detect_from_video();
+	}
+	else if (strcmp(cmd, "image") == 0)
+	{
+		fd.face_detect_draw_image(img);
+	}
+	else if (strcmp(cmd, "h264_file") == 0)
+	{
+		face_detect_from_file(cfg_data["h264_file"].c_str());
+	}
+	else if (strcmp(cmd, "h264_data") == 0)
+	{
+		face_detect_with_split(cfg_data["h264_file"].c_str());
+	}
+	else if (strcmp(cmd, "imgproc") == 0)
+	{
+		// test
+		DrawSomething ds;
+		//ds.make_one_draw();
+		//	ds.make_img_reduce(cfg_data["reduce_img"].c_str());
+		//	ds.make_add_roi(cfg_data["img1"].c_str(), cfg_data["img2"].c_str());
+		//	ds.make_add_weighted(cfg_data["img1"].c_str(), cfg_data["img2"].c_str());
+		//	ds.make_split_merge(cfg_data["img1"].c_str(), cfg_data["img2"].c_str(), cfg_data["img3"].c_str());
+		//	ds.make_control_image(cfg_data["img1"].c_str());
+		//	ds.make_dft(cfg_data["img1"].c_str());
+	}
 
-	// test
-	DrawSomething ds;
-	//ds.make_one_draw();
-//	ds.make_img_reduce(cfg_data["reduce_img"].c_str());
-//	ds.make_add_roi(cfg_data["img1"].c_str(), cfg_data["img2"].c_str());
-//	ds.make_add_weighted(cfg_data["img1"].c_str(), cfg_data["img2"].c_str());
-//	ds.make_split_merge(cfg_data["img1"].c_str(), cfg_data["img2"].c_str(), cfg_data["img3"].c_str());
-//	ds.make_control_image(cfg_data["img1"].c_str());
-//	ds.make_dft(cfg_data["img1"].c_str());
 	getchar();
     return 0;
 }
