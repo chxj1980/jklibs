@@ -62,241 +62,96 @@
 
 #include "stdafx.h"
 
-#include <stdio.h>
+#include "OpenGLGLUT.h"
 
-#include "glew.h"
-#include "glut.h"
+#include "map"
+#include "OpenGLQt.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <string.h>
+std::map<std::string, std::string> cfg_data;
 
-//Select one of the Texture mode (Set '1'):
-#define TEXTURE_DEFAULT   1
-//Rotate the texture
-#define TEXTURE_ROTATE    0
-//Show half of the Texture
-#define TEXTURE_HALF      0
-
-const int screen_w = 500, screen_h = 500;
-const int pixel_w = 1920, pixel_h = 1080;
-//YUV file
-FILE *infile = NULL;
-unsigned char buf[pixel_w*pixel_h * 3 / 2];
-unsigned char *plane[3];
-
-
-GLuint p;
-GLuint id_y, id_u, id_v; // Texture id
-GLuint textureUniformY, textureUniformU, textureUniformV;
-
-
-#define ATTRIB_VERTEX 3
-#define ATTRIB_TEXTURE 4
-
-void display(void) {
-	if (fread(buf, 1, pixel_w*pixel_h * 3 / 2, infile) != pixel_w*pixel_h * 3 / 2) {
-		// Loop
-		fseek(infile, 0, SEEK_SET);
-		fread(buf, 1, pixel_w*pixel_h * 3 / 2, infile);
-	}
-	//Clear
-	glClearColor(0.0, 255, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	//Y
-	//
-	glActiveTexture(GL_TEXTURE0);
-
-	glBindTexture(GL_TEXTURE_2D, id_y);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, pixel_w, pixel_h, 0, GL_RED, GL_UNSIGNED_BYTE, plane[0]);
-
-	glUniform1i(textureUniformY, 0);
-	//U
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, id_u);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, pixel_w / 2, pixel_h / 2, 0, GL_RED, GL_UNSIGNED_BYTE, plane[1]);
-	glUniform1i(textureUniformU, 1);
-	//V
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, id_v);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, pixel_w / 2, pixel_h / 2, 0, GL_RED, GL_UNSIGNED_BYTE, plane[2]);
-	glUniform1i(textureUniformV, 2);
-
-	// Draw
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	// Show
-	//Double
-	glutSwapBuffers();
-	//Single
-	//glFlush();
-}
-
-void timeFunc(int value) {
-	display();
-	// Timer: 40ms
-	glutTimerFunc(40, timeFunc, 0);
-}
-
-char *textFileRead(char * filename)
+int read_config(const char *file, std::map<std::string, std::string> &data)
 {
-	char *s = (char *)malloc(8000);
-	memset(s, 0, 8000);
-	FILE *infile = fopen(filename, "rb");
-	int len = fread(s, 1, 8000, infile);
-	fclose(infile);
-	s[len] = 0;
-	return s;
-}
-
-//Init Shader
-void InitShaders()
-{
-	GLint vertCompiled, fragCompiled, linked;
-
-	GLint v, f;
-	const char *vs, *fs;
-	//Shader: step1
-	v = glCreateShader(GL_VERTEX_SHADER);
-	f = glCreateShader(GL_FRAGMENT_SHADER);
-	//Get source code
-	vs = textFileRead("../../../demo/opengl/Shader.vsh");
-	fs = textFileRead("../../../demo/opengl/Shader.fsh");
-	//Shader: step2
-	glShaderSource(v, 1, &vs, NULL);
-	glShaderSource(f, 1, &fs, NULL);
-	//Shader: step3
-	glCompileShader(v);
-	//Debug
-	glGetShaderiv(v, GL_COMPILE_STATUS, &vertCompiled);
-	glCompileShader(f);
-	glGetShaderiv(f, GL_COMPILE_STATUS, &fragCompiled);
-
-	//Program: Step1
-	p = glCreateProgram();
-	//Program: Step2
-	glAttachShader(p, v);
-	glAttachShader(p, f);
-
-	glBindAttribLocation(p, ATTRIB_VERTEX, "vertexIn");
-	glBindAttribLocation(p, ATTRIB_TEXTURE, "textureIn");
-	//Program: Step3
-	glLinkProgram(p);
-	//Debug
-	glGetProgramiv(p, GL_LINK_STATUS, &linked);
-	//Program: Step4
-	glUseProgram(p);
-
-
-	//Get Uniform Variables Location
-	textureUniformY = glGetUniformLocation(p, "tex_y");
-	textureUniformU = glGetUniformLocation(p, "tex_u");
-	textureUniformV = glGetUniformLocation(p, "tex_v");
-
-#if TEXTURE_ROTATE
-	static const GLfloat vertexVertices[] = {
-		-1.0f, -0.5f,
-		0.5f, -1.0f,
-		-0.5f,  1.0f,
-		1.0f,  0.5f,
-	};
+	FILE *f = NULL;
+#ifdef _WIN32
+	fopen_s(&f, file, "rb");
 #else
-	static const GLfloat vertexVertices[] = {
-		-1.0f, -1.0f,
-		1.0f, -1.0f,
-		-1.0f,  1.0f,
-		1.0f,  1.0f,
-	};
+	f = fopen(file, "r");
 #endif
+	if (f)
+	{
+		char line[128] = { 0 };
+		while (true)
+		{
+			if (feof(f)) break;
+			char *p = fgets(line, 128, f);
+			if (!p)
+			{
+				break;
+			}
+			if (line[0] == '\0' || line[0] == '#')
+			{
+				continue;
+			}
+			char key[64] = { 0 };
+			char value[128] = { 0 };
+#ifdef _WIN32
+			char *sl = line;
+			char *tosave = key;
+			while (true)
+			{
+				if (*sl == '\0') break;
+				if (*sl == '\r' || *sl == '\n')
+				{
+					sl++;
+					continue;
+				}
+				if (*sl == '=')
+				{
+					tosave = value;
+					sl++;
+				}
+				*tosave++ = *sl++;
 
-#if TEXTURE_HALF
-	static const GLfloat textureVertices[] = {
-		0.0f,  1.0f,
-		0.5f,  1.0f,
-		0.0f,  0.0f,
-		0.5f,  0.0f,
-	};
+			}
+			int ret = 2;
+			//			int ret = sscanf_s(line, "%[^=]=%s", key, value);
 #else
-	static const GLfloat textureVertices[] = {
-		0.0f,  1.0f,
-		1.0f,  1.0f,
-		0.0f,  0.0f,
-		1.0f,  0.0f,
-	};
+			int ret = sscanf(line, "%[^=]=%s", key, value);
 #endif
-	//Set Arrays
-	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, 0, 0, vertexVertices);
-	//Enable it
-	glEnableVertexAttribArray(ATTRIB_VERTEX);
-	glVertexAttribPointer(ATTRIB_TEXTURE, 2, GL_FLOAT, 0, 0, textureVertices);
-	glEnableVertexAttribArray(ATTRIB_TEXTURE);
-
-
-	//Init Texture
-	glGenTextures(1, &id_y);
-	glBindTexture(GL_TEXTURE_2D, id_y);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glGenTextures(1, &id_u);
-	glBindTexture(GL_TEXTURE_2D, id_u);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glGenTextures(1, &id_v);
-	glBindTexture(GL_TEXTURE_2D, id_v);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-}
-
-
-
-int main(int argc, char* argv[])
-{
-	//Open YUV420P file
-	if ((infile = fopen("D:\\test\\media\\facedetect.yuv", "rb")) == NULL) {
-		printf("cannot open this file\n");
-		return -1;
+			if (ret == 2)
+			{
+				data.insert(std::make_pair(key, value));
+			}
+		}
 	}
-
-	//YUV Data
-	plane[0] = buf;
-	plane[1] = plane[0] + pixel_w*pixel_h;
-	plane[2] = plane[1] + pixel_w*pixel_h / 4;
-
-	//Init GLUT
-	glutInit(&argc, argv);
-	//GLUT_DOUBLE
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA /*| GLUT_STENCIL | GLUT_DEPTH*/);
-	glutInitWindowPosition(100, 100);
-	glutInitWindowSize(screen_w, screen_h);
-	glutCreateWindow("Simplest Video Play OpenGL");
-	printf("Lei Xiaohua\n");
-	printf("http://blog.csdn.net/leixiaohua1020\n");
-	printf("Version: %s\n", glGetString(GL_VERSION));
-	GLenum l = glewInit();
-
-	glutDisplayFunc(&display);
-	glutTimerFunc(40, timeFunc, 0);
-
-	InitShaders();
-
-	// Begin!
-	glutMainLoop();
 
 	return 0;
 }
 
+int main(int argc, char* argv[])
+{
+	if (argc < 2)
+	{
+		LOG("Usage: %s config_file\n", argv[0]);
+		return 1;
+	}
 
+	read_config(argv[1], cfg_data);
+	const char *cmd = cfg_data["cmd"].c_str();
 
+	if (strcmp(cmd, "glut") == 0)
+	{
+		OpenGLGLUT *base = new OpenGLGLUT(atoi(cfg_data["yuv_width"].c_str()), atoi(cfg_data["yuv_height"].c_str()));
+		base->create_window(atoi(cfg_data["w_width"].c_str()), atoi(cfg_data["w_height"].c_str()));
+		base->read_file_start(cfg_data["yuv_file"].c_str());
+	}
+	else if (strcmp(cmd, "qt") == 0)
+	{
+		OpenGLQt *base = new OpenGLQt(atoi(cfg_data["yuv_width"].c_str()), atoi(cfg_data["yuv_height"].c_str()));
+		base->create_window(atoi(cfg_data["w_width"].c_str()), atoi(cfg_data["w_height"].c_str()));
+		base->read_file_start(cfg_data["yuv_file"].c_str());
+	}
 
-
-
+	getchar();
+	return 0;
+}
