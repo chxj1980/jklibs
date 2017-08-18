@@ -31,7 +31,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #define OPENCV_FONTFACE_PATH "D:\\data\\work\\source\\library\\opencv-3.2.0\\data\\haarcascades\\"
-#elif __MACOS__
+#elif __DARWIN
 #define OPENCV_FONTFACE_PATH "/Users/jmdvirus/jmd/proj/app/source/opencv-3.2.0/data/haarcascades/"
 #else
 #define OPENCV_FONTFACE_PATH "/svn/public/lib/opencv-3.2.0/x64/share/OpenCV/haarcascades/"

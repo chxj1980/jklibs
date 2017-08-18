@@ -47,8 +47,8 @@ int OpenGLBase::init()
 	v = glCreateShader(GL_VERTEX_SHADER);
 	f = glCreateShader(GL_FRAGMENT_SHADER);
 	//Get source code
-	vs = textFileRead("../../../demo/opengl/Shader.vsh");
-	fs = textFileRead("../../../demo/opengl/Shader.fsh");
+	vs = textFileRead("../../demo/opengl/Shader.vsh");
+	fs = textFileRead("../../demo/opengl/Shader.fsh");
 	//Shader: step2
 	glShaderSource(v, 1, &vs, NULL);
 	glShaderSource(f, 1, &fs, NULL);

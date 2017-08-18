@@ -65,8 +65,9 @@
 #include "OpenGLGLUT.h"
 
 #include "map"
+#ifdef __OPENGL_QT
 #include "OpenGLQt.h"
-
+#endif
 std::map<std::string, std::string> cfg_data;
 
 int read_config(const char *file, std::map<std::string, std::string> &data)
@@ -147,9 +148,11 @@ int main(int argc, char* argv[])
 	}
 	else if (strcmp(cmd, "qt") == 0)
 	{
+#ifdef __OPENGL_QT
 		OpenGLQt *base = new OpenGLQt(atoi(cfg_data["yuv_width"].c_str()), atoi(cfg_data["yuv_height"].c_str()));
 		base->create_window(atoi(cfg_data["w_width"].c_str()), atoi(cfg_data["w_height"].c_str()));
 		base->read_file_start(cfg_data["yuv_file"].c_str());
+#endif
 	}
 
 	getchar();

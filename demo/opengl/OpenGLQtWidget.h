@@ -4,11 +4,14 @@
 #define __OPENGL_QTWIDGET_H
 
 #include "OpenGLBase.h"
+#ifdef __DARWIN
+
 #include <QtWidgets/QWidget>
 #include <QtGui/QOpenGLFunctions>
 #include <QtWidgets/QOpenGLWidget>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLTexture>
+#endif
 
 class OpenGLQtWidget
 	: public QOpenGLWidget, OpenGLBase, protected QOpenGLFunctions
@@ -30,18 +33,18 @@ private:
 
 	bool           m_first_open;
 
-	GLuint textureUniformY; //yÎÆÀíÊı¾İÎ»ÖÃ
-	GLuint textureUniformU; //uÎÆÀíÊı¾İÎ»ÖÃ
-	GLuint textureUniformV; //vÎÆÀíÊı¾İÎ»ÖÃ
-	GLuint id_y; //yÎÆÀí¶ÔÏóID
-	GLuint id_u; //uÎÆÀí¶ÔÏóID
-	GLuint id_v; //vÎÆÀí¶ÔÏóID
-	QOpenGLTexture* m_pTextureY;  //yÎÆÀí¶ÔÏó
-	QOpenGLTexture* m_pTextureU;  //uÎÆÀí¶ÔÏó
-	QOpenGLTexture* m_pTextureV;  //vÎÆÀí¶ÔÏó
-	QOpenGLShader *m_pVSHader;  //¶¥µã×ÅÉ«Æ÷³ÌĞò¶ÔÏó
-	QOpenGLShader *m_pFSHader;  //Æ¬¶Î×ÅÉ«Æ÷¶ÔÏó
-	QOpenGLShaderProgram *m_pShaderProgram; //×ÅÉ«Æ÷³ÌĞòÈİÆ÷
+	GLuint textureUniformY; //yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+	GLuint textureUniformU; //uï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+	GLuint textureUniformV; //vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+	GLuint id_y; //yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ID
+	GLuint id_u; //uï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ID
+	GLuint id_v; //vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ID
+	QOpenGLTexture* m_pTextureY;  //yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	QOpenGLTexture* m_pTextureU;  //uï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	QOpenGLTexture* m_pTextureV;  //vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	QOpenGLShader *m_pVSHader;  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	QOpenGLShader *m_pFSHader;  //Æ¬ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	QOpenGLShaderProgram *m_pShaderProgram; //ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 };
 
 #endif

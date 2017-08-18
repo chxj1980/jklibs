@@ -10,7 +10,7 @@
 
 /**
 * _NaluUnit
-* 内部结构体。该结构体主要用于存储和传递Nal单元的类型、大小和数据
+* 锟节诧拷锟结构锟藉。锟矫结构锟斤拷锟斤拷要锟斤拷锟节存储锟酵达拷锟斤拷Nal锟斤拷元锟斤拷锟斤拷锟酵★拷锟斤拷小锟斤拷锟斤拷锟斤拷
 */
 typedef struct _NaluUnit
 {
@@ -90,11 +90,14 @@ int face_detect_from_video() {
 	cv::Size size(640, 480);
 	cv::UMat frame;
 	CVFaceDetect fd;
+	DrawSomething ds;
 	while (1) {
 		vcap >> frame;
 		cv::Mat showframe;
 		frame.copyTo(showframe);
 #if 1
+		ds.make_rotate_image_i(showframe);
+#else
 		std::vector<cv::Rect> ret = fd.detectFaces(frame);
 		for (int i = 0; i < ret.size(); i++) {
 			cv::Rect dr = ret[i];

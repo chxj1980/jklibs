@@ -4,12 +4,14 @@ project(demo)
 include(../cmake/Config.cmake)
 
 option(WITH_OPENGL "OpenGL" ON)
+option(WITH_OPENCV "OpenCV" ON)
+option(WITH_QT "With QT" OFF)
 
 if(WINDOWS)
 include_directories(D:/data/proj/jklibs/windows/include)
 link_directories(D:/data/proj/jklibs/windows/lib)
 else()
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../jklibs/windows/jklibs/jklibs)
+#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../jklibs/windows/jklibs/jklibs)
 endif()
 
 if(JKTEST)
@@ -34,8 +36,6 @@ if(JKTEST)
     add_executable(demo_small demo_small.c)
 
         if (NOT COREI7)
-    add_executable(demo_opengl demo_opengl.c)
-    target_link_libraries(demo_opengl glut GL)
 
         include_directories(/opt/data/data/source/opengl/opengles3-book/Common/Include)
         link_directories(/opt/data/data/source/opengl/opengles3-book/build/Common)
@@ -68,7 +68,7 @@ if (APPLE)
     include_directories(/Users/jmdvirus/jmd/proj/work/source/public/lib/opencv-3.2.0/-x64/include)
     link_directories(/Users/jmdvirus/jmd/proj/work/source/public/lib/opencv-3.2.0/-x64/lib)
     set(OPENCV_LINK_LIBS opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs opencv_objdetect opencv_videoio)
-    set(OPENCL_LINK_LIBS OpenCL)
+#    set(OPENCL_LINK_LIBS OpenCL)
     set(OPENGL_NAME OpenGL)
     set(GLUT_NAME GLUT)
 elseif (WINDOWS)
@@ -90,24 +90,17 @@ else()
     set(GLUT_NAME glut)
 endif ()
 
-if (NOT COREI7)
-add_executable(opencv_tutorial opencv/tutorial.cpp)
-target_link_libraries(opencv_tutorial ${OPENCV_LINK_LIBS})
-add_executable(opencv_image opencv/image_tool.cpp)
-target_link_libraries(opencv_image ${OPENCV_LINK_LIBS})
-
-add_executable(opencv_video opencv/play_video.cpp)
-target_link_libraries(opencv_video ${OPENCV_LINK_LIBS})
-
-add_executable(opencv_video_from_capture opencv/play_video_from_capture.cpp)
-target_link_libraries(opencv_video_from_capture ${OPENCV_LINK_LIBS})
-endif()
-
 if (WINDOWS)
 add_executable(fd_video opencv/fd_video.cpp)
 target_link_libraries(fd_video ${OPENCV_LINK_LIBS})
-    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../windows/jklibs/opencv)
 endif()
+
+if (WITH_OPENCV)
+if (LINUX)
+    include_directories(/opt/intel/opencl/include)
+    link_directories(/opt/intel/opencl/lib64/)
+endif()
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../windows/jklibs/opencv)
 
 add_executable(opencv_face_detect opencv/face_detect.cpp
         opencv/CVFaceDetect.cpp
@@ -117,10 +110,9 @@ add_executable(opencv_face_detect opencv/face_detect.cpp
         opencv/DrawSomething.cpp
         opencv/DrawSomething.h
         )
-target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS} OpenCL)
+target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS} ${OPENCL_LINK_LIBS})
 
-include_directories(/opt/intel/opencl/include)
-link_directories(/opt/intel/opencl/lib64/)
+endif()
 
 if (NOT COREI7)
 
@@ -148,7 +140,20 @@ if (WITH_OPENCL)
 endif()
 
 if (WITH_OPENGL)
-    add_program(opengl opengl/main.cpp)
+        if (WITH_QT)
+            add_definitions(-D__OPENGL_QT)
+            message(STATUS "Enable Qt")
+            find_qt()
+                set(OPENGL_QT_FILE
+                opengl/OpenGLQt.cpp opengl/OpenGLQt.h
+                        opengl/OpenGLQtWidget.cpp opengl/OpenGLQtWidget.h
+                )
+                    endif()
+
+    add_executable(opengl opengl/main.cpp
+            opengl/OpenGLGLUT.cpp opengl/OpenGLGLUT.h
+            opengl/OpenGLBase.cpp opengl/OpenGLBase.h
+            ${OPENGL_QT_FILE})
     
 if (NOT WINDOWS)
 if (NOT COREI7)
@@ -156,6 +161,9 @@ if (NOT COREI7)
     if (NOT OPENGL_LIB)
         message(FATAL_ERROR "No OpenGL, please install")
     endif()
+        find_path(GLUT_INCLUDE_DIR NAMES glut.h)
+        MESSAGE(STATUS "GLUT dir: ${GLUT_INCLUDE_DIR}")
+        include_directories(${GLUT_INCLUDE_DIR})
     find_library(GLUT_LIB glut)
     if (NOT GLUT_LIB)
         message(FATAL_ERROR "No GLUT, please install")
@@ -169,6 +177,7 @@ else()
     set(GLUT_LIB glut)
     set(GLEW_LIB GLEW)
 endif()
+    MESSAGE(STATUS "glew: ${GLEW_LIB}")
     target_link_libraries(opengl ${OPENGL_LIB} ${GLUT_LIB} ${GLEW_LIB})
 endif()
 endif()
