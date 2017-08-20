@@ -3,6 +3,36 @@
 #ifndef __BASE_OPERATION_HEADER
 #define __BASE_OPERATION_HEADER
 
+
+#define LOG(fmt, ...)  \
+	do {   \
+	printf("[%s:%d] => ", __FILE__, __LINE__); \
+	printf(fmt, ##__VA_ARGS__); \
+	} while (0);
+
+#ifdef _WIN32
+#ifdef _DEBUG
+#pragma comment(lib, "opencv_core330d.lib")
+#pragma comment(lib, "opencv_highgui330d.lib")
+#pragma comment(lib, "opencv_videoio330d.lib")
+#pragma comment(lib, "opencv_imgproc330d.lib")
+#pragma comment(lib, "opencv_imgcodecs330d.lib")
+#pragma comment(lib, "opencv_objdetect330d.lib")
+#else
+#pragma comment(lib, "opencv_core320d.lib")
+#pragma comment(lib, "opencv_highgui320d.lib")
+#pragma comment(lib, "opencv_videoio320d.lib")
+#pragma comment(lib, "opencv_imgproc320d.lib")
+#pragma comment(lib, "opencv_imgcodecs320d.lib")
+#pragma comment(lib, "opencv_objdetect320d.lib")
+#endif
+#endif
+
+#include "opencv2/core/core.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/objdetect/objdetect.hpp"
+
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 

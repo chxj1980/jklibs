@@ -1,5 +1,4 @@
 
-#include "stdafx.h"
 #include "DrawSomething.h"
 
 DrawSomething::DrawSomething() {}

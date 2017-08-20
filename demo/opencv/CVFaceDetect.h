@@ -5,6 +5,9 @@
 #ifndef JKLIBS_CVFACEDETECT_H
 #define JKLIBS_CVFACEDETECT_H
 
+
+#include "BaseOperation.h"
+
 #include <vector>
 
 using namespace std;

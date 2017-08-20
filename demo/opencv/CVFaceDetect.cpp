@@ -1,7 +1,8 @@
 //
 // Created by jmdvirus on 2017/6/8.
 //
-#include "stdafx.h"
+
+
 #include "CVFaceDetect.h"
 
 #ifdef DEBUG_DURATION
