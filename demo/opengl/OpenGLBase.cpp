@@ -1,7 +1,5 @@
 
 
-#include "stdafx.h"
-
 #include "OpenGLBase.h"
 
 #define ATTRIB_VERTEX 3

@@ -1,5 +1,4 @@
 
-#include "stdafx.h"
 #include "OpenGLGLUT.h"
 
 static FILE *m_file = NULL;

@@ -60,7 +60,6 @@
 * glutSwapBuffers(): show.
 */
 
-#include "stdafx.h"
 
 #include "OpenGLGLUT.h"
 

@@ -104,8 +104,8 @@ include_directories(${OPENCV_INCLUDE_DIR})
 link_directories(${OPENCV_LIB_DIR})
 
 if (WINDOWS)
-set(OPENGL_BASE_DIR J:/proj/jklibs/windows)
-include_directories($(OPENGL_BASE_DIR)/include)
+set(OPENGL_BASE_DIR J:/proj/app/opengl)
+include_directories(${OPENGL_BASE_DIR}/include)
 link_directories(${OPENGL_BASE_DIR}/lib)
 endif()
 

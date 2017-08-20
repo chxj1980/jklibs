@@ -4,14 +4,11 @@
 #define __OPENGL_QTWIDGET_H
 
 #include "OpenGLBase.h"
-#ifdef __DARWIN
-
 #include <QtWidgets/QWidget>
 #include <QtGui/QOpenGLFunctions>
 #include <QtWidgets/QOpenGLWidget>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QOpenGLTexture>
-#endif
 
 class OpenGLQtWidget
 	: public QOpenGLWidget, OpenGLBase, protected QOpenGLFunctions
