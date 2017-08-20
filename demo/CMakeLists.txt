@@ -96,6 +96,10 @@ target_link_libraries(fd_video ${OPENCV_LINK_LIBS})
 endif()
 
 if (WITH_OPENCV)
+if (WINDOWS)
+include_directories(J:/proj/app/opencv-3.2.0/opencv/build/include)
+link_directories(J:/proj/app/opencv-3.2.0/opencv-3.2.0/build/lib/Debug)
+endif()
 if (LINUX)
     include_directories(/opt/intel/opencl/include)
     link_directories(/opt/intel/opencl/lib64/)
@@ -110,8 +114,9 @@ add_executable(opencv_face_detect opencv/face_detect.cpp
         opencv/DrawSomething.cpp
         opencv/DrawSomething.h
         )
-target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS} ${OPENCL_LINK_LIBS})
-
+if (NOT WINDOWS)
+    target_link_libraries(opencv_face_detect ${OPENCV_LINK_LIBS} ${OPENCL_LINK_LIBS})
+endif()
 endif()
 
 if (NOT COREI7)

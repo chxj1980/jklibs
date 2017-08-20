@@ -103,6 +103,12 @@ endif()
 include_directories(${OPENCV_INCLUDE_DIR})
 link_directories(${OPENCV_LIB_DIR})
 
+if (WINDOWS)
+set(OPENGL_BASE_DIR J:/proj/jklibs/windows)
+include_directories($(OPENGL_BASE_DIR)/include)
+link_directories(${OPENGL_BASE_DIR}/lib)
+endif()
+
 option(CONCLUDE_STATIC "if conclude static to static libs" ON)
 
 ### Comment it only when we know where will get harm
