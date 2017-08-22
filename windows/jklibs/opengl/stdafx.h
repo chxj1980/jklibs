@@ -17,6 +17,8 @@
 	} while (0);
 
 #ifdef _WIN32
+#include "Windows.h"
+#include "process.h"
 #define sys_sleep(x)   ::Sleep(x);
 #ifdef _DEBUG
 #pragma comment(lib, "glew32.lib")
