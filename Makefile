@@ -30,6 +30,10 @@ stream:
 	@$(ECHO) "\n\t GOTO BUILD $@ \n"
 	@cd $@; make; cd ..
 
+vdev:
+	@$(ECHO) "\n\t GOTO BUILD $@ \n"
+	@cd $@; make; cd ..
+
 ## check build-in files before make static and dyn
 dep-before:
 	@for i in $(buildin-files); do   \
@@ -94,6 +98,9 @@ dm6446:
 
 dm365:
 	@$(ECHO) "OS=dm365" > config.mk
+
+rasp3:
+	@$(ECHO) "OS=rasp3" > config.mk
 
 hi3515:
 	@$(ECHO) "OS=hi3515" > config.mk

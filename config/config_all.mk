@@ -20,6 +20,10 @@ ifeq ("$(DISK)", "")
 DISK=y
 endif
 
+ifeq (x"$(VDEV)", x"")
+VDEV=y
+endif
+
 ifeq ("$(BVSTREAM)", "")
 BVSTREAM=y
 endif
@@ -39,24 +43,7 @@ ifeq ("$(origin OS)", "command line")
 	OS := $(OS)
 endif
 
-ifeq ($(OS), hi3535)
-    include $(BASEDIR)/config/config_hi3535.mk
-endif
-ifeq ($(OS), hi3515)
-    include $(BASEDIR)/config/config_hi3515.mk
-endif
-ifeq ($(OS), hi3518)
-    include $(BASEDIR)/config/config_hi3518.mk
-endif
-ifeq ($(OS), dm365)
-    include $(BASEDIR)/config/config_dm365.mk
-endif
-ifeq ($(OS), dm6446)
-    include $(BASEDIR)/config/config_dm6446.mk
-endif
-ifeq ($(OS), x86)
-    include $(BASEDIR)/config/config_x86.mk
-endif
+include $(BASEDIR)/config/config_$(OS).mk
 
 
 ######################################
@@ -95,6 +82,9 @@ endif
 ifeq ($(DISK), y)
 endif
 
+ifeq ($(VDEV), y)
+endif
+
 ifeq ($(BVSTREAM), y)
 CFLAGS += -DBVSTREAM
 CFLAGS += -Istream
@@ -111,6 +101,7 @@ endif
 ## it will convert to filedirs-y instream the enviroument value.
 ## It will be converted to filedirs-n and other not -y if we don't want to compile it.
 filedirs-$(BVBASE) = common
+filedirs-$(VDEV) += vdev
 #filedirs-$(DISK) += disk
 #filedirs-$(BVSTREAM) += stream
 

@@ -36,3 +36,7 @@ target_link_libraries(jklibs common kfmd5 jkprotocol)
 
 install(FILES demo/jsonc_demo DESTINATION /usr/bin)
 install(FILES libjklibs.so DESTINATION /usr/lib)
+
+aux_source_directory(vdev VDEV_SOURCE)
+add_executable(vdev ${VDEV_SOURCE})
+target_link_libraries(vdev common)
