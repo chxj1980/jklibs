@@ -20,6 +20,11 @@ ifeq ("$(DISK)", "")
 DISK=y
 endif
 
+ifeq ("$(CODEC)", "")
+X264=y
+CODEC=y
+endif
+
 ifeq (x"$(VDEV)", x"")
 VDEV=y
 endif
@@ -88,7 +93,10 @@ endif
 ifeq ($(BVSTREAM), y)
 CFLAGS += -DBVSTREAM
 CFLAGS += -Istream
+endif
 
+ifeq ($(X264), y)
+LINKPATH += -lx264
 endif
 
 Q=@
@@ -102,6 +110,7 @@ endif
 ## It will be converted to filedirs-n and other not -y if we don't want to compile it.
 filedirs-$(BVBASE) = common
 filedirs-$(VDEV) += vdev
+filedirs-$(CODEC) += codec
 #filedirs-$(DISK) += disk
 #filedirs-$(BVSTREAM) += stream
 

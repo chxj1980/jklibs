@@ -20,13 +20,6 @@ int main(int argc, char **args) {
     debug_capability(dev);
     debug_fmtdesc(dev);
 
-    ret = set_fmt(dev, 0);
-    if (ret < 0) {
-        printf("Set format failed\n");
-    } else {
-        printf("Set format success\n");
-    }
-
     ret = VDevStart(dev);
     if (ret < 0) {
         printf("Dev start error %d\n", ret);
@@ -39,13 +32,14 @@ int main(int argc, char **args) {
     unsigned int len = 0;
     time_t last = time(NULL);
     while(1) {
-        if (time(NULL) - last > 5) break;
+        if (time(NULL) - last > 15) break;
         VDevGetStream(dev, &data, &len);
         printf("Get  Stream len %u, data %p\n", len, data);
 
+        if (len > 0)
         fwrite(data, 1, len, file);
 
-        usleep(40000);
+        usleep(10000);
     }
     fclose(file);
 

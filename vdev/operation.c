@@ -24,7 +24,11 @@ int open_device(VDev *dev) {
     get_capability(dev);
     get_fmtdesc(dev);
 
-    int ret = request_buffers(dev);
+    int ret = set_fmt(dev, 0);
+    if ( ret < 0) {
+        return ret;
+    }
+    ret = request_buffers(dev);
     if (ret < 0) {
         return ret;
     }
@@ -58,11 +62,11 @@ int set_fmt(VDev *dev, int fmt) {
     struct v4l2_format format;
     format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     //format.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB32;
-    //format.fmt.pix.width = 640;
-    //format.fmt.pix.height = 800;
+    format.fmt.pix.width = 640;
+    format.fmt.pix.height = 480;
     format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
     format.fmt.pix.field = V4L2_FIELD_INTERLACED;
-    int ret = ioctl(dev->devhandle, VIDIOC_TRY_FMT, &format);
+    int ret = ioctl(dev->devhandle, VIDIOC_S_FMT, &format);
     if (ret < 0) {
         return -1;
     }
@@ -70,7 +74,7 @@ int set_fmt(VDev *dev, int fmt) {
 }
 
 int request_buffers(VDev *dev) {
-    dev->req.count = 4;
+    dev->req.count = 8;
     dev->req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     dev->req.memory = V4L2_MEMORY_MMAP;
     int ret = ioctl(dev->devhandle, VIDIOC_REQBUFS, &dev->req);
@@ -82,7 +86,7 @@ int request_buffers(VDev *dev) {
         return -2;
     }
     // mmap
-    for (unsigned int i = 0; i < dev->req.count; i ++) {
+    for (unsigned int i = 0; i < dev->req.count; ++i) {
          struct v4l2_buffer buf;
          memset(&buf, 0, sizeof(buf));
          buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;

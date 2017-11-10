@@ -34,6 +34,10 @@ vdev:
 	@$(ECHO) "\n\t GOTO BUILD $@ \n"
 	@cd $@; make; cd ..
 
+codec:
+	@$(ECHO) "\n\t GOTO BUILD $@ \n"
+	@cd $@; make; cd ..
+
 ## check build-in files before make static and dyn
 dep-before:
 	@for i in $(buildin-files); do   \
