@@ -5,7 +5,6 @@ CONFIG_FILE=$(CURDIR)/../config/config_all.mk
 BASEDIR=$(CURDIR)/../
 
 include $(CONFIG_FILE)
-sinclude Config.mk
 include Object.mk
 
 OBJS= $(obj-y:%=$(OBJDIR)/%)

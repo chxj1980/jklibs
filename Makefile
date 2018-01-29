@@ -90,7 +90,7 @@ clean:
 	rm outlib/$(OS)/lib/* -rf
 
 distclean: clean
-	$(Q)rm -rf .obj*
+	$(Q)rm -rf `find . -name ".obj*"`
 
 help:
 	@$(ECHO) "\t make x86/dm6446/dm365/hi3515/hi3518/hi3535"

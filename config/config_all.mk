@@ -17,10 +17,10 @@ BVBASE=y
 BVZLOG=no
 
 ifeq ("$(DISK)", "")
-DISK=y
+DISK=n
 endif
 
-ifeq ("$(CODEC)", "")
+ifeq ("$(CODEC)", "y")
 X264=y
 CODEC=y
 endif
@@ -30,7 +30,7 @@ VDEV=n
 endif
 
 ifeq ("$(BVSTREAM)", "")
-BVSTREAM=y
+BVSTREAM=n
 endif
 
 ECHO=echo -e
@@ -111,8 +111,8 @@ endif
 filedirs-$(BVBASE) = common
 filedirs-$(VDEV) += vdev
 filedirs-$(CODEC) += codec
-#filedirs-$(DISK) += disk
-#filedirs-$(BVSTREAM) += stream
+filedirs-$(DISK) += disk
+filedirs-$(BVSTREAM) += stream
 
 ## all linked in build-in.o files in each directory
 buildin-files = $(patsubst %,%/$(OBJDIR)/build-in.o,$(filedirs-y))

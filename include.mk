@@ -1,4 +1,4 @@
-DISK=n
-CODEC=n
-VDEV=n
-BVSTREAM=n
+export DISK=n
+export CODEC=n
+export VDEV=y
+export BVSTREAM=n

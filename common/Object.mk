@@ -16,5 +16,5 @@ obj-$(KFOPENSSL_AES) += $(SRC_DIR)/aes_misc.o $(SRC_DIR)/aes_ecb.o $(SRC_DIR)/ae
 #obj-demo-$(LIBJSON) += demo/demo_json.c
 #obj-demo-$(KFCRYPTO) += demo/demo_crypto.c
 #obj-demo-y = demo/jk_demo.c
-obj-demo-y = demo/kfclientping.c
+#obj-demo-y = demo/kfclientping.c
 
