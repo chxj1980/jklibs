@@ -1,1 +1,1 @@
-OS=rasp3
+OS=x86

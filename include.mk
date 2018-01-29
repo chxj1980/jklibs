@@ -1,0 +1,4 @@
+DISK=n
+CODEC=n
+VDEV=n
+BVSTREAM=n

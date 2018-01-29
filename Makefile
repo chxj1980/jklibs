@@ -7,6 +7,8 @@ SHELL=/bin/bash
 
 BASEDIR=$(shell pwd)
 
+include include.mk
+
 sinclude config/config_all.mk
 
 

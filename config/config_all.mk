@@ -26,7 +26,7 @@ CODEC=y
 endif
 
 ifeq (x"$(VDEV)", x"")
-VDEV=y
+VDEV=n
 endif
 
 ifeq ("$(BVSTREAM)", "")
