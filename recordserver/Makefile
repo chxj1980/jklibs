@@ -22,21 +22,18 @@ BUILDIN=$(OBJDIR)/build-in.o
 all: deps $(BUILDIN) $(DEMO_EXEC)
 
 deps:
-	@mkdir -p $(OBJDIR)/json
-	@mkdir -p $(OBJDIR)/crypto
-	@mkdir -p $(OBJDIR)/unixsocket
-	@mkdir -p $(OBJDIR)/openssl-aes/src/
+	@mkdir -p $(OBJDIR)
 
 $(OBJS):$(OBJDIR)/%.o:%.c
 	@echo "\t $(CC) \t $^"
 	$(Q) $(CC) -o $@ -c $^ $(CFLAGS) $(LINKFLAGS)
 
 $(BUILDIN): $(OBJS)
-	$(Q) $(LD) -r -o $@ $^
+	$(Q) $(LD) -Ur -o $@ $^
 
 $(DEMO_EXEC):$(BUILDIN) $(obj-demo-y)
-	@echo "\t $(CC) \t $@"
-	$(Q) $(CC) -o $@ $(patsubst %,%.c,$@) $(BUILDIN) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
+	@echo "\t $(CC) \t $@-$(OS)"
+	$(Q) $(CC) -o $@-$(OS) $(patsubst %,%.c,$@) $(BUILDIN) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS)
 
 clean:
 	rm -rf $(OBJS) $(BUILDIN)

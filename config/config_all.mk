@@ -23,6 +23,7 @@ endif
 ifeq ("$(CODEC)", "y")
 X264=y
 CODEC=y
+CFLAGS+=-Icodec
 endif
 
 ifeq (x"$(VDEV)", x"")
@@ -31,6 +32,10 @@ endif
 
 ifeq ("$(BVSTREAM)", "")
 BVSTREAM=n
+endif
+
+ifeq ("$(RECORDSERVER)", "")
+RECORDSTREAM=n
 endif
 
 ECHO=echo -e
@@ -62,7 +67,7 @@ LIBFLAGS+=-L$(HOME)/libs/opensource/$(OS)/lib
 LIBFLAGS+=-L$(HOME)/libs/bvlib/$(OS)/lib
 
 ## module function
-ifneq ($(OS), x86)
+ifneq ($(OS), amd64)
 PJFLAGS += -DPJ_IS_LITTLE_ENDIAN=0 -DPJ_IS_BIG_ENDIAN=1
 endif
 
@@ -88,6 +93,7 @@ ifeq ($(DISK), y)
 endif
 
 ifeq ($(VDEV), y)
+CFLAGS += -Ivdev
 endif
 
 ifeq ($(BVSTREAM), y)
@@ -96,7 +102,8 @@ CFLAGS += -Istream
 endif
 
 ifeq ($(X264), y)
-LINKPATH += -lx264
+CFLAGS += -I/opt/data/libs/$(OS)/include
+LINKPATH += -L/opt/data/libs/$(OS)/lib -lx264
 endif
 
 Q=@
@@ -113,6 +120,8 @@ filedirs-$(VDEV) += vdev
 filedirs-$(CODEC) += codec
 filedirs-$(DISK) += disk
 filedirs-$(BVSTREAM) += stream
+filedirs-$(DEMO) += demo
+filedirs-$(RECORDSERVER) += recordserver
 
 ## all linked in build-in.o files in each directory
 buildin-files = $(patsubst %,%/$(OBJDIR)/build-in.o,$(filedirs-y))

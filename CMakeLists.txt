@@ -23,6 +23,10 @@ include_directories(common)
 include_directories(common/json)
 include_directories(kfmd5)
 
+set(SOURCE_FILE recordserver/jkrecord.c
+        recordserver/process.c
+        )
+
 add_subdirectory(demo)
 
 add_subdirectory(common)
@@ -30,7 +34,7 @@ add_subdirectory(kfmd5)
 add_subdirectory(jkprotocol)
 add_subdirectory(jni)
 
-add_library(jklibs STATIC common kfmd5 jkprotocol)
+add_library(jklibs STATIC common kfmd5 jkprotocol ${SOURCE_FILE})
 set_target_properties(jklibs PROPERTIES LINKER_LANGUAGE C)
 target_link_libraries(jklibs common kfmd5 jkprotocol)
 

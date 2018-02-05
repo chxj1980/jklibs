@@ -20,7 +20,7 @@ int init_yuv_h264(CEncoder *en) {
     en->param.i_log_level = X264_LOG_DEBUG;
     en->param.rc.i_bitrate = 1024*10;
     en->param.i_fps_den = 1;
-    en->param.i_fps_num = 10;
+    en->param.i_fps_num = 25;
     en->param.i_timebase_den = en->param.i_fps_num;
     en->param.i_timebase_num = en->param.i_fps_den;
     en->param.i_csp = X264_CSP_I422;

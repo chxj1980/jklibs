@@ -16,34 +16,18 @@ sinclude config/config_all.mk
 #filedirs-y=common disk stream
 .PHONY: $(filedirs-y)
 
-all: createdir $(filedirs-y) dep-before static dyn
+all: createdir filesbuild dep-before static dyn
 
-common:
-	@$(ECHO) "\n\t GOTO BUILD $@ \n"
-	@cd $@; make; \
-	cd ..
-
-disk:
-	@$(ECHO) "\n\t GOTO BUILD $@ \n"
-	@cd $@; make; cd ..
-
-## add jk_stream_ex.o to OBJS_MAIN for recompile if change the content.
-stream:
-	@$(ECHO) "\n\t GOTO BUILD $@ \n"
-	@cd $@; make; cd ..
-
-vdev:
-	@$(ECHO) "\n\t GOTO BUILD $@ \n"
-	@cd $@; make; cd ..
-
-codec:
-	@$(ECHO) "\n\t GOTO BUILD $@ \n"
-	@cd $@; make; cd ..
+filesbuild:
+	@for i in $(filedirs-y); do \
+        $(ECHO) "\n\t Build $$i\n"; \
+        cd $$i; make; cd ..;\
+    done
 
 ## check build-in files before make static and dyn
 dep-before:
 	@for i in $(buildin-files); do   \
-		if [ ! -f $$i ] ; then   \
+		if [[ ! -f $$i ]] && [[ "$$i" != "demo" ]] ; then   \
 			$(ECHO) "\n\t[ $$i ] not exist, so exit!\n";   \
 			exit 1;    \
 		fi;    \
@@ -72,8 +56,7 @@ createdir:
 		$(ECHO) "    No platform, please exec: "; \
 		$(ECHO) "    make x86/hi3515/dm365/hi3535";  \
 		exit 1; \
-	fi	
-	@mkdir -p $(OBJDIR)  
+	fi
 	@mkdir -p $(INSTALL_DIRS)/lib
 
 install:
@@ -98,6 +81,11 @@ help:
 
 x86:
 	@$(ECHO) "OS=x86" > config.mk
+amd64:
+	@$(ECHO) "export OS=amd64" > config.mk
+
+arm64:
+	@$(ECHO) "export OS=arm64" > config.mk
 
 dm6446:
 	@$(ECHO) "OS=dm6446" > config.mk
