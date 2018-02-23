@@ -18,7 +18,8 @@ int main(int argc, char **args)
     char *logfile = "/tmp/jkrecord.log";
     int debug = 0;
     int opt = 0;
-    while((opt = getopt(argc, args, "i:p:l:dh")) != -1) {
+    int console = 0;
+    while((opt = getopt(argc, args, "i:p:l:dch")) != -1) {
         switch(opt) {
             case 'i':
                 dev = optarg;
@@ -31,13 +32,23 @@ int main(int argc, char **args)
             case 'd':
                 debug = 1;
                 break;
+            case 'c':
+                console = 1;
+                break;
             case 'h':
-                fprintf(stderr, "Usage: %s -i video_dev -p path -l logfile -d debug\n", args[0]);
+                fprintf(stderr, "Usage: %s\n"
+                                " -i video_dev\n"
+                                " -p path\n"
+                                " -l logfile\n"
+                                " -c console print enable\n"
+                                " -d debug\n", args[0]);
                 return -3;
         }
     }
 
     rt_print_set_log_file(logfile);
+    if (console == 0)
+        rt_print_set_save_type(RT_PRINT_LOG_TYPE_OWNFILE);
 
     rtdebug("Program start with dev [%s] path [%s] logfile [%s]\n", dev, path, logfile);
     snprintf(gi.videoDev, sizeof(gi.videoDev), "%s", dev);
