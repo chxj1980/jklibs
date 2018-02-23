@@ -55,8 +55,9 @@ enum {
 
 enum {
     RT_PRINT_LOG_TYPE_NONE = -1,
-    RT_PRINT_LOG_TYPE_CONSOLE = 0,
+    RT_PRINT_LOG_TYPE_CONSOLE = 1<<1,
     RT_PRINT_LOG_TYPE_FILE = 1,
+    RT_PRINT_LOG_TYPE_OWNFILE = 1<<2,
 };
 
 enum {
@@ -69,6 +70,8 @@ RT_EXTERN_C_FUNC int rt_print_init(int rt_print_level,
           const char *name);
 RT_EXTERN_C_FUNC int rt_print_deinit();
 
+RT_EXTERN_C_FUNC int rt_print_set_log_file(const char *path);
+RT_EXTERN_C_FUNC int rt_print_reopen_file();
 // @type: 0 console, -1 none (not print), 1 to file (depends on /etc/zlog.conf)
 // RT_PRINT_LOG_TYPE_*
 RT_EXTERN_C_FUNC int rt_print_set_save_type(int type);
@@ -103,14 +106,6 @@ RT_EXTERN_C_FUNC int rt_print_none(const char *func, int line, const char *file,
                      const char *format, ...);
 RT_EXTERN_C_FUNC void rt_print_error_string(int errno);
 
-// You may control print level with kind,
-// add kind, the rtkind will print out
-// del kind, the rtkind will print nothing
-RT_EXTERN_C_FUNC int rt_print_add_kind(int kind);
-RT_EXTERN_C_FUNC int rt_print_del_kind(int kind);
-RT_EXTERN_C_FUNC int rt_print_kind(int kind, const char *func, int line, const char *file, const char *format, ...);
-#define rtkind(kind, format, ...) rt_print_kind(kind, __func__, __LINE__, __FILE__, format, ##__VA_ARGS__);
-
 #ifdef USE_ZLOG
 #define rtdzlog_error(format, ...) dzlog_error(format, ##__VA_ARGS__)
 #define rtdzlog_info(format, ...) dzlog_info(format, ##__VA_ARGS__)
@@ -132,8 +127,10 @@ RT_EXTERN_C_FUNC int rt_print_kind(int kind, const char *func, int line, const c
             case RT_PRINT_LOG_TYPE_FILE:    \
                rtdzlog_error(format, ##__VA_ARGS__);    \
             break;  \
-            case RT_PRINT_LOG_TYPE_CONSOLE: rt_print_error(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); printf("\n"); break; \
-            default: break;  \
+            case RT_PRINT_LOG_TYPE_CONSOLE:  \
+            case RT_PRINT_LOG_TYPE_OWNFILE: \
+            default: \
+                rt_print_error(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
 #define rtinfo(format, ...)    \
@@ -141,8 +138,10 @@ RT_EXTERN_C_FUNC int rt_print_kind(int kind, const char *func, int line, const c
             case RT_PRINT_LOG_TYPE_FILE:    \
                rtdzlog_info(format, ##__VA_ARGS__);    \
             break;  \
-            case RT_PRINT_LOG_TYPE_CONSOLE: rt_print_info(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); printf("\n"); break; \
-            default: break;  \
+            case RT_PRINT_LOG_TYPE_CONSOLE:  \
+            case RT_PRINT_LOG_TYPE_OWNFILE: \
+            default: \
+                rt_print_info(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
 #define rtwarn(format, ...)    \
@@ -150,8 +149,10 @@ RT_EXTERN_C_FUNC int rt_print_kind(int kind, const char *func, int line, const c
             case RT_PRINT_LOG_TYPE_FILE:    \
                rtdzlog_warn(format, ##__VA_ARGS__);    \
             break;  \
-            case RT_PRINT_LOG_TYPE_CONSOLE: rt_print_warn(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); printf("\n"); break; \
-            default: break;  \
+            case RT_PRINT_LOG_TYPE_CONSOLE:  \
+            case RT_PRINT_LOG_TYPE_OWNFILE: \
+            default: \
+                rt_print_warn(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
 #define rtmsg(format, ...)    \
@@ -159,8 +160,10 @@ RT_EXTERN_C_FUNC int rt_print_kind(int kind, const char *func, int line, const c
             case RT_PRINT_LOG_TYPE_FILE:    \
                rtdzlog_notice(format, ##__VA_ARGS__);    \
             break;  \
-            case RT_PRINT_LOG_TYPE_CONSOLE: rt_print_message(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); printf("\n"); break; \
-            default: break;  \
+            case RT_PRINT_LOG_TYPE_CONSOLE:  \
+            case RT_PRINT_LOG_TYPE_OWNFILE: \
+            default: \
+                rt_print_message(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
 #define rtdebug(format, ...)    \
@@ -168,16 +171,18 @@ RT_EXTERN_C_FUNC int rt_print_kind(int kind, const char *func, int line, const c
             case RT_PRINT_LOG_TYPE_FILE:    \
                rtdzlog_debug(format, ##__VA_ARGS__);    \
             break;  \
-            case RT_PRINT_LOG_TYPE_CONSOLE: rt_print_debug(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); printf("\n");break; \
-            default: break;  \
+            case RT_PRINT_LOG_TYPE_CONSOLE:  \
+            case RT_PRINT_LOG_TYPE_OWNFILE: \
+            default: \
+                rt_print_debug(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
 // rtcycle and rtnone force print to console.
 #define rtcycle(format, ...)    \
-        rt_print_cycle(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); printf("\n");
+        rt_print_cycle(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__);
 
 #define rtnone(format, ...)    \
-        rt_print_style_none(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); printf("\n");
+        rt_print_style_none(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__);
 
 
 // It will print out the meanful string with the number

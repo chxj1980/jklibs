@@ -46,15 +46,63 @@
 #define RT_MAX_STRING_LEN                512
 #define RT_STRING_MAX_LEN_SUPPORT        3056
 
+#define JKIFCONSOLE  \
+		((rt_p->save_type & RT_PRINT_LOG_TYPE_CONSOLE) == RT_PRINT_LOG_TYPE_CONSOLE)
+
+#define JKIFOWNFILE \
+		((rt_p->save_type & RT_PRINT_LOG_TYPE_OWNFILE) == RT_PRINT_LOG_TYPE_OWNFILE)
+
+#define JKLINE  \
+    do { \
+        if JKIFCONSOLE \
+            fprintf(stderr, "\n"); \
+        if JKIFOWNFILE \
+            if (rt_p->file) { \
+                fprintf(rt_p->file, "\n"); \
+            } \
+    } while(0)
+
+#define JKLOGPF(fd, fmt, ...) \
+    fprintf(fd, fmt, ##__VA_ARGS__)
+
+#define JKLOGP(fmt, ...) \
+    JKLOGPF(stderr, fmt, ##__VA_ARGS__)
+
+#define JKLOGPX(fmt, ...) \
+    do { \
+        if JKIFCONSOLE \
+            JKLOGP(fmt, ##__VA_ARGS__); \
+        if JKIFOWNFILE \
+            if (rt_p->file)  {  \
+                JKLOGPF(rt_p->file, fmt, ##__VA_ARGS__); \
+            } \
+    } while(0)
+
+#define JKLOGVPF(fd, fmt, ...) \
+    vfprintf(fd, fmt, ##__VA_ARGS__)
+
+#define JKLOGVP(fmt, ...) \
+	JKLOGVPF(stderr, fmt, ##__VA_ARGS__)
+
+#define JKLOGVPX(fmt, ...) \
+    do { \
+        if JKIFCONSOLE \
+            JKLOGVP(fmt, ##__VA_ARGS__); \
+        if JKIFOWNFILE \
+            if (rt_p->file) { \
+                JKLOGVPF(rt_p->file, fmt, ##__VA_ARGS__); \
+            } \
+    } while(0)
+
 #define RTNAME(name)              \
-    printf("[%s]", name)
+    JKLOGPX("[%s]", name)
 
 #define RTTIMESIMPLE()                                                             \
   do{                                                                        \
     struct timeval _tNow; struct tm _tmNow;                                  \
     gettimeofday(&_tNow, NULL);                                              \
     memcpy(&_tmNow, localtime(&_tNow.tv_sec), sizeof(_tmNow));               \
-    printf("[%02d-%02d][%02d:%02d:%02d]",                         \
+    JKLOGPX("[%02d-%02d][%02d:%02d:%02d]",                         \
         _tmNow.tm_mon+1, _tmNow.tm_mday,                \
         _tmNow.tm_hour, _tmNow.tm_min, _tmNow.tm_sec);   \
   }while(0)
@@ -66,24 +114,24 @@
     struct timeval _tNow; struct tm _tmNow;                                  \
     gettimeofday(&_tNow, NULL);                                              \
     memcpy(&_tmNow, localtime(&_tNow.tv_sec), sizeof(_tmNow));               \
-    printf("[%04d-%02d-%02d][%02d:%02d:%02d.%03ld]",                         \
+    JKLOGPX("[%04d-%02d-%02d][%02d:%02d:%02d.%03ld]",                         \
         _tmNow.tm_year+1900, _tmNow.tm_mon+1, _tmNow.tm_mday,                \
         _tmNow.tm_hour, _tmNow.tm_min, _tmNow.tm_sec, _tNow.tv_usec/1000);   \
   }while(0)
 
 #define RTFUNC(func)             \
-  printf("%s()", func)        
+  JKLOGPX("%s()", func)        
 
 #define RTLINE(line)             \
-  printf("%04d", line)        
+  JKLOGPX("%04d", line)        
 
 #define RTFILE(file)             \
-  printf("%s", file) 
+  JKLOGPX("%s", file) 
 
-#define RTLEFT()   printf("[")
-#define RTRIGHT()  printf("]")
-#define RTCOLON()  printf(" : ")
-#define RTAT()     printf(" @ ")
+#define RTLEFT()   JKLOGPX("%s", "[")
+#define RTRIGHT()  JKLOGPX("%s", "]")
+#define RTCOLON()  JKLOGPX("%s", " : ")
+#define RTAT()     JKLOGPX("%s", " @ ")
 
 #define RTALL(name, func, line, file)             \
   RTNAME(name);                 \
@@ -96,13 +144,13 @@
   RTLINE(line);                 \
   RTRIGHT()
 
-#define RTERRORTIPS(err)     printf("%s", err)
-#define RTWARNTIPS(warn)     printf("%s", warn)
-#define RTINFOTIPS(info)     printf("%s", info)
-#define RTMESSAGETIPS(message)  printf("%s", message)
-#define RTDEBUGTIPS(debug)   printf("%s", debug)
-#define RTCYCLETIPS(cycle)   printf("%s", cycle)
-#define RTTIPS(tips)         printf("%s", tips)
+#define RTERRORTIPS(err)     JKLOGPX("%s", err)
+#define RTWARNTIPS(warn)     JKLOGPX("%s", warn)
+#define RTINFOTIPS(info)     JKLOGPX("%s", info)
+#define RTMESSAGETIPS(message)  JKLOGPX("%s", message)
+#define RTDEBUGTIPS(debug)   JKLOGPX("%s", debug)
+#define RTCYCLETIPS(cycle)   JKLOGPX("%s", cycle)
+#define RTTIPS(tips)         JKLOGPX("%s", tips)
 
 #define  RT_MAX_NAME_LEN            32
 
@@ -116,10 +164,9 @@ typedef struct __RT_Print {
     char            *rt_color;
     int              rt_enable_color;
     int              rt_used;
-    int              rt_kind_cur;
-    int              rt_kind[RT_MAX_KIND_COUNTS];
+    int              save_type;  // how to save, 2 console, -1 none, 1 to file(use zlog, so depends on config of zlog.conf)
+    char             filepath[RT_MAX_STRING_LEN];
     FILE            *file;
-    int              save_type;  // how to save, 0 console, -1 none, 1 to file(use zlog, so depends on config of zlog.conf)
 } RT_Print;
 
 static RT_Print rt_print_out = {
@@ -129,7 +176,7 @@ static RT_Print rt_print_out = {
     "",
     (char*)RT_COLOR_NONE,
     RT_COLOR_FALSE,
-    0,0
+    0,2
 };
 
 static RT_Print *rt_p = &rt_print_out;
@@ -140,7 +187,7 @@ RT_EXTERN_C_FUNC int rt_print_init(int rt_print_level,
 {
     if (rt_p != NULL) {
         if (rt_p->rt_used == 1) {
-            printf("Warn: you have inited a print, exit...\n");
+            JKLOGPX("Warn: you have inited a print, exit...\n");
             return -3;
         }
     }
@@ -153,7 +200,7 @@ RT_EXTERN_C_FUNC int rt_print_init(int rt_print_level,
     if (name != NULL) {
         int len = strlen(name);
         if (len > RT_NAME_LEN_SUPPORT || len > RT_MAX_NAME_LEN) {
-            printf("WARN: long name [%d] > [%d] max support[%d], will be trancated\n", 
+            JKLOGPX("WARN: long name [%d] > [%d] max support[%d], will be trancated\n", 
                    len, RT_MAX_NAME_LEN, RT_NAME_LEN_SUPPORT);
         }
         if (len <= 0) sprintf(rt_p->rt_name, "%s", "rt_print");
@@ -164,10 +211,6 @@ RT_EXTERN_C_FUNC int rt_print_init(int rt_print_level,
     memset(rt_p->rt_style, 0, sizeof(rt_p->rt_style));
 
     rt_p->rt_used = 1;
-    int i;
-    for (i = 0; i < RT_MAX_KIND_COUNTS; i++) {
-        rt_p->rt_kind[i] = 0;
-    }
 
     return 0;
 }
@@ -179,8 +222,29 @@ RT_EXTERN_C_FUNC int rt_print_deinit()
     if (rt_p->save_type == RT_PRINT_LOG_TYPE_FILE)
     zlog_fini();
 #endif
+    if (rt_p->file) fclose(rt_p->file);
     rt_p->rt_used = 0; 
     }
+    return 0;
+}
+
+RT_EXTERN_C_FUNC int rt_print_set_log_file(const char *path)
+{
+    if (!rt_p) return -1;
+    sprintf(rt_p->filepath, "%s", path);
+    rt_p->file = fopen(path, "w");
+    if (!rt_p->file) return -2;
+    rt_p->save_type |= RT_PRINT_LOG_TYPE_OWNFILE;
+
+    return 0;
+}
+
+RT_EXTERN_C_FUNC int rt_print_reopen_file()
+{
+    if (!rt_p) return -1;
+    if (rt_p->file) fclose(rt_p->file);
+    rt_p->file = NULL;
+    rt_print_set_log_file(rt_p->filepath);
     return 0;
 }
 
@@ -244,14 +308,13 @@ RT_EXTERN_C_FUNC int rt_is_print_level_none(int level)
 RT_EXTERN_C_FUNC int rt_print_before(int type, const char *func, int line, const char *file)
 {
     if (rt_p == NULL) return -1;
-    char    pout[1024];
 
     int style = (rt_p)->rt_print_style;
     int has_done = 0;
 
     if ((rt_p)->rt_enable_color == RT_COLOR_TRUE) {
         if ((rt_p)->rt_color != NULL)
-            printf("%s", (rt_p)->rt_color);
+            JKLOGPX("%s", (rt_p)->rt_color);
     }
     if (type == -1) {
         memset((rt_p)->rt_style, 0, sizeof((rt_p)->rt_style));
@@ -316,8 +379,7 @@ RT_EXTERN_C_FUNC int rt_print_before(int type, const char *func, int line, const
     }
 
 out:
-    sprintf(pout, "%s", (rt_p)->rt_style);
-    printf("%s", pout);
+    JKLOGPX("%s", rt_p->rt_style);
 
     return 0;
 }
@@ -330,17 +392,14 @@ RT_EXTERN_C_FUNC int rt_print(int type, const char *func, int line, const char *
 
     rt_print_set_color(type);
 
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
-
     va_list arg_ptr;
     va_start(arg_ptr, format);
-    vsnprintf(out, sizeof(out), format, arg_ptr);
 
     rt_print_before(type, func, line, file);
-    printf("%s", out);
+    JKLOGVPX(format, arg_ptr);
 
     va_end(arg_ptr);
+    JKLINE;
 
     return 0;
 }
@@ -351,18 +410,16 @@ RT_EXTERN_C_FUNC int rt_print_style_none(const char *func, int line, const char 
     //if (!(rt_p->rt_print_level & RT_PRINT_NONE)) return -2;
     rt_print_set_color(RT_PRINT_DEBUG);
 
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
     va_list arg_ptr;
     va_start(arg_ptr, format);
-    vsnprintf(out, sizeof(out), format, arg_ptr);
 
     rt_print_before(-1, func, line, file);
-    printf("%s", out);
+    JKLOGVPX(format, arg_ptr);
     if ((rt_p)->rt_enable_color == RT_COLOR_TRUE) {
-        printf(RT_COLOR_NONE);
+        JKLOGPX(RT_COLOR_NONE);
     }
     va_end(arg_ptr);
+    JKLINE;
 
     return 0;
 }
@@ -373,20 +430,17 @@ RT_EXTERN_C_FUNC int rt_print_error(const char *func, int line, const char *file
     if (rt_is_print_level_none((rt_p)->rt_print_level) < 0)  return -2;
     rt_print_set_color(RT_PRINT_ERROR);
 
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
-
     va_list arg_ptr;
     va_start(arg_ptr, format);
-    vsnprintf(out, sizeof(out), format, arg_ptr);
 
     rt_print_before(RT_PRINT_ERROR, func, line, file);
-    printf("%s", out);
+    JKLOGVPX(format, arg_ptr);
     if ((rt_p)->rt_enable_color == RT_COLOR_TRUE) {
-        printf(RT_COLOR_NONE);
+        JKLOGPX(RT_COLOR_NONE);
     }
 
     va_end(arg_ptr);
+    JKLINE;
 
     return 0;
 }
@@ -398,20 +452,17 @@ RT_EXTERN_C_FUNC int rt_print_warn(const char *func, int line, const char *file,
     if (!((rt_p)->rt_print_level & RT_PRINT_WARN)) return -2;
     rt_print_set_color(RT_PRINT_WARN);
 
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
-
     va_list arg_ptr;
     va_start(arg_ptr, format);
-    vsnprintf(out, sizeof(out), format, arg_ptr);
 
     rt_print_before(RT_PRINT_WARN, func, line, file);
-    printf("%s", out);
+    JKLOGVPX(format, arg_ptr);
     if ((rt_p)->rt_enable_color == RT_COLOR_TRUE) {
-        printf(RT_COLOR_NONE);
+        JKLOGPX(RT_COLOR_NONE);
     }
 
     va_end(arg_ptr);
+    JKLINE;
 
     return 0;
 } 
@@ -423,20 +474,17 @@ RT_EXTERN_C_FUNC int rt_print_info(const char *func, int line, const char *file,
     if (!((rt_p)->rt_print_level & RT_PRINT_INFO)) return -2;
     rt_print_set_color(RT_PRINT_INFO);
 
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
-
     va_list arg_ptr;
     va_start(arg_ptr, format);
-    vsnprintf(out, sizeof(out),format, arg_ptr);
 
     rt_print_before(RT_PRINT_INFO, func, line, file);
-    printf("%s", out);
+    JKLOGVPX(format, arg_ptr);
     if ((rt_p)->rt_enable_color == RT_COLOR_TRUE) {
-        printf(RT_COLOR_NONE);
+        JKLOGPX(RT_COLOR_NONE);
     }
 
     va_end(arg_ptr);
+    JKLINE;
 
     return 0;
 } 
@@ -448,20 +496,17 @@ RT_EXTERN_C_FUNC int rt_print_message(const char *func, int line, const char *fi
     //if (!(rt_p->rt_print_level & RT_PRINT_INFO)) return -2;
     rt_print_set_color(RT_PRINT_MESSAGE);
 
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
-
     va_list arg_ptr;
     va_start(arg_ptr, format);
-    vsnprintf(out, sizeof(out), format, arg_ptr);
 
     rt_print_before(RT_PRINT_MESSAGE, func, line, file);
-    printf("%s", out);
+    JKLOGVPX(format, arg_ptr);
     if ((rt_p)->rt_enable_color == RT_COLOR_TRUE) {
-        printf(RT_COLOR_NONE);
+        JKLOGPX(RT_COLOR_NONE);
     }
 
     va_end(arg_ptr);
+    JKLINE;
 
     return 0;
 } 
@@ -473,20 +518,17 @@ RT_EXTERN_C_FUNC int rt_print_debug(const char *func, int line, const char *file
     if (!((rt_p)->rt_print_level & RT_PRINT_DEBUG)) return -2;
     rt_print_set_color(RT_PRINT_DEBUG);
 
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
-
     va_list arg_ptr;
     va_start(arg_ptr, format);
-    vsnprintf(out, sizeof(out), format, arg_ptr);
 
     rt_print_before(RT_PRINT_DEBUG, func, line, file);
-    printf("%s", out);
+    JKLOGVPX(format, arg_ptr);
     if ((rt_p)->rt_enable_color == RT_COLOR_TRUE) {
-        printf(RT_COLOR_NONE);
+        JKLOGPX(RT_COLOR_NONE);
     }
 
     va_end(arg_ptr);
+    JKLINE;
 
     return 0;
 } 
@@ -498,20 +540,17 @@ RT_EXTERN_C_FUNC int rt_print_cycle(const char *func, int line, const char *file
     if (!((rt_p)->rt_print_level & RT_PRINT_CYCLE)) return -2;
     rt_print_set_color(RT_PRINT_CYCLE);
 
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
-
     va_list arg_ptr;
     va_start(arg_ptr, format);
-    vsnprintf(out, sizeof(out), format, arg_ptr);
 
     rt_print_before(RT_PRINT_CYCLE, func, line, file);
-    printf("%s", out);
+    JKLOGVPX(format, arg_ptr);
     if ((rt_p)->rt_enable_color == RT_COLOR_TRUE) {
-        printf(RT_COLOR_NONE);
+        JKLOGPX(RT_COLOR_NONE);
     }
 
     va_end(arg_ptr);
+    JKLINE;
 
     return 0;
 } 
@@ -551,65 +590,6 @@ RT_EXTERN_C_FUNC int rt_print_stop_debug()
     return (rt_p)->rt_print_level &= ~RT_PRINT_DEBUG;
 }
 
-
-RT_EXTERN_C_FUNC int rt_print_add_kind(int kind)
-{
-    if (!rt_p) return -1;
-    int i = 0;
-    for (i = 0; i < RT_MAX_KIND_COUNTS; i++) {
-        if (rt_p->rt_kind[i] == 0) {
-            rt_p->rt_kind[i] = kind;
-            rt_p->rt_kind_cur++;
-            break;
-        }
-    }
-    return rt_p->rt_kind_cur;
-}
-
-RT_EXTERN_C_FUNC int rt_print_del_kind(int kind)
-{
-    if (!rt_p) return -1;
-    int i;
-    for (i = 0; i < RT_MAX_KIND_COUNTS; i++) {
-        if (rt_p->rt_kind[i] == 0) break;
-        if (rt_p->rt_kind[i] == kind) {
-            rt_p->rt_kind[i] = rt_p->rt_kind[rt_p->rt_kind_cur-1];
-            rt_p->rt_kind_cur--;
-        }
-    }
-	return rt_p->rt_kind_cur;
-}
-
-RT_EXTERN_C_FUNC int rt_print_kind(int kind, const char *func, int line, const char *file, const char *format, ...)
-{
-    if ((rt_p) == NULL) return -1;
-    if (rt_is_print_level_none((rt_p)->rt_print_level) < 0) return -2;
-    int i;
-    for (i = 0; i < rt_p->rt_kind_cur; i++) {
-        if (rt_p->rt_kind[i] == 0) break;
-        if (rt_p->rt_kind[i] == kind) break;
-    }
-    if (i == rt_p->rt_kind_cur) return -3;
-    rt_print_set_color(0);
-
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
-
-    va_list arg_ptr;
-    va_start(arg_ptr, format);
-    vsprintf(out, format, arg_ptr);
-
-    rt_print_before(RT_PRINT_DEBUG, func, line, file);
-    printf("%s", out);
-    if ((rt_p)->rt_enable_color == RT_COLOR_TRUE) {
-        printf(RT_COLOR_NONE);
-    }
-
-    va_end(arg_ptr);
-
-    return 0;
-}
-
 RT_EXTERN_C_FUNC void rt_print_error_string(int errno)
 {
     switch(errno) {
@@ -632,59 +612,6 @@ RT_EXTERN_C_FUNC void rt_print_error_string(int errno)
         break;
     }
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// section - test of write to file
-///////////////////////////////////////////////////////////////////////////////
-
-RT_EXTERN_C_FUNC int rt_open_file(const char *path)
-{
-    if (rt_p == NULL) return -1;
-
-    rt_p->file = fopen(path, "a+");
-    if (!rt_p->file) return -2;
-
-    return 0;
-}
-
-RT_EXTERN_C_FUNC int rt_close_file()
-{
-    if (rt_p == NULL) return -1;
-  
-    if (rt_p->file) { fclose(rt_p->file); rt_p->file = NULL; }
-
-    return 0;
-}
-
-RT_EXTERN_C_FUNC int rt_writeto_file(const char *func, int line, const char *file, const char *format, ...)
-{
-    if (rt_p == NULL) return -1;
-    char  out[RT_STRING_MAX_LEN_SUPPORT];
-    memset(out, 0, sizeof(out));
-
-    va_list arg_ptr;
-    va_start(arg_ptr, format);
-    vsprintf(out, format, arg_ptr);
-
-    int ret = fwrite(out, 1, strlen(out), rt_p->file);
-    if (ret <= 0) {
-        printf("error [%d]: \n", ret);
-    }
-
-    va_end(arg_ptr);
-
-    return 0;
-}
-
-#if 0
-int main()
-{
-    RTVERSION("test for print start \n");
-    rtmsg("form message start");
-
-    return 0;
-}
-#endif
 
 /*=============== End of file: rt_print.c ==========================*/
 

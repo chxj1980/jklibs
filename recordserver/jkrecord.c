@@ -13,15 +13,12 @@ static int quit = 1;
 
 int main(int argc, char **args) 
 {
-    if (argc <= 1) {
-        fprintf(stderr, "Use -h to see help\n");
-        return -1;
-    }
-    char *dev = NULL;
-    char *path = NULL;
+    char *dev = "/dev/video0";
+    char *path = "/tmp/av.unix";
+    char *logfile = "/tmp/jkrecord.log";
     int debug = 0;
     int opt = 0;
-    while((opt = getopt(argc, args, "i:p:dh")) != -1) {
+    while((opt = getopt(argc, args, "i:p:l:dh")) != -1) {
         switch(opt) {
             case 'i':
                 dev = optarg;
@@ -29,16 +26,20 @@ int main(int argc, char **args)
             case 'p':
                 path = optarg;
                 break;
+            case 'l':
+                logfile = optarg;
             case 'd':
-                debug = atoi(optarg);
+                debug = 1;
                 break;
             case 'h':
-            default:
-                fprintf(stderr, "Usage: %s -i video_dev -p path -d debug\n", args[0]);
+                fprintf(stderr, "Usage: %s -i video_dev -p path -l logfile -d debug\n", args[0]);
                 return -3;
         }
     }
 
+    rt_print_set_log_file(logfile);
+
+    rtdebug("Program start with dev [%s] path [%s] logfile [%s]\n", dev, path, logfile);
     snprintf(gi.videoDev, sizeof(gi.videoDev), "%s", dev);
 
     if (debug) {
@@ -60,7 +61,7 @@ int main(int argc, char **args)
         rterror("rs start failed [%d]\n", ret);
         return -2;
     }
-    ret = sock_init(&gi, "/tmp/av.unix");
+    ret = sock_init(&gi, path);
     if (ret < 0) {
         rterror("sock init failed [%d]\n", ret);
     }
@@ -70,10 +71,10 @@ int main(int argc, char **args)
     while (1) {
         if (quit && time(NULL) - last > 15) break;
         ret = rs_run(&gi);
-        rtdebug("Codec Decoder len %d\n", gi.stream_delen);
+        rtdebug("Codec Decoder len %d", gi.stream_delen);
         if (gi.stream_delen > 0) {
-            ret = sock_send(&gi, gi.stream_dedata, gi.stream_delen);
-            rtdebug("sock send data ret [%d] len [%d]\n", ret, gi.stream_delen);
+            ret = sock_send(&gi, (unsigned char*)gi.stream_dedata, gi.stream_delen);
+            rtdebug("sock send data ret [%d] len [%d]", ret, gi.stream_delen);
         }
 
         if (debug) {
