@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include "process.h"
 
@@ -79,10 +80,13 @@ int main(int argc, char **args)
 
     time_t last = time(NULL);
     quit = 0;
+    struct timeval tv;
     while (1) {
         if (quit && time(NULL) - last > 15) break;
         ret = rs_run(&gi);
-        rtdebug("Codec Decoder len %d", gi.stream_delen);
+        gettimeofday(&tv, NULL);
+        unsigned int tim = tv.tv_sec *1000 + tv.tv_usec /1000;
+        rtdebug("[%u] Codec Decoder len %d", tim, gi.stream_delen);
         if (gi.stream_delen > 0) {
             ret = sock_send(&gi, (unsigned char*)gi.stream_dedata, gi.stream_delen);
             rtdebug("sock send data ret [%d] len [%d]", ret, gi.stream_delen);

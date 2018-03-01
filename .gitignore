@@ -4,3 +4,4 @@ cmake-build-debug
 Debug/
 .vs
 ipch
+*.o
