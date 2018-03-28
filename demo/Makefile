@@ -1,28 +1,34 @@
 
+shell=/bin/bash
+CURDIR=$(shell pwd)
+CONFIG_FILE=$(CURDIR)/../config/config_all.mk
+BASEDIR=$(CURDIR)/../
 
-#OBJSOURCE=$(patsubst %.c,$(TMP_OBJ)/%.o,$(SOURCE_FILE))
+include $(CONFIG_FILE)
+include Object.mk
 
-JKRECORD_FILE=jkrecord.c
+OBJ_DEPS=$(obj-dep-y)
+## form *.c to *(exec demo name)
+DEMO_EXEC=$(patsubst %.c,%,$(obj-demo-y))
+DEMO_EXEC_GEN=$(DEMO_EXEC:%=%-$(OS))
 
-CFLAGS+=-I../vdev -I../codec -I../common
-LDFLAGS+=-L/opt/data/libs/$(OS)/lib -lx264
+DEMO_CFLAGS += -I.
 
-OBJDIR=.obj$(OS)
+.PHONY: demo
 
-BUILDIN_FILES=../common/$(OBJDIR)/build-in.o
-BUILDIN_FILES+=../codec/$(OBJDIR)/build-in.o
-BUILDIN_FILES+=../vdev/$(OBJDIR)/build-in.o
+all: deps $(DEMO_EXEC)
 
-pre:
-	@mkdir -p .obj
+deps:
+	@mkdir -p $(OBJDIR)
 
-jkrecord:
-	$(CC) -o jkrecord-$(OS) $(JKRECORD_FILE) $(BUILDIN_FILES) $(CFLAGS) $(LDFLAGS)
-
-all:
-
-.PHONY: clean
+$(DEMO_EXEC):$(obj-demo-y)
+	@echo "\t $(CC) \t $@-$(OS)"
+	$(Q) $(CC) -o $@-$(OS) $(patsubst %,%.c,$@) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
 
 clean:
-	rm -rf jkrecord-$(OS)
+	rm -rf $(OBJS)
+	rm -rf $(DEMO_EXEC) $(DEMO_EXEC_GEN)
+
+distclean:
+	rm -rf $(OBJDIR)
 
