@@ -1,0 +1,10 @@
+
+#define STATIC_IN_RELEASE 
+
+#define MAJOR_VERSION 1
+
+#define MINOR_VERSION 0
+
+#define MICRO_VERSION 1.1
+
+#define VERSION "10"

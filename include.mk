@@ -5,3 +5,4 @@ export BVSTREAM=n
 export DEMO=y
 export RECORDSERVER=n
 export OPENAV=y
+export QRCODE=y

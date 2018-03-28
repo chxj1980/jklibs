@@ -123,6 +123,7 @@ filedirs-$(BVSTREAM) += stream
 filedirs-$(DEMO) += demo
 filedirs-$(RECORDSERVER) += recordserver
 filedirs-$(OPENAV) += openav
+filedirs-$(QRCODE) += qrcode
 
 ## all linked in build-in.o files in each directory
 buildin-files = $(patsubst %,%/$(OBJDIR)/build-in.o,$(filedirs-y))
