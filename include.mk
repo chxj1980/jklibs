@@ -1,6 +1,7 @@
 export DISK=n
-export CODEC=y
-export VDEV=y
+export CODEC=n
+export VDEV=n
 export BVSTREAM=n
 export DEMO=y
-export RECORDSERVER=y
+export RECORDSERVER=n
+export OPENAV=y

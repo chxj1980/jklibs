@@ -28,8 +28,7 @@ filesbuild:
 dep-before:
 	@for i in $(buildin-files); do   \
 		if [[ ! -f $$i ]] && [[ "$$i" != "demo" ]] ; then   \
-			$(ECHO) "\n\t[ $$i ] not exist, so exit!\n";   \
-			exit 1;    \
+			$(ECHO) "\n\t[ $$i ] not exist, warning!\n";   \
 		fi;    \
 	done
 

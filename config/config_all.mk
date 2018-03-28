@@ -122,6 +122,7 @@ filedirs-$(DISK) += disk
 filedirs-$(BVSTREAM) += stream
 filedirs-$(DEMO) += demo
 filedirs-$(RECORDSERVER) += recordserver
+filedirs-$(OPENAV) += openav
 
 ## all linked in build-in.o files in each directory
 buildin-files = $(patsubst %,%/$(OBJDIR)/build-in.o,$(filedirs-y))
@@ -138,6 +139,7 @@ CC=$(CROSS_COMPILE)gcc
 ifeq ($(BVPROTOBUF), yes)
 CC=$(CROSS_COMPILE)g++
 endif
+CXX=$(CROSS_COMPILE)g++
 AR=$(CROSS_COMPILE)ar
 LD=$(CROSS_COMPILE)ld
 STRIP=$(CROSS_COMPILE)strip
