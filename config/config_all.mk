@@ -53,7 +53,7 @@ ifeq ("$(origin OS)", "command line")
 	OS := $(OS)
 endif
 
-include $(BASEDIR)/config/config_$(OS).mk
+sinclude $(BASEDIR)/config/config_$(OS).mk
 
 
 ######################################
