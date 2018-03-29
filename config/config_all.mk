@@ -46,6 +46,8 @@ LIBSNAME=jk-v1
 ## debug use
 #BVDEBUG=yes
 
+export THIRD_BASEPATH=/opt/data/libs/
+
 sinclude $(BASEDIR)/config.mk
 
 ## If the command from command line, use it instead others
@@ -120,13 +122,13 @@ filedirs-$(VDEV) += vdev
 filedirs-$(CODEC) += codec
 filedirs-$(DISK) += disk
 filedirs-$(BVSTREAM) += stream
-filedirs-$(DEMO) += demo
 filedirs-$(RECORDSERVER) += recordserver
 filedirs-$(OPENAV) += openav
 filedirs-$(QRCODE) += qrcode
 
 ## all linked in build-in.o files in each directory
 buildin-files = $(patsubst %,%/$(OBJDIR)/build-in.o,$(filedirs-y))
+filedirs-d-$(DEMO) += demo
 
 OBJDIR=.obj$(OS)
 #OBJS=$(OBJS_y:%=$(OBJDIR)/%)

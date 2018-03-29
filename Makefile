@@ -19,7 +19,7 @@ sinclude config/config_all.mk
 all: createdir filesbuild dep-before static dyn
 
 filesbuild:
-	@for i in $(filedirs-y); do \
+	@for i in $(filedirs-y) $(filedirs-d-y); do \
         $(ECHO) "\n\t Build $$i\n"; \
         cd $$i; make; cd ..;\
     done
@@ -27,7 +27,9 @@ filesbuild:
 ## check build-in files before make static and dyn
 dep-before:
 	@for i in $(buildin-files); do   \
-		if [[ ! -f $$i ]] && [[ "$$i" != "demo" ]] ; then   \
+		fname=$$i ;   \
+		ffname=${fname%%/*} ; \
+		if [[ ! -f $$i ]] && [[ $$ffname != "demo" ]] ; then   \
 			$(ECHO) "\n\t[ $$i ] not exist, warning!\n";   \
 		fi;    \
 	done
