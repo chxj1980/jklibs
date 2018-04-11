@@ -2,10 +2,11 @@
 // Created by v on 16-12-23.
 //
 
-#include <cstdio>
 #include <list>
 #include <pthread.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string>
 
 typedef struct {
     int       iParam;
@@ -65,6 +66,19 @@ int demo() {
 
     DemoB * b = new DemoB();
     b->hello();
+    return 0;
+}
+
+int list_test_string() {
+    std::list<std::string> string_list;
+    char url[512] = "xxxxx";
+    string_list.push_back(url);
+    string_list.push_back("value");
+ 
+    for (std::list<std::string>::iterator iter = string_list.begin(); iter != string_list.end(); iter++) {
+         std::string s = *iter;
+         printf("string: [%s]\n", s.c_str());
+    }
     return 0;
 }
 
@@ -134,9 +148,10 @@ void *base_test(void *arges)
 int main() {
 //    list_test();
 //    demo();
+    list_test_string();
 
-    TBase *base = new TBase();
-    base->test_args(1, 2);
+//    TBase *base = new TBase();
+    //base->test_args(1, 2);
 
     sleep(10);
 

@@ -15,6 +15,7 @@ int base_demo_size()
     unsigned short us;
     char c;
     unsigned char uc;
+    float f;
     long l;
     long long ll;
     unsigned long ul;
@@ -27,10 +28,15 @@ int base_demo_size()
     printf("unsigned short = %d\n", sizeof(us));
     printf("char = %d\n", sizeof(c));
     printf("unsigned char = %d\n", sizeof(uc));
+    printf("float = %d\n", sizeof(f));
     printf("long = %d\n", sizeof(l));
     printf("long long = %d\n", sizeof(ll));
     printf("unsigned long = %d\n", sizeof(ul));
     printf("unsigned long long = %d\n", sizeof(ull));
+    printf("short* = %d\n", sizeof(short*));
+    printf("unsigned short * = %d\n", sizeof(unsigned short *));
+    printf("char * = %d\n", sizeof(char*));
+    printf("float * = %d\n", sizeof(float*));
     return 0;
 }
 
