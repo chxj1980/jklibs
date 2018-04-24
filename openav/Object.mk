@@ -18,5 +18,5 @@ endif
 
 obj-$(OPENAV)=BaseOperation.o  CVFaceDetect.o  DrawSomething.o
 
-obj-demo-$(OPENAV) = face_detect
+obj-demo-$(OPENAV) = face_detect.cpp
 

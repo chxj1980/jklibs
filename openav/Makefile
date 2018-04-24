@@ -10,7 +10,7 @@ include Object.mk
 OBJS= $(obj-y:%=$(OBJDIR)/%)
 OBJ_DEPS=$(obj-dep-y)
 ## form *.c to *(exec demo name)
-DEMO_EXEC=$(patsubst %.c,%,$(obj-demo-y))
+DEMO_EXEC=$(patsubst %.cpp,%,$(obj-demo-y))
 DEMO_EXEC_GEN=$(DEMO_EXEC:%=%-$(OS))
 
 DEMO_CFLAGS += -I.
@@ -32,8 +32,8 @@ $(BUILDIN): $(OBJS)
 	$(Q) $(LD) -r -o $@ $^
 
 $(DEMO_EXEC):$(BUILDIN) $(obj-demo-y)
-	@echo "\t $(COMPILE) \t $@-$(OS)"
-	$(Q) $(COMPILE) -o $@-$(OS) $(patsubst %,%.cpp,$@) $(BUILDIN) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
+	@echo "\t $(COMPILE) \t $@"
+	$(Q) $(COMPILE) -o $@ $(patsubst %,%.cpp,$(@))  $(BUILDIN) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
 
 clean:
 	rm -rf $(OBJS) $(BUILDIN)

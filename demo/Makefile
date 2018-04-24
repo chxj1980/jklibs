@@ -23,12 +23,12 @@ deps:
 	@mkdir -p $(OBJDIR)
 
 $(DEMO_EXEC):$(obj-demo-y)
-	@echo "\t $(CC) \t $@-$(OS)"
-	$(Q) $(CC) -o $@-$(OS) $(patsubst %,%.c,$@) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
+	@echo "\t $(CC) \t $@"
+	$(Q) $(CC) -o $@ $(patsubst %,%.c,$@) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
 
 $(DEMO_CPP_EXEC):$(obj-demo-cpp-y)
-	@echo "\t $(CXX) \t $@-$(OS)"
-	$(Q) $(CXX) -o $@-$(OS) $(patsubst %,%.cpp,$@) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
+	@echo "\t $(CXX) \t $@"
+	$(Q) $(CXX) -o $@ $(patsubst %,%.cpp,$@) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
 
 clean:
 	rm -rf $(OBJS)

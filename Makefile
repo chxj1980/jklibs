@@ -66,7 +66,7 @@ install:
 	$(Q) cp $(INSTALL_LIBS) $(INSTALL_DIRS)/lib/
 
 clean:
-	@for i in $(filedirs-y); do   \
+	@for i in $(filedirs-y) $(filedirs-d-y); do   \
 		echo ""; \
 		cd $$i; make clean; cd ..;   \
 		echo ""; \
