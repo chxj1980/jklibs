@@ -16,6 +16,8 @@ BVBASE=y
 ## outside zlog
 BVZLOG=no
 
+CONFIG_FILE=common/config.h
+
 ifeq ("$(DISK)", "")
 DISK=n
 endif

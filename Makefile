@@ -16,7 +16,16 @@ sinclude config/config_all.mk
 #filedirs-y=common disk stream
 .PHONY: $(filedirs-y)
 
-all: createdir filesbuild dep-before static dyn
+
+all: generate_config createdir filesbuild dep-before static dyn
+
+generate_config:
+	@ [ -f $(CONFIG_FILE) ] && rm -rf $(CONFIG_FILE); \
+		DATA=`date +%Y%m%d%H%M%S`; \
+		GITVERSION=`./tools/setlocalversion`; \
+		BUILD_GIT_VERSION=$$DATA.git-$$GITVERSION; \
+		echo "# generated git version" >> $(CONFIG_FILE); \
+		echo "#define BUILD_GIT_VERSION $$BUILD_GIT_VERSION" >> $(CONFIG_FILE)
 
 filesbuild:
 	@for i in $(filedirs-y) $(filedirs-d-y); do \
