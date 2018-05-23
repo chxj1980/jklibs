@@ -11,9 +11,9 @@
 #include <errno.h>
 
 #include "rt_unixsocket.h"
-#include "bvpu_utils.h"
-#include "rt_print.h"
-#include "jk_common.h"
+#include "cm_utils.h"
+#include "cm_print.h"
+#include "cm_common.h"
 
 #define RT_UNIXSOCKET_PATH_MAX  256
 
@@ -44,17 +44,17 @@ int rt_unixsocket_server_init(RTUnixSocketServerHandle *h, const char *path)
 
     int ret = bind(fd, (struct sockaddr*)&addr, sizeof(addr));
     if (ret == -1) {
-        rterror("bind failed: %d,%s", ret, strerror(ret));
+        cmerror("bind failed: %d,%s", ret, strerror(ret));
         return -4;
     }
 
     ret = listen(fd, 2);
     if (ret == -1) {
-        rterror("listen failed: %d, %s", ret, strerror(ret));
+        cmerror("listen failed: %d, %s", ret, strerror(ret));
         return -5;
     }
 
-    RTUnixSocketServerHandle inH = (RTUnixSocketServerHandle)jk_mem_calloc(1, sizeof(struct tagRTUnixSocketServerHandle));
+    RTUnixSocketServerHandle inH = (RTUnixSocketServerHandle)cm_mem_calloc(1, sizeof(struct tagRTUnixSocketServerHandle));
     if (!inH) {
         close(fd);
         return JK_RESULT_E_MALLOC_FAIL;
@@ -73,7 +73,7 @@ int rt_unixsocket_server_deinit(RTUnixSocketServerHandle *h)
 {
     if (*h) {
         close((*h)->iFD);
-        bvpu_mem_free(*h);
+        cm_mem_free(*h);
     }
     *h = NULL;
     return 0;
@@ -92,7 +92,7 @@ int rt_unixsocket_server_accept(RTUnixSocketServerHandle h)
     int client = 0;
     client = accept(h->iFD, NULL, NULL);
     if (client == -1) {
-        rterror("accept failed: %d", client);
+        cmerror("accept failed: %d", client);
     }
     return client;
 }
@@ -104,7 +104,7 @@ int rt_unixsocket_server_recv(RTUnixSocketServerHandle h, int client, char *data
     int rc = 0;
     rc = recv(client, data, *len, 0);
     if (rc == -1) {
-        rterror("read failed: %d,%s", rc, strerror(rc));
+        cmerror("read failed: %d,%s", rc, strerror(rc));
         return -2;
     } else if (rc == 0) {
 
@@ -119,7 +119,7 @@ int rt_unixsocket_server_send(RTUnixSocketServerHandle h, int client, char *data
 
     int rc = send(client, data, len, 0);
     if (rc == -1) {
-        rterror("send failed: %d, %s", rc, strerror(rc));
+        cmerror("send failed: %d, %s", rc, strerror(rc));
         return -2;
     }
     return rc;
@@ -158,7 +158,7 @@ int rt_unixsocket_client_init(RTUnixSocketClientHandle *h, const char *path)
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, path, sizeof(addr.sun_path)-1);
 
-    RTUnixSocketClientHandle inH = (RTUnixSocketClientHandle)jk_mem_calloc(1, sizeof(struct tagRTUnixSocketServerHandle));
+    RTUnixSocketClientHandle inH = (RTUnixSocketClientHandle)cm_mem_calloc(1, sizeof(struct tagRTUnixSocketServerHandle));
     if (!inH) {
         close(fd);
         return JK_RESULT_E_MALLOC_FAIL;
@@ -178,7 +178,7 @@ int rt_unixsocket_client_deinit(RTUnixSocketClientHandle *h)
 {
     if (*h) {
         close((*h)->iFD);
-        bvpu_mem_free(*h);
+        cm_mem_free(*h);
         *h = NULL;
     }
     return 0;
@@ -191,10 +191,10 @@ int rt_unixsocket_client_send(RTUnixSocketClientHandle h, char *data, int len)
     if (!h->iConn) {
         int c = connect(h->iFD, (struct sockaddr *) &h->szAddr, sizeof(h->szAddr));
         if (c == -1) {
-            rterror("connect failed: %d,%s", c, strerror(errno));
+            cmerror("connect failed: %d,%s", c, strerror(errno));
             return -2;
         } else {
-            rtinfo("connect [%s] success\n", h->szUnixPath);
+            cminfo("connect [%s] success\n", h->szUnixPath);
         }
         h->iConn = 1;
     }
@@ -203,10 +203,10 @@ int rt_unixsocket_client_send(RTUnixSocketClientHandle h, char *data, int len)
     if (data && len > 0) {
         int n = write(h->iFD, data, len);
         if (n <= 0 || n != len) {
-            rterror("send failed: %d", n);
+            cmerror("send failed: %d", n);
             if (n == -1) {
                 h->iConn = 0; // maybe connect failed.
-                rterror("send failed: %s", strerror(errno));
+                cmerror("send failed: %s", strerror(errno));
                 return -3;
             }
         }
@@ -224,7 +224,7 @@ int rt_unixsocket_client_recv(RTUnixSocketClientHandle h, char *data, int *len)
 
     int c = recv(h->iFD, data, *len, 0);
     if (c == -1) {
-        rterror("read failed: %d,%s", c, strerror(c));
+        cmerror("read failed: %d,%s", c, strerror(c));
         return -3;
     }
     *len = c;

@@ -5,7 +5,7 @@ CFLAGS+= -Iopenssl-aes/include -I.
 
 SRC_DIR=openssl-aes/src
 
-obj-y += rt_print.o jk_conn_tcp.o rt_server_tcp.o  bvpu_utils.o jkbytes.o
+obj-y += cm_print.o cm_conn_tcp.o rt_server_tcp.o  cm_utils.o jkbytes.o
 obj-y += unixsocket/rt_unixsocket.o
 obj-$(LIBJSON) += json/json.o
 obj-$(KFCRYPTO) += crypto/base64.o
