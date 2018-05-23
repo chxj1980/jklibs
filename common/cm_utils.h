@@ -1,5 +1,5 @@
 /**
- *          File: bvpu_utils.h
+ *          File: cm_utils.h
  *
  *        Create: 2014年12月19日 星期五 14时13分45秒
  *
@@ -7,7 +7,7 @@
  *
  *       Version: 1.0.0
  *
- *        Author: yuwei.zhang@besovideo.com
+ *        Author: jmdvirus
  *
  *===================================================================
  */
@@ -28,102 +28,144 @@
  * Copyright (C) @ BesoVideo, 2014
  */
 
-#ifndef __BVPU_UTILS_H
-#define __BVPU_UTILS_H
+#ifndef __CM_UTILS_H
+#define __CM_UTILS_H
 
 #include <time.h>
 #include <stdlib.h>
 
 // Base mem function.
 
-#define jk_mem_malloc(size)    \
+#define cm_mem_malloc(size)    \
              malloc(size)
-#define jk_mem_calloc(count, size)    \
+#define cm_mem_calloc(count, size)    \
              calloc(count, size)
-#define jk_mem_realloc(t, size)     \
+#define cm_mem_realloc(t, size)     \
              realloc(t, size)
-#define jk_mem_free(t)      \
+#define cm_mem_free(t)      \
              free(t);
 
-#define bvpu_mem_malloc(size)    \
-             malloc(size)
-#define bvpu_mem_calloc(count, size)    \
-             calloc(count, size)
-#define bvpu_mem_realloc(t, size)     \
-             realloc(t, size)
-#define bvpu_mem_free(t)      \
-             free(t);
+
+enum {
+    CM_WALLTIME_TYPE_NONE = 0,
+    CM_WALLTIME_TYPE_ONCE = 1,
+    CM_WALLTIME_TYPE_INTERVAL = 2,
+};
+
+enum {
+    CM_WALLTIME_TIMETYPE_NONE = 0,
+    CM_WALLTIME_TIMETYPE_EVERYDAY = 1,
+    CM_WALLTIME_TIMETYPE_YEARDAY = 2,
+    CM_WALLTIME_TIMETYPE_MONTHDAY = 3,
+    CM_WALLTIME_TIMETYPE_WEEK = 4,
+    CM_WALLTIME_TIMETYPE_ONCE = 5,
+};
+
+typedef struct {
+    int        iYear;
+    int        iMon;
+    int        iDay;
+    int        iHour;
+    int        iMinute;
+    int        iSecond;
+} CMWallTime;
+
+typedef struct {
+    int         iType;         // once, interval (CM_WALLTIME_TYPE_*)
+    int         iTimeType;     // each week, everyday, year day, month day. (CM_WALLTIME_TIMETYPE_*)
+    int         iWeekDay;      // which day of week, 0-6 : sunday to monday
+    CMWallTime  szStartTime;
+    CMWallTime  szEndTime;
+} CMWallTimeCondition;
+
+
+/**
+ * Set time
+ * @param t
+ * @return 0
+ */
+int cm_walltime_set(CMWallTime *t, int year, int month, int day,
+                    int hour, int minute, int second);
+
+/**
+ * If time in
+ * @param cond
+ * @return 1 - in, other no
+ */
+int cm_walltime_in(CMWallTimeCondition *cond);
 
 // 0xff,0x88,0x9 --> 0xff 0x88 0x9 (in @data)
-int bvpu_parse_data(unsigned char *data, char *string);
+int cm_parse_data(unsigned char *data, char *string);
 
 // ex: xx,xxx,xxxx
 // parse from @string to find each @sign, with @maxlen
 // save them to @save for max @arrsize
 // return max found.
-int bvpu_parse_data_string(char *string, char *save, int arrsize, int maxlen, const char sign);
+int cm_parse_data_string(char *string, char *save, int arrsize, int maxlen, const char sign);
 
 // ex: d,s,2
 // Parse from @string of @maxlen with @sign,
 // save them to @data
 // @data must enough long.
 // return how many  be parsed.
-int bvpu_parse_data_char(unsigned char *data, char *string, int maxlen, const char *sign);
+int cm_parse_data_char(unsigned char *data, char *string, int maxlen, const char *sign);
 
 // ex:d,s,2
 // Parse from @string of @maxlen with @sign
 // save them to @save.
 // @save must enough long.
 // return length be parsed.
-int bvpu_parse_string_int(char *string, int *save, int maxlen, const char *sign);
+int cm_parse_string_int(char *string, int *save, int maxlen, const char *sign);
 
 // ex: (xxxx) -> xxxx
 // remove parenthesis of @string, save it to @save.
-int bvpu_clear_parenthesis(char *save, char *string);
+int cm_clear_parenthesis(char *save, char *string);
 
 // Like up, be change @string.
-int bvpu_clear_parenthesis_self(char *string);
+int cm_clear_parenthesis_self(char *string);
 
 
 // Remote the last '\n' mark.
-int bvpu_remove_last_break(char *args);
+int cm_remove_last_break(char *args);
 
 ///////////////
 // Take String to Path and Name
 // ex: /Path/Filename
 // Warn: you must sure the path and name has enough space.
-int bvpu_seperate_filename(char *orig, char *path, char *name);
+int cm_seperate_filename(char *orig, char *path, char *name);
 
 //////////////////////
 // With Network
 // Get the ip of @dn_or_ip, 
 // @eth: device name (like eth,ppp1)
-char *bvpu_get_ip(char *dn_or_ip, const char *eth);
+char *cm_get_ip(char *dn_or_ip, const char *eth);
+
+int cm_get_mac(char * mac, int len_limit, char *dev);    //返回值是实际写入char * mac的字符个数（不包括'\0')
 
 // Get flow of pointed ip
 // @interface (like eth,wlan ...)
-int bvpu_get_flow(const char *interface, unsigned long long *recv,unsigned long long *send, unsigned long long *total);
+int cm_get_flow(const char *interface, unsigned long long *recv,unsigned long long *send, unsigned long long *total);
 
 // Convert int @value to char and save to @save,
 // the return pointer to @save
 // return NULL if fail
-const char *bvpu_itoa(int value, char *save);
+const char *cm_itoa(int value, char *save);
 
 // convert string to value to @out
 // return < 0 fail
 //        == 0 success
-int bvpu_atoi(const char *value, int *out);
+int cm_atoi(const char *value, int *out);
 
 // codec parse of sps pps sde
 // Some may be contain sde info, we need ignore it.
-int bvpu_codec_parse_pps(char *pps, int lenpps);
+int cm_codec_parse_pps(char *pps, int lenpps);
 // @data ex: 00 00 00 01 [sps] 00 00 00 01 [pps]
 /*
  * @data the data
  * @pps will save pps here
  * @sps will save sps here
  */
-int bvpu_codec_parse(char *data, int len, char *pps, int *lenpps, char *sps, int *lensps);
+int cm_codec_parse(char *data, int len, char *pps, int *lenpps, char *sps, int *lensps);
 
 /*
  * @func: If the program with string @prog is running
@@ -141,7 +183,7 @@ int is_program_running(int cnts, const char *prog[]);
  * @return: > 0 success read length. -1 args error, -2, file open fail.
  * @warn: you must free @data, when you needn't it.
  */
-int jk_read_file_data(const char *filename, char **data, int *len);
+int cm_read_file_data(const char *filename, char **data, int *len);
 
 /*
  * @func: Generate time string with seconds.
@@ -149,7 +191,23 @@ int jk_read_file_data(const char *filename, char **data, int *len);
  * It is not thread safe and not reentrance.
  * @tm: If <= 0, it will get current time.
  */
-const char *jk_time_string(time_t tm);
+const char *cm_time_string(time_t tm);
+
+/**
+ * return now time with microsecond
+ */
+unsigned long long cm_gettime_micro();
+
+/**
+ * random generate num's chars to @result
+ * */
+int cm_random_with_num_char(char *result, int num);
+int cm_random_with_num_char_sym(char *result, int num);
+
+/**
+ * return now time with millisecond
+ */
+unsigned long long cm_gettime_milli();
 
 /*
  * @func: compare string with the maxlength.
@@ -161,22 +219,11 @@ int kf_string_compare(const char *src, const char *dst);
 /*
  * @func: hex to binary
  */
-uint32_t rt_hex2bin (void *bin, char hex[]);
+uint32_t cm_hex2bin (void *bin, char hex[]);
 
-void rt_bin2scr (void *bin, uint32_t len);
-
-/**************************************************************************
- * 函数名称：rt_files_return_clientmac_via_clientip
- * 函数功能：接收数据
- * 参数：    char *input_client_ip	该参数为要查询的客户端IP地址
- * 返回值：
- *	IP地址字符串		查询查询成功
- *      "fopen fail"            open files fail
- *      "find no result"        no resut find
- ***************************************************************************/
-char *rt_files_return_clientmac_via_clientip(char *input_client_ip);//通过客户端的IP地址在DHCP文件中查询该客户端的MAC地址，并返回MAC地址
+void cm_bin2scr (void *bin, uint32_t len);
 
 
-#endif  // __BVPU_UTILS_H
+#endif  // __CM_UTILS_H
 
-/*=============== End of file: bvpu_utils.h =====================*/
+/*=============== End of file: cm_utils.h =====================*/

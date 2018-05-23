@@ -1,13 +1,12 @@
 /*
  *===========================================================================
  *
- *          Name: jk_conn_tcp.c
+ *          Name: cm_conn_tcp.c
  *        Create: 2015年09月25日 星期五 19时58分05秒
  *
  *   Discription: 
  *
  *        Author: jmdvirus
- *         Email: jmdvirus@roamter.com
  *
  *===========================================================================
  */
@@ -28,11 +27,11 @@
 #include <errno.h>
 #include <netdb.h>
 
-#include "jk_conn_tcp.h"
-#include "bvpu_utils.h"
-#include "rt_print.h"
+#include "cm_conn_tcp.h"
+#include "cm_utils.h"
+#include "cm_print.h"
 
-struct tagJKConnTCP {
+struct tagCMConnTCP {
     char        addr[64];
     int         port;
     int         sockFD;
@@ -41,11 +40,11 @@ struct tagJKConnTCP {
     int         status;
 };
 
-int jk_conn_tcp_create(JKConnTCP *conn, const char *addr, int port)
+int cm_conn_tcp_create(CMConnTCP *conn, const char *addr, int port)
 {
     if (*conn != NULL || !addr || port <= 0 || port > 65535) return -1;
 
-    JKConnTCP inConn = (JKConnTCP)jk_mem_malloc(sizeof(struct tagJKConnTCP));
+    CMConnTCP inConn = (CMConnTCP)cm_mem_malloc(sizeof(struct tagCMConnTCP));
     if (!inConn) return -2;
 
     sprintf(inConn->addr, "%s", addr);
@@ -64,8 +63,9 @@ int jk_conn_tcp_create(JKConnTCP *conn, const char *addr, int port)
     bzero(&inConn->addr_in, sizeof(struct sockaddr_in));
     inConn->addr_in.sin_family = AF_INET;
     //inet_pton(AF_INET, inConn->addr, &inConn->addr_in.sin_addr);
-    sprintf(&inConn->addr_in.sin_addr, "%s", host->h_addr_list[0]);
-    rtdebug("Server ip is: %s", inet_ntoa(*(struct in_addr*)host->h_addr_list[0]));
+    // sprintf((char*)&inConn->addr_in.sin_addr, "%s", host->h_addr_list[0]);
+    inConn->addr_in.sin_addr.s_addr = inet_addr(addr);
+    cmdebug("Server ip is: %s\n", inet_ntoa(*(struct in_addr*)host->h_addr_list[0]));
 
     inConn->addr_in.sin_port = htons(inConn->port);
     
@@ -73,7 +73,7 @@ int jk_conn_tcp_create(JKConnTCP *conn, const char *addr, int port)
     return 0;
 }
 
-int jk_conn_tcp_connect(JKConnTCP conn, int bCycle, int waitTime, int checktimes)
+int cm_conn_tcp_connect(CMConnTCP conn, int bCycle, int waitTime, int checktimes)
 {
     if (!conn) return -1;
     if (waitTime < 0) waitTime = 1;
@@ -92,7 +92,7 @@ int jk_conn_tcp_connect(JKConnTCP conn, int bCycle, int waitTime, int checktimes
                 conn->status = 1;
                 break;
             }
-            rtdebug("connect falied, reconnect ... %x,%s", errno, strerror(errno));
+            cmdebug("connect falied, reconnect ... %x,%s\n", errno, strerror(errno));
             sleep(waitTime);
             continue;
         }
@@ -103,7 +103,7 @@ int jk_conn_tcp_connect(JKConnTCP conn, int bCycle, int waitTime, int checktimes
     return conn->status;
 }
 
-int jk_conn_tcp_close(JKConnTCP *conn)
+int cm_conn_tcp_close(CMConnTCP *conn)
 {
     if (!conn) return -1;
     if ((*conn)->sockFD) close((*conn)->sockFD);
@@ -112,7 +112,7 @@ int jk_conn_tcp_close(JKConnTCP *conn)
     return 0;
 }
 
-int jk_conn_tcp_send(JKConnTCP conn, const char *data, long len)
+int cm_conn_tcp_send(CMConnTCP conn, const char *data, long len)
 {
     if (!conn || !data || len <= 0) return -111;
 
@@ -130,20 +130,27 @@ int jk_conn_tcp_send(JKConnTCP conn, const char *data, long len)
     return sendlen;
 }
 
-int jk_conn_tcp_recv(JKConnTCP conn, char *recvData, long *recvLen, int bCycle)
+int cm_conn_tcp_recv(CMConnTCP conn, char *recvData, long *recvLen, int bCycle)
 {
     if (!conn || !recvData || !recvLen) return -1;
 
     int sockfd = conn->sockFD;
     long containLen = *recvLen;
     *recvLen = 0;
+    int checktimes = 50;
+    int recv_counts = 0;
     do {
         char data[1024] = {0};
         int lendata = 1024;
-        int nBytes = recv(sockfd, data, lendata, 0);
-        if (nBytes == 0) continue;
+        int nBytes = recv(sockfd, data, lendata, MSG_DONTWAIT);
+        if (nBytes == 0) {
+            if (recv_counts++ > checktimes) break;
+            continue;
+        }
         if (nBytes == -1) {
-            rterror("Read data error %s", strerror(errno));
+            if (recv_counts++ > checktimes) break;
+            if (errno == EAGAIN || errno == EWOULDBLOCK) continue;
+            cmerror("Read data error %s\n", strerror(errno));
             conn->status = 0;
             return -2;
         }
@@ -158,4 +165,4 @@ int jk_conn_tcp_recv(JKConnTCP conn, char *recvData, long *recvLen, int bCycle)
     return 0;
 }
 
-/*=============== End of file: jk_conn_tcp.c ==========================*/
+/*=============== End of file: cm_conn_tcp.c ==========================*/

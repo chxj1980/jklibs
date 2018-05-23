@@ -1,25 +1,25 @@
 /*
  *===================================================================
  *
- *          Name: jk_conn_tcp.h
+ *          Name: cm_conn_tcp.h
  *        Create: 2015年09月25日 星期五 19时57分30秒
  *
  *   Discription: 
  *       Version: 1.0.0
  *
- *        Author: jmdvirus@roamter.com
+ *        Author: jmdvirus
  *
  *===================================================================
  */
-#ifndef __JK_CONN_TCP
-#define __JK_CONN_TCP
+#ifndef __CM_CONN_TCP
+#define __CM_CONN_TCP
 
-typedef struct tagJKConnTCP *JKConnTCP;
+typedef struct tagCMConnTCP *CMConnTCP;
 
 /*
  * Create a connect.
  */
-int jk_conn_tcp_create(JKConnTCP *conn, const char *addr, int port);
+int cm_conn_tcp_create(CMConnTCP *conn, const char *addr, int port);
 
 /*
  * connect to server.
@@ -27,24 +27,24 @@ int jk_conn_tcp_create(JKConnTCP *conn, const char *addr, int port);
  * @waitTime: wait some time reconnect when connect failed.
  * @checktimes: how many times need we retry when connect failed.
  */
-int jk_conn_tcp_connect(JKConnTCP conn, int bCycle, int waitTime, int checktimes);
+int cm_conn_tcp_connect(CMConnTCP conn, int bCycle, int waitTime, int checktimes);
 
 /*
  * close the conn.
  */
-int jk_conn_tcp_close(JKConnTCP *conn);
+int cm_conn_tcp_close(CMConnTCP *conn);
 
 /*
  * Send data out.
  */
-int jk_conn_tcp_send(JKConnTCP conn, const char *data, long len);
+int cm_conn_tcp_send(CMConnTCP conn, const char *data, long len);
 
 /*
  * recv data from connected data.
  * @bCycle: if connected until nothing.
  */
-int jk_conn_tcp_recv(JKConnTCP conn, char *recvData, long *recvLen, int bCycle);
+int cm_conn_tcp_recv(CMConnTCP conn, char *recvData, long *recvLen, int bCycle);
 
 #endif
 
-/*=============== End of file: jk_conn_tcp.h =====================*/
+/*=============== End of file: cm_conn_tcp.h =====================*/

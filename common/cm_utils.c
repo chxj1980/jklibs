@@ -1,12 +1,11 @@
 /**
- *          File: bvpu_utils.c
+ *          File: cm_utils.c
  *
  *        Create: 2014年12月19日 星期五 14时13分24秒
  *
  *   Discription: 
  *
- *        Author: yuwei.zhang
- *         Email: yuwei.zhang@besovideo.com
+ *        Author: jmdvirus
  *
  *===========================================================================
  */
@@ -24,19 +23,147 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright (C) @ BesoVideo, 2014
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 // 
 // Common functions
 //
-#include "bvpu_utils.h"
+#include "cm_utils.h"
 
-int bvpu_parse_data(unsigned char *data, char *string)
+int cm_walltime_set(CMWallTime *t, int year, int month, int day,
+                    int hour, int minute, int second)
+{
+    t->iYear = year;
+    t->iMon = month;
+    t->iDay = day;
+    t->iHour = hour;
+    t->iMinute = minute;
+    t->iSecond = second;
+    return 0;
+}
+
+int cm_walltime_in(CMWallTimeCondition *cond)
+{
+
+    time_t now = time(NULL);
+    struct tm *tm = localtime(&now);
+
+    char starttime[64] = {0};
+    char endtime[64] = {0};
+    char nowtime[64] = {0};
+    char nowd[64] = {0};
+    sprintf(nowd, "%04d%02d%02d", tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
+    sprintf(nowtime, "%04d%02d%02d%02d%02d%02d", tm->tm_year + 1900, tm->tm_mon + 1,
+    tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+    char nowt[64] = {0};
+    sprintf(nowt, "%02d%02d%02d", tm->tm_hour, tm->tm_min, tm->tm_sec);
+
+    switch (cond->iTimeType) {
+        case CM_WALLTIME_TIMETYPE_EVERYDAY:
+        {
+            char startd[64] = {0};
+            sprintf(startd, "%04d%02d%02d", cond->szStartTime.iYear, cond->szStartTime.iMon,
+                    cond->szStartTime.iDay);
+            char endd[64] = {0};
+            sprintf(endd, "%04d%02d%02d", cond->szEndTime.iYear, cond->szEndTime.iMon,
+                    cond->szEndTime.iDay);
+
+            if (strcmp(startd, nowd) <= 0 && strcmp(nowd, endd) <= 0) {
+                sprintf(starttime, "%02d%02d%02d",
+                        cond->szStartTime.iHour, cond->szStartTime.iMinute,
+                        cond->szStartTime.iSecond);
+
+                sprintf(endtime, "%02d%02d%02d",
+                        cond->szEndTime.iHour, cond->szEndTime.iMinute, cond->szEndTime.iSecond);
+                if (strcmp(starttime, nowt) <= 0 && strcmp(nowt, endtime) <= 0) {
+                    return 1;
+                }
+            }
+        }
+            break;
+        case CM_WALLTIME_TIMETYPE_MONTHDAY:
+        {
+            if (cond->szStartTime.iYear <= tm->tm_year &&
+                    cond->szEndTime.iYear >= tm->tm_year &&
+                    cond->szStartTime.iMon <= tm->tm_mon &&
+                    cond->szEndTime.iMon >= tm->tm_mon &&
+                    cond->szStartTime.iDay == tm->tm_mday) {
+                sprintf(starttime, "%02d%02d%02d", cond->szStartTime.iHour, cond->szStartTime.iMinute,
+                        cond->szStartTime.iSecond);
+                sprintf(endtime, "%02d%02d%02d", cond->szEndTime.iHour, cond->szEndTime.iMinute,
+                        cond->szEndTime.iSecond);
+                if (strcmp(starttime, nowt) <= 0 && strcmp(nowt, endtime) <= 0) {
+                    return 1;
+                }
+            }
+        }
+            break;
+        case CM_WALLTIME_TIMETYPE_WEEK:
+        {
+            int nowweek = tm->tm_wday;
+            if (nowweek != cond->iWeekDay) return -1;
+            char startd[64] = {0};
+            sprintf(startd, "%04d%02d%02d", cond->szStartTime.iYear, cond->szStartTime.iMon,
+                    cond->szStartTime.iDay);
+            char endd[64] = {0};
+            sprintf(endd, "%04d%02d%02d", cond->szEndTime.iYear, cond->szEndTime.iMon,
+                    cond->szEndTime.iDay);
+
+            if (strcmp(startd, nowd) <= 0 && strcmp(nowd, endd) <= 0) {
+                sprintf(starttime, "%02d%02d%02d", cond->szStartTime.iHour, cond->szStartTime.iMinute,
+                        cond->szStartTime.iSecond);
+                sprintf(endtime, "%02d%02d%02d", cond->szEndTime.iHour, cond->szEndTime.iMinute,
+                        cond->szEndTime.iSecond);
+                if (strcmp(starttime, nowt) <= 0 && strcmp(nowt, endtime) <= 0) {
+                    return 1;
+                }
+            }
+        }
+            break;
+        case CM_WALLTIME_TIMETYPE_YEARDAY:
+        {
+            if (tm->tm_year >= cond->szStartTime.iYear && tm->tm_year <= cond->szEndTime.iYear &&
+                    tm->tm_mon == cond->szStartTime.iMon && tm->tm_mday == cond->szStartTime.iDay) {
+
+                sprintf(starttime, "%02d%02d%02d",
+                        cond->szStartTime.iHour, cond->szStartTime.iMinute,
+                        cond->szStartTime.iSecond);
+
+                sprintf(endtime, "%02d%02d%02d",
+                        cond->szEndTime.iHour, cond->szEndTime.iMinute, cond->szEndTime.iSecond);
+                if (strcmp(starttime, nowtime) <= 0 && strcmp(nowtime, endtime) <= 0) {
+                    return 1;
+                }
+            }
+        }
+            break;
+        case CM_WALLTIME_TIMETYPE_ONCE:
+        {
+            sprintf(starttime, "%04d%02d%02d%02d%02d%02d", cond->szStartTime.iYear,
+                    cond->szStartTime.iMon, cond->szStartTime.iDay,
+                    cond->szStartTime.iHour, cond->szStartTime.iMinute,
+                    cond->szStartTime.iSecond);
+
+            sprintf(endtime, "%04d%02d%02d%02d%02d%02d", cond->szEndTime.iYear,
+                    cond->szEndTime.iMon, cond->szEndTime.iDay,
+                    cond->szEndTime.iHour, cond->szEndTime.iMinute, cond->szEndTime.iSecond);
+            if (strcmp(starttime, nowtime) == 0 && strcmp(nowtime, endtime) == 0) {
+                return 1;
+            }
+        }
+            break;
+        default:
+            return -1;
+    }
+    return 0;
+}
+
+int cm_parse_data(unsigned char *data, char *string)
 {
     char p[128];
     char *str;
@@ -60,7 +187,7 @@ int bvpu_parse_data(unsigned char *data, char *string)
     return i+1;
 }
 
-int bvpu_parse_data_string(char *string, char *save, int arrsize, int maxlen, const char sign)
+int cm_parse_data_string(char *string, char *save, int arrsize, int maxlen, const char sign)
 {
     if (string == NULL || save == NULL || arrsize < 0 || maxlen < 0) return -1;
     int      i = 0, j = 0;
@@ -90,7 +217,7 @@ int bvpu_parse_data_string(char *string, char *save, int arrsize, int maxlen, co
     return i;    // return what we realy deal, maybe not maxlen
 }
 
-int bvpu_parse_data_char(unsigned char *data, char *string, int maxlen, const char *sign)
+int cm_parse_data_char(unsigned char *data, char *string, int maxlen, const char *sign)
 {
     char p[128];
     char *str;
@@ -115,7 +242,7 @@ int bvpu_parse_data_char(unsigned char *data, char *string, int maxlen, const ch
     return i;
 }
 
-int bvpu_parse_string_int(char *string, int *save, int maxlen, const char *sign)
+int cm_parse_string_int(char *string, int *save, int maxlen, const char *sign)
 {
     char  p[128];
     char *str;
@@ -143,11 +270,11 @@ int bvpu_parse_string_int(char *string, int *save, int maxlen, const char *sign)
 #if 0
 // (xx,xx);(xx,xx)
 // We don't control if great then imageSize max size
-int bvpu_parse_string_imagerects(char *string, BVPU_SDK_ImageSize *imageSize, const char *sign)
+int cm_parse_string_imagerects(char *string, CM_SDK_ImageSize *imageSize, const char *sign)
 {
     if (!string || !imageSize) return -1;
 
-    BVPU_SDK_ImageSize *inImage = imageSize;
+    CM_SDK_ImageSize *inImage = imageSize;
 
     char tmp[512] = {0};
     sprintf(tmp, "%s", string);
@@ -170,7 +297,7 @@ int bvpu_parse_string_imagerects(char *string, BVPU_SDK_ImageSize *imageSize, co
 }
 #endif
 
-int bvpu_clear_parenthesis(char *save, char *string)
+int cm_clear_parenthesis(char *save, char *string)
 {
     if (save == NULL || string == NULL) return -1;
 
@@ -187,130 +314,16 @@ int bvpu_clear_parenthesis(char *save, char *string)
 
     return 0;
 }
-int bvpu_clear_parenthesis_self(char *string)
+int cm_clear_parenthesis_self(char *string)
 {
     if (string == NULL) return -1;
     
     char  save[1024] = {0};
-    bvpu_clear_parenthesis(save, string);
+    cm_clear_parenthesis(save, string);
     return sprintf(string, "%s", save);
 }
 
-#if 0
-int bvpu_in_walltime(BVPU_SDK_WallTime *start, BVPU_SDK_WallTime *end, struct tm *now)
-{
-    if (!start || !end || !now) return BVPU_SDK_RESULT_E_INVALIDPARAM;
-#if 0
-    BVINFO("[%d:%d:%d-%d:%d:%d, %d:%d:%d]\n", start->iYear, start->iMonth, start->iDay,
-              end->iYear, end->iMonth, end->iDay, 
-              now->tm_year, now->tm_mon, now->tm_mday);
-#endif
-
-    // now year is outside of start and end year
-    int now_year = now->tm_year + 1900;
-    int now_mon = now->tm_mon + 1;
-    if (now_year > end->iYear || now_year < start->iYear) {
-        return -1;
-    }
-
-    // Others is valid year, judge month
-    // 1. now year == start year, check if month and day valid
-    // 2. now year == end year, check if month and day valid
-    // 3. maybe now year == start year == end year, so need check
-    //    start year and end year
-    if (now_year == start->iYear) {
-        // 1. cur mon < mon is fail
-        // 2. cur mon > mon is valid
-        // 3. cur mon == mon, need to check day
-        if (now_mon < start->iMonth) return -1;
-        if (now_mon == start->iMonth) {
-            if (now->tm_mday < start->iDay) return -1;
-        }
-    } 
-
-    if (now_year == end->iYear) {
-        // same with upper rule
-        if (now_mon > end->iMonth) return -1;
-        if (now_mon == end->iMonth) {
-            if (now->tm_mday > end->iDay) return -1;
-        }
-    }
- 
-    // if year, month, day check valid
-    // next to check time
-    // check time only when the start and end year,month,day are same
-#if 0
-    if (start->iYear == end->iYear && start->iMonth == end->iMonth 
-           && start->iDay == end->iDay) {
-BVINFO("%d,%d,%d-%d,%d,%d---%d,%d,%d-%d,%d,%d-- now %d,%d,%d,%d,%d,%d\n",
-        start->iYear, start->iMonth, start->iDay, start->iHour, start->iMinute, start->iSecond,
-        end->iYear, end->iMonth, end->iDay, end->iHour, end->iMinute, end->iSecond,
-        now->tm_year, now->tm_mon, now->tm_mday, now->tm_hour, now->tm_min, now->tm_sec);
-#endif
-        
-    time_t starttime = start->iHour * 3600 + start->iMinute * 60 + start->iSecond;
-    time_t endtime = end->iHour * 3600 + end->iMinute * 60 + end->iSecond;
-    time_t nowtime = now->tm_hour * 3600 + now->tm_min * 60 + now->tm_sec;
-    // The same day, check time
-    if (start->iYear == end->iYear && start->iMonth == end->iMonth &&
-           start->iDay == end->iDay) {
-        if (nowtime > endtime || nowtime < starttime) return -1;
-    // The same with start day, check start time
-    } else if (start->iYear == now_year && start->iMonth == now_mon
-                  && start->iDay == now->tm_mday) {
-        if (nowtime < starttime) return -1;
-    // The same with end day, check end time
-    } else if (end->iYear == now_year && end->iMonth == now_mon
-                  && end->iDay == now->tm_mday) {
-        if (nowtime > endtime) return -1;
-    }
-     
-#if 0
-    }
-#endif
-
-    return 0;
-}
-
-// 
-// Check if now time in daytimeslice
-int bvpu_in_daytimeslice(BVPU_SDK_DayTimeSlice *slice, struct tm *now)
-{
-    if (!slice || !now) return BVPU_SDK_RESULT_E_INVALIDPARAM;
-
-    time_t nowsec = now->tm_hour * 3600 + now->tm_min * 60 + now->tm_sec;
-    int j;
-    // I just compare today depends on week day
-    int today = now->tm_wday;    // what the week today
-    for (j = 0; j < BVPU_SDK_MAX_DAYTIMESLICE_COUNT; j++) {
-        //BV_DayTimeSlice *inSlice = &slice[i][j];
-        // Here scanf day time slice * today begin from slice
-        // And then is the read data
-        BVPU_SDK_DayTimeSlice *inSlice = slice+today*BVPU_SDK_MAX_DAYTIMESLICE_COUNT+j;
-        if (inSlice) {
-#if 0
-            BVINFO("compare time [%d][%d] [%d:%d:%d-%d:%d:%d]\n",
-                  today, j, inSlice->cHourBegin, inSlice->cMinuteBegin, inSlice->cSecondBegin,
-                  inSlice->cHourEnd, inSlice->cMinuteEnd, inSlice->cSecondEnd);
-#endif
-            time_t start = inSlice->cHourBegin * 3600 + 
-                   inSlice->cMinuteBegin * 60 + inSlice->cSecondBegin;
-            time_t end = inSlice->cHourEnd * 3600 + 
-                   inSlice->cMinuteEnd * 60 + inSlice->cSecondEnd;
-            // Find one, ignore others
-            // If start and end are 0 means don't snapshots any
-            if (start == end && end == 0) return -1;
-            if (nowsec >= start && nowsec <= end) {
-                return 0;
-            }
-        }
-    }
-
-    return -1;
-}
-#endif
-
-int bvpu_remove_last_break(char *args)
+int cm_remove_last_break(char *args)
 {
     if (args == NULL) return -1;
 
@@ -320,6 +333,7 @@ int bvpu_remove_last_break(char *args)
 
     return 0;
 }
+
 
 /////////////////////////////////////////////////////////////////////////////////
 ///////////////   Network
@@ -335,7 +349,7 @@ int bvpu_remove_last_break(char *args)
 #include <netdb.h>
 
 #define h_addr h_addr_list[0]
-char *bvpu_get_ip(char *dn_or_ip, const char *eth)
+char *cm_get_ip(char *dn_or_ip, const char *eth)
 {
    struct hostent *host;
    struct ifreq req;
@@ -366,7 +380,28 @@ char *bvpu_get_ip(char *dn_or_ip, const char *eth)
    return dn_or_ip;
 }
 
-int bvpu_get_flow(const char *interface, unsigned long long *recv,unsigned long long *send, unsigned long long *total)
+int cm_get_mac(char * mac, int len_limit, char *dev)    //返回值是实际写入char * mac的字符个数（不包括'\0'）
+{
+    struct ifreq ifreq;
+    int sock;
+
+    if ((sock = socket (AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        return -1;
+    }
+    strcpy (ifreq.ifr_name, dev);    //Currently, only get eth0
+
+    if (ioctl (sock, SIOCGIFHWADDR, &ifreq) < 0)
+    {
+        return -2;
+    }
+
+    close(sock);
+
+    return snprintf (mac, len_limit, "%X:%X:%X:%X:%X:%X", (unsigned char) ifreq.ifr_hwaddr.sa_data[0], (unsigned char) ifreq.ifr_hwaddr.sa_data[1], (unsigned char) ifreq.ifr_hwaddr.sa_data[2], (unsigned char) ifreq.ifr_hwaddr.sa_data[3], (unsigned char) ifreq.ifr_hwaddr.sa_data[4], (unsigned char) ifreq.ifr_hwaddr.sa_data[5]);
+}
+
+int cm_get_flow(const char *interface, unsigned long long *recv,unsigned long long *send, unsigned long long *total)
 {
     int ret = 0;
     unsigned int l1,l2;
@@ -403,7 +438,7 @@ out:
 // Take String to Path and Name
 // ex: /Path/Filename
 // Warn: you must sure the path and name has enough space.
-int bvpu_seperate_filename(char *orig, char *path, char *name)
+int cm_seperate_filename(char *orig, char *path, char *name)
 {
     if (!orig) return -1;
 
@@ -434,7 +469,7 @@ int bvpu_seperate_filename(char *orig, char *path, char *name)
 // Convert int @value to char and save to @save,
 // the return pointer to @save
 // return NULL if fail
-const char *bvpu_itoa(int value, char *save)
+const char *cm_itoa(int value, char *save)
 {
 #if 0
 #ifdef MIPS
@@ -453,7 +488,7 @@ const char *bvpu_itoa(int value, char *save)
 // convert string to value to @out
 // return < 0 fail
 //        == 0 success
-int bvpu_atoi(const char *value, int *out)
+int cm_atoi(const char *value, int *out)
 {
     int ret = sscanf(value, "%d", out);
     if (ret != 1) {
@@ -468,7 +503,7 @@ int bvpu_atoi(const char *value, int *out)
 
 // codec parse of sps pps sde
 // Some may be contain sde info, we need ignore it.
-int bvpu_codec_parse_pps(char *pps, int lenpps)
+int cm_codec_parse_pps(char *pps, int lenpps)
 {
     char *p = pps;  // remember the start position, use for cacultate the length.
     char *pn = pps;
@@ -479,7 +514,7 @@ int bvpu_codec_parse_pps(char *pps, int lenpps)
         if (donelen +3 >= lenpps) break;
         // find next 0x 00 00 00 01
         if (*pn == 0x0 && *(pn+1) == 0x0 && *(pn+2) == 0x0 && *(pn+3) == 0x01) {
-            char *now = pn;  // remeber the address.
+            //char *now = pn;  // remeber the address.
             lenreadpps = pn - p;
             memmove(pps, p, lenreadpps);
             break;
@@ -496,7 +531,7 @@ int bvpu_codec_parse_pps(char *pps, int lenpps)
  * @pps will save pps here
  * @sps will save sps here
  */
-int bvpu_codec_parse(char *data, int len, char *pps, int *lenpps, char *sps, int *lensps)
+int cm_codec_parse(char *data, int len, char *pps, int *lenpps, char *sps, int *lensps)
 {
     if (len <= 0 || !lensps || !lenpps || !sps || !pps || !data) return -1;
     char *p = data;
@@ -531,7 +566,7 @@ int bvpu_codec_parse(char *data, int len, char *pps, int *lenpps, char *sps, int
         p++;
         donelen ++;
     }
-    *lenpps = bvpu_codec_parse_pps(pps, *lenpps);
+    *lenpps = cm_codec_parse_pps(pps, *lenpps);
     return 0;
 }
 
@@ -565,9 +600,9 @@ int is_program_running(int cnts, const char *prog[]) {
 
     int ret = 0;
     while((d = readdir(dir)) != NULL) {
-        char cmdname[64] = {0};
+        char cmdname[288] = {0};
         if (d->d_type != DT_DIR) continue;
-        sprintf(cmdname, "/proc/%s/cmdline", d->d_name);
+        snprintf(cmdname, sizeof(cmdname), "/proc/%s/cmdline", d->d_name);
         if (access(cmdname, R_OK) == 0) {
             FILE *f = fopen(cmdname, "r");
             if (f) {
@@ -612,7 +647,7 @@ int is_program_running(int cnts, const char *prog[]) {
     return ret;
 }
 
-int jk_read_file_data(const char *filename, char **data, int *len) {
+int cm_read_file_data(const char *filename, char **data, int *len) {
     if (!filename || !data) return -1;
     FILE *f = fopen(filename, "r");
     if (!f) return -2;
@@ -621,7 +656,7 @@ int jk_read_file_data(const char *filename, char **data, int *len) {
     int leneach = 1024;
     int err = 0;
     while (!feof(f)) {
-        *data = (char*)jk_mem_realloc(*data, lenread+leneach+1);
+        *data = (char*)cm_mem_realloc(*data, lenread+leneach+1);
         if (!*data) { err = -11; break;}
         int out = fread(*data+lenread, 1, leneach, f);
         if (out <= 0) { err = -12; break;}
@@ -633,7 +668,7 @@ int jk_read_file_data(const char *filename, char **data, int *len) {
     return err != 0 ? err : lenread;
 }
 
-const char *jk_time_string(time_t tm)
+const char *cm_time_string(time_t tm)
 {
     static char tStr[16] = {0};
     time_t t = tm;
@@ -644,7 +679,50 @@ const char *jk_time_string(time_t tm)
     return tStr;
 }
 
-int kf_string_compare(const char *src, const char *dst)
+unsigned long long cm_gettime_micro()
+{
+    struct timeval tv;
+    int ret = gettimeofday(&tv, NULL);
+    if (ret != 0) {
+        return 0;
+    }
+    return tv.tv_sec * 1000000 + tv.tv_usec;
+}
+
+unsigned long long cm_gettime_milli()
+{
+    struct timeval tv;
+    int ret = gettimeofday(&tv, NULL);
+    if (ret != 0) {
+        return 0;
+    }
+    return tv.tv_sec * 1000 + tv.tv_usec / 1000000;
+}
+
+int cm_random_with_chars(char *result, int num, char *chars)
+{
+    int len = strlen(chars);
+    srand((unsigned int)time(NULL));
+    int i;
+    for (i = 0; i < num; i++) {
+        result[i] = chars[(rand() % len)];
+    }
+    return 0;
+}
+
+int cm_random_with_num_char(char *result, int num)
+{
+    char *num_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    return cm_random_with_chars(result, num, num_char);
+}
+
+int cm_random_with_num_char_sym(char *result, int num)
+{
+    char *num_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz,=";
+    return cm_random_with_chars(result, num, num_char);
+}
+
+int cm_string_compare(const char *src, const char *dst)
 {
     if (!src || !dst) return -1;
 
@@ -654,19 +732,19 @@ int kf_string_compare(const char *src, const char *dst)
     return strncasecmp(src, dst, clen);
 }
 
-int _rt_isxdigit (int c)
+int _cm_isxdigit (int c)
 {
   return (c >= '0' && c <= '9') || 
          (c >= 'a' && c <= 'f') ||
          (c >= 'A' && c <= 'F');
 }
 
-int _rt_isprint (int c)
+int _cm_isprint (int c)
 {
   return 1;
 }
 
-uint32_t rt_hex2bin (void *bin, char hex[]) 
+uint32_t cm_hex2bin (void *bin, char hex[]) 
 {
     uint32_t len, i;
     uint32_t x;
@@ -679,7 +757,7 @@ uint32_t rt_hex2bin (void *bin, char hex[])
     }
     
     for (i=0; i<len; i++) {
-        if (_rt_isxdigit((int)hex[i]) == 0) {
+        if (_cm_isxdigit((int)hex[i]) == 0) {
             return 0; 
         }
     }
@@ -691,7 +769,7 @@ uint32_t rt_hex2bin (void *bin, char hex[])
     return len / 2;
 } 
 
-void rt_bin2scr (void *bin, uint32_t len) 
+void cm_bin2scr (void *bin, uint32_t len) 
 {
   uint32_t i, ofs;
   uint8_t c;
@@ -711,124 +789,9 @@ void rt_bin2scr (void *bin, uint32_t len)
 
     for (i=0; i<16 && ofs+i < len; i++) {
         c=mem[ofs+i];
-        printf ("%c", (c=='\t' || !_rt_isprint (c)) ? '.' : c);
+        printf ("%c", (c=='\t' || !_cm_isprint (c)) ? '.' : c);
     }
   }
 }
 
-#include<string.h>
-#include"rt_print.h"
-//#include"rasp/kfrasp.h"
-//KFConnectItemInfo device_info;//该结构体用于在rt_files_return_clientmac_via_clientip函数当中返回客户端和本机mac相关信息
-
-char *file_path = "/home/pig/KF/kfconfig/common/dhcp.leases";//如果文件位置发生变动，请在此处修改//这种容易发生改动的变量最好定义为全局变量
-
-/////////////////////////////////////////////////////////////////////////////////
-//函数名称：int rt_files_return_clientmac_via_clientip
-//函数功能：从dhcp.leases中查找IP地址所对应的设备信息包括客
-//          户端mac地址客户端名称，路由器mac地址等
-//参数：    char *input_client_ip	该参数为要查询的客户端IP地址
-//返回值：
-//           0  查询查询成功
-//          -1  打开文件失败
-//          -2  没有查找到IP地址所对应的相关信息）
-/////////////////////////////////////////////////////////////////////////////////
-int  rt_files_return_deviceinfo_via_clientip(char *input_client_ip)
-//该函数执行完毕之后device_info结构体中将返回对应的数据
-{
-/*
-    FILE *fp = NULL;//定义文件类型指针
-    if((fp = fopen(file_path,"r")) == NULL)//以只读方式打开文件
-    {
-        rterror("open files error!\n");
-        return -1;
-    }
-    while (!feof(fp))
-    {
-        char time_sign[64] = {0};
-        char client_mac[64] = {0};
-        char client_ip[64] = {0};
-        char client_name[256] = {0};
-        char router_mac[64] = {0};
-        fscanf(fp, "%s", time_sign);//遇到空格时结束
-        fscanf(fp, "%s", client_mac);
-        fscanf(fp, "%s", client_ip);
-        fscanf(fp, "%s", client_name);
-        fscanf(fp, "%s", router_mac);
-        //printf("%d %s %s\n", NumData, MACData, IPData);
-        if(strcmp(client_ip, input_client_ip) == 0)
-        {
-            strcpy(device_info.szAddr, client_ip);
-            //device_info.szAddr = client_ip;
-            strcpy(device_info.szDeviceMac, client_mac);
-            strcpy(device_info.szName, client_name);
-            strcpy(device_info.szRouterMac, router_mac);
-            fclose(fp);          
-
-            device_info.szAddr = client_ip;
-            //device_info.szAddr = client_ip;
-            device_info.szDeviceMac = client_mac;
-            strcpy(device_info.szName = client_name;
-            strcpy(device_info.szRouterMac = router_mac;
-            fclose(fp);        
-            return 0;   
-
-      //  }
-    }
-*/
-            
-      printf("a\n");
-    FILE *fp = NULL;//定义文件类型指针
-    if((fp = fopen(file_path,"r")) == NULL)//以只读方式打开文件
-    {
-        printf("open files error!\n");
-        return -1;
-    }
-    printf("b\n");
-    while (!feof(fp))
-    {
-        char time_sign[64] = {0};
-        char client_mac[64] = {0};
-        char client_ip[64] = {0};
-        char client_name[256] = {0};
-        char router_mac[64] = {0};
-        printf("bb\n");
-    
-        //printf("cccccccccc\n");
-        fscanf(fp, "%s", time_sign);//遇到空格时结束
-        printf("timesign=%s\n",time_sign);
-        
-        fscanf(fp, "%s", client_mac);
-        printf("client_mac=%s\n",client_mac);
-        
-        fscanf(fp, "%s", client_ip);
-        printf("client_ip=%s\n",client_ip);
-        
-        fscanf(fp, "%s", client_name);
-        printf("client_name=%s\n",client_name);
-        
-        fscanf(fp, "%s", router_mac);
-        printf("router_mac=%s\n",router_mac);
-        printf("bbbbb\n");
-        //printf("%d %s %s\n", NumData, MACData, IPData);
-        if(strcmp(client_ip, input_client_ip) == 0)
-        {
-            printf("client_ip is %s\n",client_ip);
-            printf("client_mac is %s\n",client_mac);
-            printf("client_name is %s\n",client_name);
-            printf("router_mac is %s\n",router_mac);
-            printf("c\n");
-            return 0;             
-        }
-        printf("bbb\n");
-     }
-    printf("d\n");
-    return -2;
-}
-
-
-
-
-
-
-/*=============== End of file: bvpu_utils.c ==========================*/
+/*=============== End of file: cm_utils.c ==========================*/
