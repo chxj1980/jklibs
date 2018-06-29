@@ -50,6 +50,8 @@ LIBSNAME=jk-v1
 
 export THIRD_BASEPATH=/opt/data/libs/
 
+export THIRD_BASE=third
+
 sinclude $(BASEDIR)/config.mk
 
 ## If the command from command line, use it instead others
@@ -59,10 +61,15 @@ endif
 
 sinclude $(BASEDIR)/config/config_$(OS).mk
 
+ifeq (x$(DEBUG_M), xy)
+DEBUG_OP= -g
+else
+DEBUG_OP= -O2
+endif
 
 ######################################
 ### Constant args
-CFLAGS += -O2 -fPIC -Wall
+CFLAGS += $(DEBUG_OP) -fPIC -Wall
 CFLAGS += -Wno-unused-variable -Wno-unused-function -Wno-switch
 
 ## the path when you use out lib
@@ -121,12 +128,14 @@ endif
 ## It will be converted to filedirs-n and other not -y if we don't want to compile it.
 filedirs-$(BVBASE) = common
 filedirs-$(VDEV) += vdev
+filedirs-$(KFMD5) += kfmd5
 filedirs-$(CODEC) += codec
 filedirs-$(DISK) += disk
 filedirs-$(BVSTREAM) += stream
 filedirs-$(RECORDSERVER) += recordserver
 filedirs-$(OPENAV) += openav
 filedirs-$(QRCODE) += qrcode
+filedirs-$(AITING) += aiting
 
 ## all linked in build-in.o files in each directory
 buildin-files = $(patsubst %,%/$(OBJDIR)/build-in.o,$(filedirs-y))

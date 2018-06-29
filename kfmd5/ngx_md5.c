@@ -295,7 +295,6 @@ int kfmd5_ngx(unsigned char *input, size_t ilen, unsigned char output[16])
     char *data = (char*)input;
     size_t size = ilen;
     ngx_md5_update(&ctx, data, size);
-    ngx_md5_update(&ctx, data, size);
     ngx_md5_final((char*)output, &ctx);
     return 0;
 }

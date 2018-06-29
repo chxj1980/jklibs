@@ -29,9 +29,9 @@ generate_config:
 
 filesbuild:
 	@for i in $(filedirs-y) $(filedirs-d-y); do \
-        $(ECHO) "\n\t Build $$i\n"; \
-        cd $$i; make; cd ..;\
-    done
+		$(ECHO) "\n\t Build $$i\n"; \
+		cd $$i; make; cd ..;\
+	done
 
 ## check build-in files before make static and dyn
 dep-before:
@@ -70,9 +70,13 @@ createdir:
 	@mkdir -p $(INSTALL_DIRS)/lib
 
 install:
+	@for i in $(filedirs-y) ; do \
+		$(ECHO) "\n\t Install $$i\n"; \
+		cd $$i; make install; cd ..;\
+	done
 	@$(ECHO) "\t cp $(INSTALL_HEADERS) $(INSTALL_DIRS)/include/"
-	$(Q) cp $(INSTALL_HEADERS) $(INSTALL_DIRS)/include/
-	$(Q) cp $(INSTALL_LIBS) $(INSTALL_DIRS)/lib/
+	$(Q) cp -vrf $(INSTALL_HEADERS) $(INSTALL_DIRS)/include/
+	$(Q) cp -rvf $(INSTALL_LIBS) $(INSTALL_DIRS)/lib/
 
 clean:
 	@for i in $(filedirs-y) $(filedirs-d-y); do   \
@@ -114,6 +118,9 @@ hi3518:
 
 hi3535:
 	@$(ECHO) "OS=hi3535" > config.mk
+
+mips:
+	@$(ECHO) "OS=mips" > config.mk
 
 DEBUG:
 	@$(ECHO) "BVDEBUG=yes" >> config.mk
