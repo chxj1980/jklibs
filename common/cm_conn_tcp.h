@@ -14,12 +14,22 @@
 #ifndef __CM_CONN_TCP
 #define __CM_CONN_TCP
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct tagCMConnTCP *CMConnTCP;
 
 /*
  * Create a connect.
  */
 int cm_conn_tcp_create(CMConnTCP *conn, const char *addr, int port);
+
+/*
+ * New method will never use connect method.
+ * It will connect when created.
+ */
+int cm_conn_tcp_create_new(CMConnTCP *conn, const char *addr, int port);
 
 /*
  * connect to server.
@@ -44,6 +54,23 @@ int cm_conn_tcp_send(CMConnTCP conn, const char *data, long len);
  * @bCycle: if connected until nothing.
  */
 int cm_conn_tcp_recv(CMConnTCP conn, char *recvData, long *recvLen, int bCycle);
+
+/**
+ * Caller do read, no more process
+ * < 0 fail
+ * > 0 len read
+ * anytime, will set result to *recvlen
+ * @param conn
+ * @param recvData
+ * @param recvlen
+ * @return
+ */
+int cm_conn_tcp_recv_simple(CMConnTCP conn, char *recvData, int *recvlen);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

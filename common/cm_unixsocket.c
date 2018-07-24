@@ -1,6 +1,5 @@
 //
 // Created by v on 16-3-2.
-// Author: jmdvirus@roamter.com
 //
 
 #include <stdio.h>
@@ -10,23 +9,22 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "rt_unixsocket.h"
+#include "cm_unixsocket.h"
 #include "cm_utils.h"
-#include "cm_print.h"
 #include "cm_common.h"
 
-#define RT_UNIXSOCKET_PATH_MAX  256
+#define CM_UNIXSOCKET_PATH_MAX  256
 
-struct tagRTUnixSocketServerHandle {
-    char          szUnixPath[RT_UNIXSOCKET_PATH_MAX];  // socket path
+struct tagCMUnixSocketServerHandle {
+    char          szUnixPath[CM_UNIXSOCKET_PATH_MAX];  // socket path
     struct sockaddr_un  szAddr;
     int           iFD;
 };
 
-int rt_unixsocket_server_init(RTUnixSocketServerHandle *h, const char *path)
+int cm_unixsocket_server_init(CMUnixSocketServerHandle *h, const char *path)
 {
     if (!path || !h) return -1;
-    if (strlen(path) >= RT_UNIXSOCKET_PATH_MAX) {
+    if (strlen(path) >= CM_UNIXSOCKET_PATH_MAX) {
         return -2;
     }
 
@@ -44,22 +42,23 @@ int rt_unixsocket_server_init(RTUnixSocketServerHandle *h, const char *path)
 
     int ret = bind(fd, (struct sockaddr*)&addr, sizeof(addr));
     if (ret == -1) {
-        //cmerror("bind failed: %d,%s", ret, strerror(ret));
+//        cmerror("bind failed: %d,%s", ret, strerror(ret));
         return -4;
     }
 
     ret = listen(fd, 2);
     if (ret == -1) {
+//        cmerror("listen failed: %d, %s", ret, strerror(ret));
         return -5;
     }
 
-    RTUnixSocketServerHandle inH = (RTUnixSocketServerHandle)cm_mem_calloc(1, sizeof(struct tagRTUnixSocketServerHandle));
+    CMUnixSocketServerHandle inH = (CMUnixSocketServerHandle)cm_mem_calloc(1, sizeof(struct tagCMUnixSocketServerHandle));
     if (!inH) {
         close(fd);
-		return -8;
+        return -6;
     }
 
-    strncpy(inH->szUnixPath, path, RT_UNIXSOCKET_PATH_MAX-1);
+    strncpy(inH->szUnixPath, path, CM_UNIXSOCKET_PATH_MAX-1);
     inH->iFD = fd;
     memcpy(&inH->szAddr, &addr, sizeof(addr));
 
@@ -68,7 +67,7 @@ int rt_unixsocket_server_init(RTUnixSocketServerHandle *h, const char *path)
     return 0;
 }
 
-int rt_unixsocket_server_deinit(RTUnixSocketServerHandle *h)
+int cm_unixsocket_server_deinit(CMUnixSocketServerHandle *h)
 {
     if (*h) {
         close((*h)->iFD);
@@ -78,7 +77,7 @@ int rt_unixsocket_server_deinit(RTUnixSocketServerHandle *h)
     return 0;
 }
 
-int rt_unixsocket_server_client_close(int client)
+int cm_unixsocket_server_client_close(int client)
 {
     if (client) {
         close(client);
@@ -86,22 +85,24 @@ int rt_unixsocket_server_client_close(int client)
     return 0;
 }
 
-int rt_unixsocket_server_accept(RTUnixSocketServerHandle h)
+int cm_unixsocket_server_accept(CMUnixSocketServerHandle h)
 {
     int client = 0;
     client = accept(h->iFD, NULL, NULL);
     if (client == -1) {
+//        cmerror("accept failed: %d", client);
     }
     return client;
 }
 
-int rt_unixsocket_server_recv(RTUnixSocketServerHandle h, int client, char *data, int *len)
+int cm_unixsocket_server_recv(CMUnixSocketServerHandle h, int client, char *data, int *len)
 {
     if (!h || !client || !data || !len) return -1;
 
     int rc = 0;
     rc = recv(client, data, *len, 0);
     if (rc == -1) {
+//        cmerror("read failed: %d,%s", rc, strerror(rc));
         return -2;
     } else if (rc == 0) {
 
@@ -110,12 +111,13 @@ int rt_unixsocket_server_recv(RTUnixSocketServerHandle h, int client, char *data
     return *len;
 }
 
-int rt_unixsocket_server_send(RTUnixSocketServerHandle h, int client, char *data, int len)
+int cm_unixsocket_server_send(CMUnixSocketServerHandle h, int client, char *data, int len)
 {
     if (!h || !client || !data || len <= 0) return -1;
 
     int rc = send(client, data, len, 0);
     if (rc == -1) {
+//        cmerror("send failed: %d, %s", rc, strerror(rc));
         return -2;
     }
     return rc;
@@ -126,17 +128,17 @@ int rt_unixsocket_server_send(RTUnixSocketServerHandle h, int client, char *data
 // Client from here
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-struct tagRTUnixSocketClientHandle {
-    char          szUnixPath[RT_UNIXSOCKET_PATH_MAX];  // socket path
+struct tagCMUnixSocketClientHandle {
+    char          szUnixPath[CM_UNIXSOCKET_PATH_MAX];  // socket path
     struct sockaddr_un  szAddr;
     int           iFD;
     int           iConn;  // if has connected.
 };
 
-int rt_unixsocket_client_init(RTUnixSocketClientHandle *h, const char *path)
+int cm_unixsocket_client_init(CMUnixSocketClientHandle *h, const char *path)
 {
     if (!path || !h) return -1;
-    if (strlen(path) >= RT_UNIXSOCKET_PATH_MAX) {
+    if (strlen(path) >= CM_UNIXSOCKET_PATH_MAX) {
         return -2;
     }
 
@@ -154,13 +156,13 @@ int rt_unixsocket_client_init(RTUnixSocketClientHandle *h, const char *path)
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, path, sizeof(addr.sun_path)-1);
 
-    RTUnixSocketClientHandle inH = (RTUnixSocketClientHandle)cm_mem_calloc(1, sizeof(struct tagRTUnixSocketServerHandle));
+    CMUnixSocketClientHandle inH = (CMUnixSocketClientHandle)cm_mem_calloc(1, sizeof(struct tagCMUnixSocketServerHandle));
     if (!inH) {
         close(fd);
-		return -8;
+        return -6;
     }
 
-    strncpy(inH->szUnixPath, path, RT_UNIXSOCKET_PATH_MAX);
+    strncpy(inH->szUnixPath, path, CM_UNIXSOCKET_PATH_MAX);
     inH->iFD = fd;
     memcpy(&inH->szAddr, &addr, sizeof(addr));
     inH->iConn = 0;
@@ -170,7 +172,7 @@ int rt_unixsocket_client_init(RTUnixSocketClientHandle *h, const char *path)
     return 0;
 }
 
-int rt_unixsocket_client_deinit(RTUnixSocketClientHandle *h)
+int cm_unixsocket_client_deinit(CMUnixSocketClientHandle *h)
 {
     if (*h) {
         close((*h)->iFD);
@@ -180,15 +182,17 @@ int rt_unixsocket_client_deinit(RTUnixSocketClientHandle *h)
     return 0;
 }
 
-int rt_unixsocket_client_send(RTUnixSocketClientHandle h, char *data, int len)
+int cm_unixsocket_client_send(CMUnixSocketClientHandle h, char *data, int len)
 {
     if (!h) return -1;
 
     if (!h->iConn) {
         int c = connect(h->iFD, (struct sockaddr *) &h->szAddr, sizeof(h->szAddr));
         if (c == -1) {
+//            cmerror("connect failed: %d,%s", c, strerror(errno));
             return -2;
         } else {
+//            cminfo("connect [%s] success\n", h->szUnixPath);
         }
         h->iConn = 1;
     }
@@ -197,8 +201,10 @@ int rt_unixsocket_client_send(RTUnixSocketClientHandle h, char *data, int len)
     if (data && len > 0) {
         int n = write(h->iFD, data, len);
         if (n <= 0 || n != len) {
+//            cmerror("send failed: %d", n);
             if (n == -1) {
                 h->iConn = 0; // maybe connect failed.
+//                cmerror("send failed: %s", strerror(errno));
                 return -3;
             }
         }
@@ -208,7 +214,7 @@ int rt_unixsocket_client_send(RTUnixSocketClientHandle h, char *data, int len)
     return sendcnts;
 }
 
-int rt_unixsocket_client_recv(RTUnixSocketClientHandle h, char *data, int *len)
+int cm_unixsocket_client_recv(CMUnixSocketClientHandle h, char *data, int *len)
 {
     if (!h || !data || !len) return -1;
 
@@ -216,7 +222,7 @@ int rt_unixsocket_client_recv(RTUnixSocketClientHandle h, char *data, int *len)
 
     int c = recv(h->iFD, data, *len, 0);
     if (c == -1) {
-        //cmerror("read failed: %d,%s", c, strerror(c));
+//        cmerror("read failed: %d,%s", c, strerror(c));
         return -3;
     }
     *len = c;

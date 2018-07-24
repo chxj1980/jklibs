@@ -1,7 +1,7 @@
 
 KFOPENSSL_AES=n
 
-CFLAGS+= -Iopenssl-aes/include -I.
+CFLAGS+= -Iopenssl-aes/include -I. -DUSE_LIBCURL=0
 
 SRC_DIR=openssl-aes/src
 

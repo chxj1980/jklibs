@@ -126,7 +126,7 @@ endif
 ## We allowed to compile.
 ## it will convert to filedirs-y instream the enviroument value.
 ## It will be converted to filedirs-n and other not -y if we don't want to compile it.
-filedirs-$(BVBASE) = common
+filedirs-$(BVBASE) = common commonex
 filedirs-$(VDEV) += vdev
 filedirs-$(KFMD5) += kfmd5
 filedirs-$(CODEC) += codec
@@ -143,6 +143,10 @@ filedirs-d-$(DEMO) += demo
 
 OBJDIR=.obj$(OS)
 #OBJS=$(OBJS_y:%=$(OBJDIR)/%)
+
+export DEP_COMMON=common/$(OBJDIR)/build-in.o
+export DEP_COMMONEX=commonex/$(OBJDIR)/build-in.o
+export DEP_KFMD5=kfmd5/$(OBJDIR)/build-in.o
 
 #####################################
 ### set args for diff platform

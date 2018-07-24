@@ -34,6 +34,8 @@
 #include <time.h>
 #include <stdlib.h>
 
+#include <ctype.h>
+
 // Base mem function.
 
 #define cm_mem_malloc(size)    \
@@ -78,6 +80,9 @@ typedef struct {
     CMWallTime  szEndTime;
 } CMWallTimeCondition;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Set time
@@ -128,6 +133,9 @@ int cm_clear_parenthesis_self(char *string);
 // Remote the last '\n' mark.
 int cm_remove_last_break(char *args);
 
+// clear @c from origin, save to save.
+int cm_clear_string_char(char *origin, char *save, char c);
+
 ///////////////
 // Take String to Path and Name
 // ex: /Path/Filename
@@ -140,7 +148,15 @@ int cm_seperate_filename(char *orig, char *path, char *name);
 // @eth: device name (like eth,ppp1)
 char *cm_get_ip(char *dn_or_ip, const char *eth);
 
+int cm_get_ip_dev(const char *dev, char *ipaddr);
+
 int cm_get_mac(char * mac, int len_limit, char *dev);    //返回值是实际写入char * mac的字符个数（不包括'\0')
+
+// return 1: valid
+//   other: not valid
+int cm_check_mac_valid(const char *mac_addr);
+
+int cm_generate_mac_with_char(const char *mac, char *save, char c);
 
 // Get flow of pointed ip
 // @interface (like eth,wlan ...)
@@ -193,6 +209,8 @@ int cm_read_file_data(const char *filename, char **data, int *len);
  */
 const char *cm_time_string(time_t tm);
 
+unsigned int cm_gettime_only_micro();
+
 /**
  * return now time with microsecond
  */
@@ -209,11 +227,20 @@ int cm_random_with_num_char_sym(char *result, int num);
  */
 unsigned long long cm_gettime_milli();
 
+
+int cm_format_time(char *save, int max, char *format);
+
+int cm_format_time_t(char *save, int max, char *format, time_t t);
+
+int cm_format_time_local(char *save, int max, char *format, struct tm *tm);
+
 /*
  * @func: compare string with the maxlength.
  * @src, @dst: same with strcmp
  */
 int kf_string_compare(const char *src, const char *dst);
+
+int hexToByte(char *str, int ilen, char *save);
 
 #include <stdint.h>
 /*
@@ -223,6 +250,33 @@ uint32_t cm_hex2bin (void *bin, char hex[]);
 
 void cm_bin2scr (void *bin, uint32_t len);
 
+int cm_get_wifi_signal(const char *dev);
+
+// filesystem
+unsigned long long cm_get_ubi_size(const char *dev);
+
+unsigned long long cm_get_ubi_available(const char *dev);
+
+unsigned long long cm_get_ubi_free(const char *dev);
+
+uint8_t cm_http_getfile(char *sUrl, char *sFileName);
+
+unsigned short cm_litte_to_big(unsigned short v);
+
+unsigned short cm_big_to_little(unsigned short v);
+
+// from last to take string from split
+// clear @save yourself,
+// you must sure save big enough
+int cm_take_out_last_string(const char *str, char split, char *save);
+
+unsigned long cm_get_file_size(const char *filename);
+
+int cm_wifi_signal_level(int signal);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // __CM_UTILS_H
 

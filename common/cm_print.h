@@ -24,9 +24,34 @@
 #define CM_EXTERN_C_FUNC
 #endif
 
+#include <stdio.h>
+
 #ifdef USE_ZLOG
 #include "zlog/zlog.h"
 #endif
+
+#define RT_NAME_LEN_SUPPORT              64
+#define RT_MAX_STRING_LEN                512
+#define RT_STRING_MAX_LEN_SUPPORT        3056
+
+
+#define  RT_MAX_NAME_LEN            32
+
+#define  RT_MAX_KIND_COUNTS         64
+
+typedef struct __RT_Print {
+    int              cm_print_level;
+    int              cm_print_style;
+    char             cm_name[RT_MAX_NAME_LEN+1];
+    char             cm_style[RT_MAX_STRING_LEN+1];
+    char            *cm_color;
+    int              cm_enable_color;
+    int              cm_used;
+    int              save_type;  // how to save, 2 console, -1 none, 1 to file(use zlog, so depends on config of zlog.conf)
+    char             filepath[RT_MAX_STRING_LEN];
+    FILE            *file;
+    unsigned long long         file_maxsize;
+} CMLogPrint;
 
 /* use for cm_print_level */
 enum {
@@ -63,54 +88,57 @@ enum {
     CM_COLOR_FALSE = 0,
     CM_COLOR_TRUE,
 };
- 
-CM_EXTERN_C_FUNC int cm_print_init(int cm_print_level, 
+
+
+CM_EXTERN_C_FUNC int cm_print_init_simple(CMLogPrint *cm_p, const char *name);
+
+CM_EXTERN_C_FUNC int cm_print_init(CMLogPrint *cm_p, int cm_print_level,
           int cm_print_style, int cm_print_enable_color, 
           const char *name);
-CM_EXTERN_C_FUNC int cm_print_deinit();
+CM_EXTERN_C_FUNC int cm_print_deinit(CMLogPrint *cm_p);
 
-CM_EXTERN_C_FUNC int cm_print_set_log_file(const char *path);
-CM_EXTERN_C_FUNC int cm_print_reopen_file();
+CM_EXTERN_C_FUNC int cm_print_set_log_file(CMLogPrint *cm_p, const char *path);
+CM_EXTERN_C_FUNC int cm_print_reopen_file(CMLogPrint *cm_p);
 /**
  * Set max file size
  * @param maxsize [in] must as bytes
  * @return 0
  */
-CM_EXTERN_C_FUNC int cm_print_set_file_maxsize(unsigned long long maxsize);
+CM_EXTERN_C_FUNC int cm_print_set_file_maxsize(CMLogPrint *cm_p, unsigned long long maxsize);
 
 // @type: 0 console, -1 none (not print), 1 to file (depends on /etc/zlog.conf)
 // CM_PRINT_LOG_TYPE_*
-CM_EXTERN_C_FUNC int cm_print_set_save_type(int type);
-CM_EXTERN_C_FUNC int cm_print_get_log_type();
-CM_EXTERN_C_FUNC int cm_print_init_file_conf(const char *filepath, const char *processName);
+CM_EXTERN_C_FUNC int cm_print_set_save_type(CMLogPrint *cm_p, int type);
+CM_EXTERN_C_FUNC int cm_print_get_log_type(CMLogPrint *cm_p);
+CM_EXTERN_C_FUNC int cm_print_init_file_conf(CMLogPrint *cm_p, const char *filepath, const char *processName);
 // Please set the config file path and the process name if 
 // you want set log to file
 // @conf: it is config file, and it tell program how to write log and where.
-#define CMLOG_INIT(conf, name) cm_print_init_file_conf(conf, name);
+#define CMLOG_INIT(l, conf, name) cm_print_init_file_conf(l, conf, name);
 
-CM_EXTERN_C_FUNC int cm_print_change_level(int level);
-CM_EXTERN_C_FUNC int cm_print_start_debug();
-CM_EXTERN_C_FUNC int cm_print_stop_debug();
-CM_EXTERN_C_FUNC int cm_print_start_cycle();
-CM_EXTERN_C_FUNC int cm_print_stop_cycle();
+CM_EXTERN_C_FUNC int cm_print_change_level(CMLogPrint *cm_p, int level);
+CM_EXTERN_C_FUNC int cm_print_start_debug(CMLogPrint *cm_p);
+CM_EXTERN_C_FUNC int cm_print_stop_debug(CMLogPrint *cm_p);
+CM_EXTERN_C_FUNC int cm_print_start_cycle(CMLogPrint *cm_p);
+CM_EXTERN_C_FUNC int cm_print_stop_cycle(CMLogPrint *cm_p);
 
 // @func: print log with diff type
 // please use the micro define.
-CM_EXTERN_C_FUNC int cm_print_info(const char *func, int line, const char *file,
+CM_EXTERN_C_FUNC int cm_print_info(CMLogPrint *cm_p, const char *func, int line, const char *file,
                      const char *format, ...);
-CM_EXTERN_C_FUNC int cm_print_warn(const char *func, int line, const char *file,
+CM_EXTERN_C_FUNC int cm_print_warn(CMLogPrint *cm_p, const char *func, int line, const char *file,
                      const char *format, ...);
-CM_EXTERN_C_FUNC int cm_print_message(const char *func, int line, const char *file,
+CM_EXTERN_C_FUNC int cm_print_message(CMLogPrint *cm_p, const char *func, int line, const char *file,
                      const char *format, ...);
-CM_EXTERN_C_FUNC int cm_print_error(const char *func, int line, const char *file,
+CM_EXTERN_C_FUNC int cm_print_error(CMLogPrint *cm_p, const char *func, int line, const char *file,
                      const char *format, ...);
-CM_EXTERN_C_FUNC int cm_print_debug(const char *func, int line, const char *file,
+CM_EXTERN_C_FUNC int cm_print_debug(CMLogPrint *cm_p, const char *func, int line, const char *file,
                      const char *format, ...);
-CM_EXTERN_C_FUNC int cm_print_cycle(const char *func, int line, const char *file,
+CM_EXTERN_C_FUNC int cm_print_cycle(CMLogPrint *cm_p, const char *func, int line, const char *file,
                      const char *format, ...);
-CM_EXTERN_C_FUNC int cm_print_none(const char *func, int line, const char *file,
+CM_EXTERN_C_FUNC int cm_print_none(CMLogPrint *cm_p, const char *func, int line, const char *file,
                      const char *format, ...);
-CM_EXTERN_C_FUNC void cm_print_error_string(int errno);
+CM_EXTERN_C_FUNC void cm_print_error_string(CMLogPrint *cm_p, int errno);
 
 #ifdef USE_ZLOG
 #define cmdzlog_error(format, ...) dzlog_error(format, ##__VA_ARGS__)
@@ -128,72 +156,72 @@ CM_EXTERN_C_FUNC void cm_print_error_string(int errno);
 
 // Caller please call these functions below
 
-#define cmerror(format, ...)    \
-        switch (cm_print_get_log_type()) {    \
+#define cmerrore(l, format, ...)    \
+        switch (cm_print_get_log_type(l)) {    \
             case CM_PRINT_LOG_TYPE_FILE:    \
                cmdzlog_error(format, ##__VA_ARGS__);    \
             break;  \
             case CM_PRINT_LOG_TYPE_CONSOLE:  \
             case CM_PRINT_LOG_TYPE_OWNFILE: \
             default: \
-                cm_print_error(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
+                cm_print_error(l, __func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
-#define cminfo(format, ...)    \
-        switch (cm_print_get_log_type()) {    \
+#define cminfoe(l, format, ...)    \
+        switch (cm_print_get_log_type(l)) {    \
             case CM_PRINT_LOG_TYPE_FILE:    \
                cmdzlog_info(format, ##__VA_ARGS__);    \
             break;  \
             case CM_PRINT_LOG_TYPE_CONSOLE:  \
             case CM_PRINT_LOG_TYPE_OWNFILE: \
             default: \
-                cm_print_info(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
+                cm_print_info(l, __func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
-#define cmwarn(format, ...)    \
-        switch (cm_print_get_log_type()) {    \
+#define cmwarne(l, format, ...)    \
+        switch (cm_print_get_log_type(l)) {    \
             case CM_PRINT_LOG_TYPE_FILE:    \
                cmdzlog_warn(format, ##__VA_ARGS__);    \
             break;  \
             case CM_PRINT_LOG_TYPE_CONSOLE:  \
             case CM_PRINT_LOG_TYPE_OWNFILE: \
             default: \
-                cm_print_warn(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
+                cm_print_warn(l, __func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
-#define cmmsg(format, ...)    \
-        switch (cm_print_get_log_type()) {    \
+#define cmmsge(l, format, ...)    \
+        switch (cm_print_get_log_type(l)) {    \
             case CM_PRINT_LOG_TYPE_FILE:    \
                cmdzlog_notice(format, ##__VA_ARGS__);    \
             break;  \
             case CM_PRINT_LOG_TYPE_CONSOLE:  \
             case CM_PRINT_LOG_TYPE_OWNFILE: \
             default: \
-                cm_print_message(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
+                cm_print_message(l, __func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
-#define cmdebug(format, ...)    \
-        switch (cm_print_get_log_type()) {    \
+#define cmdebuge(l, format, ...)    \
+        switch (cm_print_get_log_type(l)) {    \
             case CM_PRINT_LOG_TYPE_FILE:    \
                cmdzlog_debug(format, ##__VA_ARGS__);    \
             break;  \
             case CM_PRINT_LOG_TYPE_CONSOLE:  \
             case CM_PRINT_LOG_TYPE_OWNFILE: \
             default: \
-                cm_print_debug(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
+                cm_print_debug(l, __func__, __LINE__, __FILE__, format, ##__VA_ARGS__); break; \
         };   
 
 // rtcycle and rtnone force print to console.
-#define cmcycle(format, ...)    \
-        cm_print_cycle(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__);
+#define cmcycle(l, format, ...)    \
+        cm_print_cycle(l, __func__, __LINE__, __FILE__, format, ##__VA_ARGS__);
 
-#define cmnone(format, ...)    \
-        cm_print_style_none(__func__, __LINE__, __FILE__, format, ##__VA_ARGS__);
+#define cmnone(l, format, ...)    \
+        cm_print_style_none(l, __func__, __LINE__, __FILE__, format, ##__VA_ARGS__);
 
 
 // It will print out the meanful string with the number
 // force to console
-#define cmerrno(no)   cm_print_error_string(no);
+#define cmerrno(l, no)   cm_print_error_string(l, no);
 
 #define CMVERSION(fmt, args...)                                                 \
     do{	printf("\033[01;31;31m");                                              \

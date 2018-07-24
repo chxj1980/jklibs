@@ -162,4 +162,5 @@ int cm_http_ws_generate_str(CMHttpHeader *header, char *result, int maxresult);
 // TODO: should parse all to CMHttpMessage as Response.
 int cm_http_ws_parser_result_code(const char *str, size_t len);
 
+
 #endif // __CM_HTTP_H

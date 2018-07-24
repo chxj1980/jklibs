@@ -29,11 +29,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 // 
 // Common functions
 //
 #include "cm_utils.h"
+
+#ifndef USE_LIBCURL
+#define USE_LIBCURL 1
+#endif
+
+#if (USE_LIBCURL == 1)
+#include <curl/curl.h>
+#endif
 
 int cm_walltime_set(CMWallTime *t, int year, int month, int day,
                     int hour, int minute, int second)
@@ -334,6 +345,20 @@ int cm_remove_last_break(char *args)
     return 0;
 }
 
+int cm_clear_string_char(char *origin, char *save, char c)
+{
+    char *p = origin;
+    char *s = save;
+    while (p && *p != '\0') {
+        if (*p != c) {
+            *s++ = *p++;
+        } else {
+            p++;
+        }
+    }
+    *s = '\0';
+    return 0;
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 ///////////////   Network
@@ -347,6 +372,33 @@ int cm_remove_last_break(char *args)
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <netdb.h>
+
+int cm_get_ip_dev(const char *dev, char *ipaddr)
+{
+    int sock_get_ip;  
+  
+    struct   sockaddr_in *sin;  
+    struct   ifreq ifr_ip;     
+  
+    if ((sock_get_ip=socket(AF_INET, SOCK_STREAM, 0)) == -1)  
+    {  
+         return -2;
+    }  
+     
+    memset(&ifr_ip, 0, sizeof(ifr_ip));     
+    strncpy(ifr_ip.ifr_name, dev, sizeof(ifr_ip.ifr_name) - 1);     
+   
+    if( ioctl( sock_get_ip, SIOCGIFADDR, &ifr_ip) < 0 )     
+    {     
+         return -1;
+    }       
+    sin = (struct sockaddr_in *)&ifr_ip.ifr_addr;     
+    strcpy(ipaddr,inet_ntoa(sin->sin_addr));         
+      
+    close( sock_get_ip );  
+      
+    return  0;
+}
 
 #define h_addr h_addr_list[0]
 char *cm_get_ip(char *dn_or_ip, const char *eth)
@@ -398,7 +450,7 @@ int cm_get_mac(char * mac, int len_limit, char *dev)    //返回值是实际写�
 
     close(sock);
 
-    return snprintf (mac, len_limit, "%X:%X:%X:%X:%X:%X", (unsigned char) ifreq.ifr_hwaddr.sa_data[0], (unsigned char) ifreq.ifr_hwaddr.sa_data[1], (unsigned char) ifreq.ifr_hwaddr.sa_data[2], (unsigned char) ifreq.ifr_hwaddr.sa_data[3], (unsigned char) ifreq.ifr_hwaddr.sa_data[4], (unsigned char) ifreq.ifr_hwaddr.sa_data[5]);
+    return snprintf (mac, len_limit, "%02X:%02X:%02X:%02X:%02X:%02X", (unsigned char) ifreq.ifr_hwaddr.sa_data[0], (unsigned char) ifreq.ifr_hwaddr.sa_data[1], (unsigned char) ifreq.ifr_hwaddr.sa_data[2], (unsigned char) ifreq.ifr_hwaddr.sa_data[3], (unsigned char) ifreq.ifr_hwaddr.sa_data[4], (unsigned char) ifreq.ifr_hwaddr.sa_data[5]);
 }
 
 int cm_get_flow(const char *interface, unsigned long long *recv,unsigned long long *send, unsigned long long *total)
@@ -432,6 +484,38 @@ int cm_get_flow(const char *interface, unsigned long long *recv,unsigned long lo
 out:
     if (fp) { fclose(fp); fp = NULL; }
     return ret;
+}
+
+int cm_check_mac_valid(const char *mac_addr)
+{
+    int i=0;
+    if(strlen(mac_addr)!=12)
+    {
+        return -1;
+    }
+    for(i=0;i<12;i++)
+    {
+        if(!isxdigit(mac_addr[i]))
+        {
+            return -1;
+        }
+    }
+    return 1;
+}
+
+int cm_generate_mac_with_char(const char *mac, char *save, char c)
+{
+    if (!mac || !save) return -1;
+    int i = 0;
+    int j = 0;
+    int len = strlen(mac);
+    for (i = 1; i < len+1; i++) {
+        save[j++] = mac[i-1];
+        if (i%2 == 0 && i < len) {
+            save[j++] = c;
+        }
+    }
+    return 0;
 }
 
 ///////////////
@@ -651,21 +735,14 @@ int cm_read_file_data(const char *filename, char **data, int *len) {
     if (!filename || !data) return -1;
     FILE *f = fopen(filename, "r");
     if (!f) return -2;
+    struct stat st;
+    stat(filename, &st);
+    if (len) *len = st.st_size;
 
-    int lenread = *len;
-    int leneach = 1024;
-    int err = 0;
-    while (!feof(f)) {
-        *data = (char*)cm_mem_realloc(*data, lenread+leneach+1);
-        if (!*data) { err = -11; break;}
-        int out = fread(*data+lenread, 1, leneach, f);
-        if (out <= 0) { err = -12; break;}
-        lenread += out;
-    }
-    if (len) *len = lenread;
-
+    *data = (char*)malloc(*len);
+    int ret = fread(*data, 1, *len, f);
     fclose(f);
-    return err != 0 ? err : lenread;
+    return ret;
 }
 
 const char *cm_time_string(time_t tm)
@@ -677,6 +754,16 @@ const char *cm_time_string(time_t tm)
     }
     sprintf(tStr, "%ld", t);
     return tStr;
+}
+
+unsigned int cm_gettime_only_micro()
+{
+    struct timeval tv;
+    int ret = gettimeofday(&tv, NULL);
+    if (ret != 0) {
+        return 0;
+    }
+    return tv.tv_usec;
 }
 
 unsigned long long cm_gettime_micro()
@@ -696,7 +783,25 @@ unsigned long long cm_gettime_milli()
     if (ret != 0) {
         return 0;
     }
-    return tv.tv_sec * 1000 + tv.tv_usec / 1000000;
+    return ((unsigned long long )tv.tv_sec) * 1000 + (unsigned long long) tv.tv_usec / 1000;
+}
+
+int cm_format_time(char *save, int max, char *format)
+{
+    time_t t = time(NULL);
+    struct tm *tm = localtime(&t);
+    return strftime(save, max, format, tm);
+}
+
+int cm_format_time_t(char *save, int max, char *format, time_t t)
+{
+    struct tm *tm = localtime(&t);
+    return strftime(save, max, format, tm);
+}
+
+int cm_format_time_local(char *save, int max, char *format, struct tm *tm)
+{
+    return strftime(save, max, format, tm);
 }
 
 int cm_random_with_chars(char *result, int num, char *chars)
@@ -718,7 +823,7 @@ int cm_random_with_num_char(char *result, int num)
 
 int cm_random_with_num_char_sym(char *result, int num)
 {
-    char *num_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz,=";
+    char *num_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz,=+";
     return cm_random_with_chars(result, num, num_char);
 }
 
@@ -792,6 +897,170 @@ void cm_bin2scr (void *bin, uint32_t len)
         printf ("%c", (c=='\t' || !_cm_isprint (c)) ? '.' : c);
     }
   }
+}
+
+int cm_get_wifi_signal(const char *dev)
+{
+    int size = 10240, signal = 0;
+    char buf[10240] = {0};
+    char *ptr;
+
+    char iwconfigstr[128] = {0};
+    sprintf(iwconfigstr, "iwconfig %s | grep Signal > /tmp/wifi_signal", dev);
+    system(iwconfigstr);
+
+    FILE *f = fopen("/tmp/wifi_signal", "r");
+    if (!f) return 0;
+    fread(buf, 1, size, f);
+
+    if (buf[0] != '\0') {
+        ptr = strstr(buf, "Signal level=");
+        if (ptr) {
+            ptr += strlen("Signal level=");
+            signal = atoi(ptr);
+        }
+    }
+    fclose(f);
+
+    return signal;
+}
+
+#include <sys/statvfs.h>
+
+unsigned long long cm_get_ubi_size(const char *dev)
+{
+    struct statvfs st;
+    int ret = statvfs(dev, &st);
+    if (ret < 0) {
+        return 0;
+    }
+    return (unsigned long long)st.f_bsize * st.f_blocks;
+}
+
+unsigned long long cm_get_ubi_available(const char *dev)
+{
+    struct statvfs st;
+    int ret = statvfs(dev, &st);
+    if (ret < 0) {
+        return 0;
+    }
+    return st.f_bsize * st.f_bavail;
+}
+
+unsigned long long cm_get_ubi_free(const char *dev)
+{
+    struct statvfs st;
+    int ret = statvfs(dev, &st);
+    if (ret < 0) {
+        return ret;
+    }
+    return st.f_bsize * st.f_ffree;
+}
+
+uint8_t cm_http_getfile(char *sUrl, char *sFileName)
+{
+    int ret = -1;
+#if (USE_LIBCURL == 1)
+    CURLcode res = CURLE_OK;
+    CURL *pCurlEasyHandle = NULL;
+    char cStationURL[1024];
+    cStationURL[0] = '\0';
+    FILE* file = NULL;
+
+
+    if (sUrl == NULL || strlen(sUrl) == 0)
+    {
+        sFileName = NULL;
+        return -1;
+    }
+
+    file = fopen( sFileName, "wb");
+    if(file == NULL){
+        printf("fopen error\n");
+        return -1;
+    }
+
+    /** Add "&urlinbody=true" at the end of the URL **/
+    sprintf(cStationURL, "%s", sUrl);
+    pCurlEasyHandle = curl_easy_init();
+
+    if (pCurlEasyHandle)
+    {
+        curl_easy_setopt(pCurlEasyHandle, CURLOPT_VERBOSE, 1L);
+        curl_easy_setopt(pCurlEasyHandle, CURLOPT_DNS_CACHE_TIMEOUT, 0);
+        curl_easy_setopt(pCurlEasyHandle, CURLOPT_URL, cStationURL);
+        curl_easy_setopt(pCurlEasyHandle, CURLOPT_FOLLOWLOCATION, 1);
+
+        curl_easy_setopt(pCurlEasyHandle, CURLOPT_WRITEDATA, file);
+
+
+        res = curl_easy_perform(pCurlEasyHandle);
+
+        curl_easy_cleanup(pCurlEasyHandle);
+
+        fclose(file);
+    }
+    ret = res;
+#endif
+
+    return ret;
+}
+
+unsigned short cm_litte_to_big(unsigned short v)
+{
+    unsigned short ret = 0;
+    ret |= (v & 0xff) << 8;
+    ret |= (v >> 8 & 0xff);
+    return ret;
+}
+
+unsigned short cm_big_to_little(unsigned short v)
+{
+    unsigned short ret = 0;
+    ret |= (v & 0xff) << 8;
+    ret |= (v >> 8 & 0xff);
+    return ret;
+}
+
+// from last to take string from split
+// clear @save yourself,
+// you must sure save big enough
+int cm_take_out_last_string(const char *str, char split, char *save)
+{
+    char *pos = rindex(str, split);
+    if (pos) {
+        strncpy(save, pos+1, str + strlen(str) - pos -1);
+    }
+    return 0;
+}
+
+unsigned long cm_get_file_size(const char *filename)
+{
+    unsigned long filesize = 0;
+    FILE *fp = fopen(filename, "r");
+    if (fp) {
+        fseek(fp, 0L, SEEK_END);
+        filesize = ftell(fp);
+        fclose(fp);
+    }
+    return filesize;
+}
+
+int cm_wifi_signal_level(int signal)
+{
+    static int levels[4] = { -35, -50, -75, -90 };
+    if (signal < levels[3]) {
+        return 1;
+    } else if (signal > levels[0]) {
+        return 5;
+    } else if (signal < levels[0] && signal > levels[1]) {
+        return 4;
+    } else if (signal < levels[1] && signal > levels[2]) {
+        return 3;
+    } else if (signal < levels[2] && signal > levels[3]) {
+        return 2;
+    }
+    return 0;
 }
 
 /*=============== End of file: cm_utils.c ==========================*/

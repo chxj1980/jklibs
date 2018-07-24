@@ -9,8 +9,8 @@
 #include <malloc.h>
 
 #include "cm_http.h"
-#include "cm_interface.h"
 #include "cm_utils.h"
+#include "cm_base64.h"
 
 int cm_http_generate_header(CMHttpHeader *header, const char *method, const char *url)
 {
@@ -20,9 +20,9 @@ int cm_http_generate_header(CMHttpHeader *header, const char *method, const char
      header->iVersionMajor = 1;
      header->iVersionMinor = 1;
 
-    snprintf(header->szHost, sizeof(header->szHost), "%s", JDH_SERVER_HOST);
+    //snprintf(header->szHost, sizeof(header->szHost), "%s", JDH_SERVER_HOST);
     snprintf(header->szURL, sizeof(header->szURL), "%s", url);
-    snprintf(header->szUserAgent, sizeof(header->szUserAgent), "%s", JDH_USER_AGENT);
+    //snprintf(header->szUserAgent, sizeof(header->szUserAgent), "%s", JDH_USER_AGENT);
     snprintf(header->szConnection, sizeof(header->szConnection), "%s", "close");
 
     return 0;
@@ -168,6 +168,14 @@ int cm_ws_parse_frame_header(const char *data, int len, CMWSFrameHeader* head)
     return 0;
 }
 
+int cm_http_ws_generate_key(char *key, size_t *len)
+{
+    char gen[18] = {0};
+    cm_random_with_num_char(gen, 16);
+    cm_base64_encode((unsigned char*)key, len, (unsigned char*)gen, 16);
+    return 0;
+}
+
 //
 int cm_http_ws_header_init(CMHttpHeader *header, const char *url, const char *addr, int port)
 {
@@ -178,14 +186,15 @@ int cm_http_ws_header_init(CMHttpHeader *header, const char *url, const char *ad
     snprintf(header->szMethod, sizeof(header->szMethod), "%s", "GET");
     snprintf(header->szURL, sizeof(header->szURL), "%s", url);
     snprintf(header->szHost, sizeof(header->szHost), "%s:%d", addr, port);
-    snprintf(header->szOrigin, sizeof(header->szOrigin), "http://%s:%d", addr, port);
-    cm_random_with_num_char_sym(header->szWSKey, 24);
-    header->szWSKey[24] = '\0';
+    snprintf(header->szOrigin, sizeof(header->szOrigin), "http://%s", addr);
+    size_t keylen = sizeof(header->szWSKey);
+    cm_http_ws_generate_key(header->szWSKey, &keylen);
 
     // snprintf(header->szWSKey, sizeof(header->szWSKey), "%s", "bFhlIHNh3dBsZSBub25jZQ==");
     snprintf(header->szConnection, sizeof(header->szConnection), "%s", "Upgrade");
     snprintf(header->szWSProtocol, sizeof(header->szWSProtocol), "%s", "chat, superchat");
     snprintf(header->szWSUpgrade, sizeof(header->szWSUpgrade), "%s", "websocket");
+    snprintf(header->szUserAgent, sizeof(header->szUserAgent), "%s", "yt-client");
     header->iWSVersion = 13;
     header->iUpgrade = 1;
 
@@ -204,6 +213,7 @@ int cm_http_ws_generate_str(CMHttpHeader *header, char *result, int maxresult)
                                 "Sec-WebSocket-Key: %s\r\n"
                                 "Origin: %s\r\n"
                                 "Sec-WebSocket-Version: %d\r\n"
+                                "UserAgent: %s\r\n"
                                 "\r\n",
                                 header->szMethod, header->szURL,
                                 header->iVersionMajor, header->iVersionMinor,
@@ -212,7 +222,8 @@ int cm_http_ws_generate_str(CMHttpHeader *header, char *result, int maxresult)
                                 header->szConnection,
                                 header->szWSKey,
                                 header->szOrigin,
-                                header->iWSVersion);
+                                header->iWSVersion,
+                                header->szUserAgent);
 
     }
     return n;
@@ -234,3 +245,6 @@ int cm_http_ws_parser_result_code(const char *str, size_t len)
 
     return 0;
 }
+
+
+
