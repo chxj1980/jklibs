@@ -14,8 +14,8 @@ int main(int argc, char **args) {
 	x = 1280;
 	y = 960;
     CodecHandle h;
-    int ret = CodecInit(&h, CODEC_VIDEO_YUV422, CODEC_VIDEO_H264);
-    //int ret = CodecInit(&h, CODEC_VIDEO_YUV420, CODEC_VIDEO_H264);
+    //int ret = CodecInit(&h, CODEC_VIDEO_YUV422, CODEC_VIDEO_H264);
+    int ret = CodecInit(&h, CODEC_VIDEO_YUV420, CODEC_VIDEO_H264);
     if (ret < 0) {
         printf("Error codec init [%d]\n", ret);
         return -1;

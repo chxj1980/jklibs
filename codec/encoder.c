@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -60,8 +61,7 @@ int close_yuv_h264(CEncoder *en) {
     return 0;
 }
 
-int encoder_yuv_h264(CEncoder *en, char *data, unsigned int length) {
-    char *pNals = NULL;
+static int encoder_yuv422_h264(CEncoder *en, char *data, unsigned int length) {
     int   iNals = 0;
     char *y = (char*)en->pic_in.img.plane[0];
     char *u = (char*)en->pic_in.img.plane[1];
@@ -81,6 +81,32 @@ int encoder_yuv_h264(CEncoder *en, char *data, unsigned int length) {
     int frame_size = x264_encoder_encode(en->handle, &en->nal, &iNals, &en->pic_in, &en->pic_out);
 
     if (frame_size < 0) return -1;
+	return iNals;
+}
+
+static int encoder_yuv420_h264(CEncoder *en, char *data, unsigned int length) {
+    int   iNals = 0;
+	en->pic_in.img.plane[0] = (uint8_t*)data;
+	en->pic_in.img.plane[1] = (uint8_t*)data + en->param.i_height;
+	en->pic_in.img.plane[2] = (uint8_t*)data + en->param.i_height*5/4;
+    en->pic_in.i_pts ++;
+    en->outlength = 0;
+    int frame_size = x264_encoder_encode(en->handle, &en->nal, &iNals, &en->pic_in, &en->pic_out);
+	printf("-------- %d\n", frame_size);
+
+    if (frame_size < 0) return -1;
+	return iNals;
+}
+
+int encoder_yuv_h264(CEncoder *en, char *data, unsigned int length) {
+	int iNals = 0;
+	if (en->codec_type == X264_CSP_I422) {
+	    iNals = encoder_yuv422_h264(en, data, length);
+	} else if (en->codec_type == X264_CSP_I420) {
+	    iNals = encoder_yuv420_h264(en, data, length);
+	}
+	if (iNals < 0) return -1;
+
     for (int i = 0; i < iNals; i++) {
          memcpy(en->outdata + en->outlength, en->nal[i].p_payload, en->nal[i].i_payload);
          en->outlength += en->nal[i].i_payload;

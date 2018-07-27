@@ -22,8 +22,7 @@ int CodecInit(CodecHandle *handle, int input, int output) {
 			   c->iInput == CODEC_VIDEO_YUV420)	&&
         c->iOutput == CODEC_VIDEO_H264) {
         c->en = (CEncoder*)malloc(sizeof(CEncoder));
-		c->en->codec_type = c->iInput;
-        init_yuv_h264(c->en);
+        init_yuv_h264(c->en, c->iInput);
     } else {
         free(c);
         return -2;
