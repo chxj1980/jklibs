@@ -18,9 +18,11 @@ int CodecInit(CodecHandle *handle, int input, int output) {
     memset(c, 0, sizeof(CCodec));
     c->iInput = input;
     c->iOutput = output;
-    if (c->iInput == CODEC_VIDEO_YUV422 &&
+    if ((c->iInput == CODEC_VIDEO_YUV422 ||
+			   c->iInput == CODEC_VIDEO_YUV420)	&&
         c->iOutput == CODEC_VIDEO_H264) {
         c->en = (CEncoder*)malloc(sizeof(CEncoder));
+		c->en->codec_type = c->iInput;
         init_yuv_h264(c->en);
     } else {
         free(c);

@@ -5,7 +5,7 @@
 #include "codec.h"
 #include "base.h"
 
-int init_yuv_h264(CEncoder *en) {
+int init_yuv_h264(CEncoder *en, int yuv_type) {
     memset(en, 0, sizeof(CEncoder));
     x264_param_default_preset(&en->param, "veryfast", "zerolatency");
     en->param.i_threads = X264_SYNC_LOOKAHEAD_AUTO;
@@ -23,7 +23,11 @@ int init_yuv_h264(CEncoder *en) {
     en->param.i_fps_num = 25;
     en->param.i_timebase_den = en->param.i_fps_num;
     en->param.i_timebase_num = en->param.i_fps_den;
-    en->param.i_csp = X264_CSP_I422;
+	if (yuv_type == CODEC_VIDEO_YUV422) {
+        en->codec_type = X264_CSP_I422;
+	} else if (yuv_type == CODEC_VIDEO_YUV420) {
+		en->codec_type = X264_CSP_I420;
+	}
     x264_param_apply_profile(&en->param, x264_profile_names[4]);
 
     return 0;
@@ -37,8 +41,9 @@ int set_solution(CEncoder *en, int h, int w) {
 
 int open_yuv_h264(CEncoder *en) {
     x264_picture_init(&en->pic_out);
-    x264_picture_alloc(&en->pic_in, X264_CSP_I422, en->param.i_width, en->param.i_height);
-    en->pic_in.img.i_csp = X264_CSP_I422;
+	int i_csp = 0;
+    x264_picture_alloc(&en->pic_in, en->codec_type, en->param.i_width, en->param.i_height);
+    en->pic_in.img.i_csp = en->codec_type;
     en->pic_in.img.i_plane = 3;
     en->pic_in.i_pts = 1;
     int msize = en->param.i_width * en->param.i_height * 2;

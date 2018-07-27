@@ -9,14 +9,19 @@ int main(int argc, char **args) {
     char *input_file = args[1];
     char *output_file = args[2];
 
+	int x = 640;
+	int y = 480;
+	x = 1280;
+	y = 960;
     CodecHandle h;
     int ret = CodecInit(&h, CODEC_VIDEO_YUV422, CODEC_VIDEO_H264);
+    //int ret = CodecInit(&h, CODEC_VIDEO_YUV420, CODEC_VIDEO_H264);
     if (ret < 0) {
         printf("Error codec init [%d]\n", ret);
         return -1;
     }
 
-    CodecSetSolution(h, 640, 480);
+    CodecSetSolution(h, x, y);
     ret = CodecOpen(h);
     if (ret < 0) {
         printf("Error open [%d]\n", ret);
@@ -26,7 +31,7 @@ int main(int argc, char **args) {
     printf("Codec init success\n");
     FILE *fin = fopen(input_file, "r");
     FILE *fout = fopen(output_file, "w");
-    int size = 640*480*2;
+    int size = x*y*2;
     char *data = (char*)malloc(size);
     char *outdata = NULL;
     unsigned int outlength = 0;
