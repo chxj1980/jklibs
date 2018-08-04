@@ -50,7 +50,7 @@ int cm_conn_tcp_create(CMConnTCP *conn, const char *addr, int port)
     sprintf(inConn->addr, "%s", addr);
     inConn->port = port;
 
-    inConn->sockFD = socket(AF_INET, SOCK_STREAM, 0);
+    inConn->sockFD = socket(AF_INET, SOCK_STREAM|SOCK_NONBLOCK, 0);
     if (!inConn->sockFD) {
         return -3;
     }
@@ -142,9 +142,13 @@ int cm_conn_tcp_connect(CMConnTCP conn, int bCycle, int waitTime, int checktimes
                 conn->status = 1;
                 break;
             }
-//            cmdebug("connect falied, reconnect ... %x,%s\n", errno, strerror(errno));
-            sleep(waitTime);
-            continue;
+            printf("connect falied, reconnect ... %x,%s\n", errno, strerror(errno));
+            if (bCycle) {
+				sleep(waitTime);
+                continue;
+			} else {
+			    break;
+			}
         }
         conn->status = 1;
         break;
