@@ -74,7 +74,13 @@ int list_test_string() {
     char url[512] = "xxxxx";
     string_list.push_back(url);
     string_list.push_back("value");
- 
+
+    for (std::list<std::string>::iterator iter = string_list.begin(); iter != string_list.end();) {
+         std::string s = *iter;
+         printf("string: [%s]\n", s.c_str());
+         string_list.erase(iter++);
+    }
+	printf("after:\n");
     for (std::list<std::string>::iterator iter = string_list.begin(); iter != string_list.end(); iter++) {
          std::string s = *iter;
          printf("string: [%s]\n", s.c_str());

@@ -25,15 +25,15 @@ deps:
 	@mkdir -p $(OBJDIR)
 
 $(OBJS):$(OBJDIR)/%.o:%.cc
-	@echo "\t $(CC) \t $^"
-	$(Q) $(CC) -o $@ -c $^ $(CFLAGS) $(LINKFLAGS)
+	@echo "\t $(CXX) \t $^"
+	$(Q) $(CXX) -o $@ -c $^ $(CFLAGS) $(LINKFLAGS)
 
 $(BUILDIN): $(OBJS)
 	$(Q) $(LD) -r -o $@ $^
 
 $(DEMO_EXEC):$(BUILDIN) $(obj-demo-y)
-	@echo "\t $(CC) \t $@-$(OS)"
-	$(Q) $(CC) -o $@-$(OS) $(patsubst %,%.cc,$@) $(BUILDIN) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
+	@echo "\t $(CXX) \t $@-$(OS)"
+	$(Q) $(CXX) -o $@-$(OS) $(patsubst %,%.cc,$@) $(BUILDIN) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
 
 install:
 	$(Q) install -v -d $(DESTDIR)
