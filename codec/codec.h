@@ -33,9 +33,9 @@ API_PREFIX int CodecOpen(CodecHandle handle);
 
 API_PREFIX int CodecClose(CodecHandle *handle);
 
-API_PREFIX int CodecPush(CodecHandle handle, const char *data, unsigned int length);
+API_PREFIX int CodecPush(CodecHandle handle, unsigned char *data, unsigned int length);
 
-API_PREFIX int CodecPop(CodecHandle handle, char **data, unsigned int *length);
+API_PREFIX int CodecPop(CodecHandle handle, unsigned char **data, unsigned int *length);
 
 #ifdef __cplusplus
 }

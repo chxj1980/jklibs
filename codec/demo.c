@@ -15,7 +15,8 @@ int main(int argc, char **args) {
 	y = 960;
     CodecHandle h;
     //int ret = CodecInit(&h, CODEC_VIDEO_YUV422, CODEC_VIDEO_H264);
-    int ret = CodecInit(&h, CODEC_VIDEO_YUV420, CODEC_VIDEO_H264);
+    //int ret = CodecInit(&h, CODEC_VIDEO_YUV420, CODEC_VIDEO_H264);
+    int ret = CodecInit(&h, CODEC_VIDEO_YUV420, CODEC_VIDEO_H265);
     if (ret < 0) {
         printf("Error codec init [%d]\n", ret);
         return -1;
@@ -32,8 +33,8 @@ int main(int argc, char **args) {
     FILE *fin = fopen(input_file, "r");
     FILE *fout = fopen(output_file, "w");
     int size = x*y*2;
-    char *data = (char*)malloc(size);
-    char *outdata = NULL;
+    unsigned char *data = (unsigned char*)malloc(size);
+    unsigned char *outdata = NULL;
     unsigned int outlength = 0;
     int alllength = 0;
     while (1) {
@@ -45,7 +46,9 @@ int main(int argc, char **args) {
         ret = CodecPush(h, data, size);
         if (ret < 0) {
             printf("Codec error, but conintue [%d]\n", ret);
-        }
+        } else {
+			printf("push data success len [%d]\n", size);
+		}
         CodecPop(h, &outdata, &outlength);
         alllength += outlength;
         printf("Pop out data [%d] alllength [%d]\n", outlength, alllength);
