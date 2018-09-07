@@ -1063,4 +1063,37 @@ int cm_wifi_signal_level(int signal)
     return 0;
 }
 
+// orig + v (ret value), used for one int value for return 2 values
+// one for user defined, one for errno
+// orig for errno , v for user set...
+// 0x ff ff ff ff ff ff ff ff
+//    r  r  orig        v  v
+// r - reserved
+// orig - errno (must > 0)
+// v - user set value
+int cm_retserrno(int orig, int v)
+{
+	if (orig < 0) {
+	    return ~(((~orig+1) | (v << 8)) - 1);
+	} else {
+		return orig | (v << 8);
+	}
+}
+
+int cm_retgerrno(int orig) {
+	if (orig < 0) {
+		return ((~orig+1) & 0x00ffff00) >> 8;
+	} else {
+	    return (orig & 0x00ffff00) >> 8;
+	}
+}
+
+int cm_retgret(int orig) {
+	if (orig < 0) {
+		return ~(((~orig+1) & 0x000000ff) - 1);
+	} else {
+		return orig & 0x000000ff;
+	}
+}
+
 /*=============== End of file: cm_utils.c ==========================*/

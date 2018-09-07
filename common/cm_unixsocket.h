@@ -16,6 +16,10 @@ int cm_unixsocket_server_init(CMUnixSocketServerHandle *h, const char *path);
 
 int cm_unixsocket_server_deinit(CMUnixSocketServerHandle *h);
 
+int cm_unixsocket_server_nonblock(CMUnixSocketServerHandle h, int client);
+
+int cm_unixsocket_server_fcntl(CMUnixSocketServerHandle h, int flag);
+
 int cm_unixsocket_server_client_close(int client);
 
 int cm_unixsocket_server_accept(CMUnixSocketServerHandle h);
@@ -29,6 +33,10 @@ int cm_unixsocket_server_send(CMUnixSocketServerHandle h, int client, char *data
 int cm_unixsocket_client_init(CMUnixSocketClientHandle *h, const char *path);
 
 int cm_unixsocket_client_deinit(CMUnixSocketClientHandle *h);
+
+int cm_unixsocket_client_nonblock(CMUnixSocketClientHandle h);
+
+int cm_unixsocket_client_fcntl(CMUnixSocketClientHandle h, int flag);
 
 int cm_unixsocket_client_send(CMUnixSocketClientHandle h, char *data, int len);
 

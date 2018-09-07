@@ -24,6 +24,7 @@ endif
 
 ifeq ("$(CODEC)", "y")
 X264=y
+X265=y
 CODEC=y
 CFLAGS+=-Icodec
 endif
@@ -115,6 +116,11 @@ endif
 ifeq ($(X264), y)
 CFLAGS += -I/opt/data/libs/$(OS)/include
 LINKPATH += -L/opt/data/libs/$(OS)/lib -lx264
+endif
+
+ifeq ($(X265), y)
+CFLAGS += -I/opt/data/libs/$(OS)/include
+LINKPATH += -L/opt/data/libs/$(OS)/lib -lx265
 endif
 
 Q=@

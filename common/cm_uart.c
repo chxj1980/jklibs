@@ -185,3 +185,4 @@ int cm_uart_send(int fd, unsigned char *send_buf,int data_len)
         return -1;
     }
 }
+

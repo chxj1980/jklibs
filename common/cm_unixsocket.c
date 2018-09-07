@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include "cm_unixsocket.h"
 #include "cm_utils.h"
@@ -77,6 +78,20 @@ int cm_unixsocket_server_deinit(CMUnixSocketServerHandle *h)
     return 0;
 }
 
+int cm_unixsocket_server_nonblock(CMUnixSocketServerHandle h, int client)
+{
+	if (!h) return -1;
+	if (client > 0) fcntl(client, F_SETFL, SOCK_NONBLOCK);
+	else fcntl(h->iFD, F_SETFL, SOCK_NONBLOCK);
+	return 0;
+}
+
+int cm_unixsocket_server_fcntl(CMUnixSocketServerHandle h, int flag)
+{
+	if (!h) return -1;
+	return fcntl(h->iFD, F_SETFL, flag);
+}
+
 int cm_unixsocket_server_client_close(int client)
 {
     if (client) {
@@ -99,23 +114,17 @@ int cm_unixsocket_server_recv(CMUnixSocketServerHandle h, int client, char *data
 {
     if (!h || !client || !data || !len) return -1;
 
-    int rc = 0;
+    int rc = -1;
     rc = recv(client, data, *len, 0);
-    if (rc == -1) {
-//        cmerror("read failed: %d,%s", rc, strerror(rc));
-        return -2;
-    } else if (rc == 0) {
-
-    }
-    *len = rc;
-    return *len;
+	if (rc >= 0) *len = rc;
+    return rc == -1 ? -1 : 0;
 }
 
 int cm_unixsocket_server_send(CMUnixSocketServerHandle h, int client, char *data, int len)
 {
     if (!h || !client || !data || len <= 0) return -1;
 
-    int rc = send(client, data, len, 0);
+    int rc = send(client, data, len, MSG_NOSIGNAL);
     if (rc == -1) {
 //        cmerror("send failed: %d, %s", rc, strerror(rc));
         return -2;
@@ -182,6 +191,18 @@ int cm_unixsocket_client_deinit(CMUnixSocketClientHandle *h)
     return 0;
 }
 
+int cm_unixsocket_client_nonblock(CMUnixSocketClientHandle h)
+{
+	if (!h) return -1;
+	return fcntl(h->iFD, F_SETFL, SOCK_NONBLOCK);
+}
+
+int cm_unixsocket_client_fcntl(CMUnixSocketClientHandle h, int flag)
+{
+	if (!h) return -1;
+	return fcntl(h->iFD, F_SETFL, flag);
+}
+
 int cm_unixsocket_client_send(CMUnixSocketClientHandle h, char *data, int len)
 {
     if (!h) return -1;
@@ -189,9 +210,11 @@ int cm_unixsocket_client_send(CMUnixSocketClientHandle h, char *data, int len)
     if (!h->iConn) {
         int c = connect(h->iFD, (struct sockaddr *) &h->szAddr, sizeof(h->szAddr));
         if (c == -1) {
+			printf("connect failed : %d, %s\n", errno, strerror(errno));
 //            cmerror("connect failed: %d,%s", c, strerror(errno));
             return -2;
         } else {
+			printf("connect success\n");
 //            cminfo("connect [%s] success\n", h->szUnixPath);
         }
         h->iConn = 1;
@@ -221,11 +244,7 @@ int cm_unixsocket_client_recv(CMUnixSocketClientHandle h, char *data, int *len)
     if (!h->iConn) return -2;
 
     int c = recv(h->iFD, data, *len, 0);
-    if (c == -1) {
-//        cmerror("read failed: %d,%s", c, strerror(c));
-        return -3;
-    }
-    *len = c;
+    if (c >= 0) *len = c;
 
-    return 0;
+    return c == -1 ? -3 : 0;
 }

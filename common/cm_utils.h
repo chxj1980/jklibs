@@ -274,6 +274,18 @@ unsigned long cm_get_file_size(const char *filename);
 
 int cm_wifi_signal_level(int signal);
 
+// orig + v (ret value), used for one int value for return 2 values
+// one for user defined, one for errno
+// orig for errno , v for user set...
+// 0x ff ff ff ff ff ff ff ff
+//    r  r  orig        v  v
+// r - reserved
+// orig - errno (must > 0)
+// v - user set value
+int cm_retserrno(int orig, int v);
+int cm_retgerrno(int orig);
+int cm_retgret(int orig);
+
 #ifdef __cplusplus
 }
 #endif
