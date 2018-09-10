@@ -222,16 +222,12 @@ int cm_unixsocket_client_send(CMUnixSocketClientHandle h, char *data, int len)
 
     int sendcnts = 0;
     if (data && len > 0) {
-        int n = write(h->iFD, data, len);
-        if (n <= 0 || n != len) {
-//            cmerror("send failed: %d", n);
-            if (n == -1) {
-                h->iConn = 0; // maybe connect failed.
-//                cmerror("send failed: %s", strerror(errno));
-                return -3;
-            }
-        }
-        sendcnts = n;
+        int n = send(h->iFD, data, len, MSG_NOSIGNAL);
+		if (n == -1) {
+			h->iConn = 0;
+			return n;
+		}
+		sendcnts = n;
     }
 
     return sendcnts;

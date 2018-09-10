@@ -15,7 +15,7 @@ char *base_demo_func_return()
 
 int base_demo_size_func(char p1[100])
 {
-    printf("func sizeof(char p1) = %d\n", sizeof(p1));
+    printf("func sizeof(char p1) = %ld\n", sizeof(p1));
     return 0;
 }
 
@@ -23,13 +23,13 @@ int base_demo_size_o()
 {
     char *p = (char*)malloc(100);
     
-    printf("sizeof(char*p) = %d\n", sizeof(p));
+    printf("sizeof(char*p) = %ld\n", sizeof(p));
 
     char p1[20] = "hello";
-    printf("sizeof(char p1) = %d\n", sizeof(p1));
+    printf("sizeof(char p1) = %ld\n", sizeof(p1));
 
     void *p2 = (void*)malloc(50);
-    printf("sizeof(void *p2) = %d\n", sizeof(p2));
+    printf("sizeof(void *p2) = %ld\n", sizeof(p2));
 
     if (p) free(p);
     if (p2) free(p2);
@@ -51,28 +51,28 @@ int base_demo_size()
     unsigned long ul;
     unsigned  long long ull;
 
-    printf("size_t = %d\n", sizeof(t));
-    printf("int = %d\n", sizeof(i));
-    printf("short = %d\n", sizeof(s));
-    printf("unsigned int = %d\n", sizeof(ui));
-    printf("unsigned short = %d\n", sizeof(us));
-    printf("char = %d\n", sizeof(c));
-    printf("unsigned char = %d\n", sizeof(uc));
-    printf("float = %d\n", sizeof(f));
-    printf("long = %d\n", sizeof(l));
-    printf("long long = %d\n", sizeof(ll));
-    printf("unsigned long = %d\n", sizeof(ul));
-    printf("unsigned long long = %d\n", sizeof(ull));
-    printf("short* = %d\n", sizeof(short*));
-    printf("unsigned short * = %d\n", sizeof(unsigned short *));
-    printf("char * = %d\n", sizeof(char*));
-    printf("float * = %d\n", sizeof(float*));
+    printf("size_t = %ld\n", sizeof(t));
+    printf("int = %ld\n", sizeof(i));
+    printf("short = %ld\n", sizeof(s));
+    printf("unsigned int = %ld\n", sizeof(ui));
+    printf("unsigned short = %ld\n", sizeof(us));
+    printf("char = %ld\n", sizeof(c));
+    printf("unsigned char = %ld\n", sizeof(uc));
+    printf("float = %ld\n", sizeof(f));
+    printf("long = %ld\n", sizeof(l));
+    printf("long long = %ld\n", sizeof(ll));
+    printf("unsigned long = %ld\n", sizeof(ul));
+    printf("unsigned long long = %ld\n", sizeof(ull));
+    printf("short* = %ld\n", sizeof(short*));
+    printf("unsigned short * = %ld\n", sizeof(unsigned short *));
+    printf("char * = %ld\n", sizeof(char*));
+    printf("float * = %ld\n", sizeof(float*));
     return 0;
 }
 
 int base_demo_shit_length()
 {
-    printf("1<<31 = %d\n", 1<<31-1);
+    printf("1<<31 = %d\n", (1<<31)-1);
     return 0;
 }
 

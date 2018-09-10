@@ -33,7 +33,8 @@ int main() {
 			int ret = cm_unixsocket_client_send(h, data, lendata);
 			if (ret < 0) {
 				printf("send error [%d][%s]\n", errno, strerror(errno));
-				break;
+				sleep(1);
+				continue;
 			}
 			char sdata[1024] = {0};
 			int lens = 1024;
