@@ -32,15 +32,19 @@ int main() {
 
 	int count = 0;
 	while(1) {
-		if (count++ > 5) {
+		if (count++ > 0) {
 			time_t t = time(NULL);
 			printf("[%ld]Start to kill thread\n", t);
-			thread_exit = 1;
-			pthread_join(p, NULL);
+			//thread_exit = 1;
+			//pthread_join(p, NULL);
+			pthread_cancel(p);
 			break;
 		}
 		sleep(2);
 	}
+
+	printf("program exit\n");
+	sleep(1);
 
 	return 0;
 }
