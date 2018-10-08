@@ -23,7 +23,7 @@ int main() {
 			sleep(1);
 			continue;
 	    }
-		cm_unixsocket_client_nonblock(h);
+		//cm_unixsocket_client_nonblock(h);
 		//sleep(5);
 
 		while(1) {
@@ -53,7 +53,7 @@ int main() {
 					break;
 			    }
 			}
-			sleep(1);
+			sleep(10);
 		}
 		cm_unixsocket_client_deinit(&h);
 	}

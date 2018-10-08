@@ -30,6 +30,7 @@ int cm_conn_tcp_create(CMConnTCP *conn, const char *addr, int port);
  * It will connect when created.
  */
 int cm_conn_tcp_create_new(CMConnTCP *conn, const char *addr, int port);
+int cm_conn_tcp_create_new_timeout(CMConnTCP *conn, const char *addr, int port, int timeout);
 
 /*
  * connect to server.
