@@ -11,7 +11,7 @@
 #include "cm_conn_ws.h"
 #include "cm_http.h"
 #include "cm_utils.h"
-#include "cm_logprint.h"
+#include "base/cm_logprint.h"
 
 //
 // Web socket connection
@@ -157,7 +157,7 @@ int cm_websocket_request_recv_ex(CMConnTCP conn, char **result, size_t *lenresul
 #endif
         }
         if (n < 0) {
-            cmerror("recv data header errror [%d]\n", n);
+            cmerror("recv data header errror [%d] [%s]\n", n, strerror(errno));
             errvalue = -2;
             break;
         } else {

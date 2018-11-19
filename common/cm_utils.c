@@ -334,12 +334,48 @@ int cm_clear_parenthesis_self(char *string)
     return sprintf(string, "%s", save);
 }
 
+int cm_remove_space(char *str)
+{
+    int len = strlen(str);
+    char *p = str+len - 1;
+    while(*p == ' ' || *p == '\n') {
+        p--;
+    }
+
+    *(p+1) = '\0';
+
+    int indx = 0;
+    p = str;
+    while (*p++ == ' ') {
+        indx++;
+    }
+
+    int i = 0;
+    while (indx > 0) {
+        if (indx >= len - 1) {
+            str[i] = '\0';
+            break;
+        }
+        str[i++] = str[indx++];
+    }
+
+    return 0;
+}
+
 int cm_remove_last_break(char *args)
 {
     if (args == NULL) return -1;
 
     int  len = strlen(args);
-    if (args[len-1] == '\n') 
+
+#if 0
+    char *p = args + len - 1;
+    while (p && *p == '\n') {
+        *p = '\0';
+        p--;
+    }
+#endif
+    if (args[len-1] == '\n')
         args[len-1] = '\0';
 
     return 0;
@@ -742,6 +778,9 @@ int cm_read_file_data(const char *filename, char **data, int *len) {
     *data = (char*)malloc(*len);
     int ret = fread(*data, 1, *len, f);
     fclose(f);
+	if (ret < *len)
+	    (*data)[ret] = '\0';
+	else (*data)[ret - 1] = '\0';
     return ret;
 }
 
@@ -817,14 +856,14 @@ int cm_random_with_chars(char *result, int num, char *chars)
 
 int cm_random_with_num_char(char *result, int num)
 {
-    char *num_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    return cm_random_with_chars(result, num, num_char);
+    const char *num_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    return cm_random_with_chars(result, num, (char*)num_char);
 }
 
 int cm_random_with_num_char_sym(char *result, int num)
 {
-    char *num_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz,=+";
-    return cm_random_with_chars(result, num, num_char);
+    const char *num_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz,=+";
+    return cm_random_with_chars(result, num, (char*)num_char);
 }
 
 int cm_string_compare(const char *src, const char *dst)
@@ -858,12 +897,12 @@ uint32_t cm_hex2bin (void *bin, char hex[])
     len = strlen (hex);
     
     if ((len & 1) != 0) {
-        return 0; 
+        return -1; 
     }
     
     for (i=0; i<len; i++) {
         if (_cm_isxdigit((int)hex[i]) == 0) {
-            return 0; 
+            return -2; 
         }
     }
     
@@ -1027,7 +1066,7 @@ unsigned short cm_big_to_little(unsigned short v)
 // you must sure save big enough
 int cm_take_out_last_string(const char *str, char split, char *save)
 {
-    char *pos = rindex(str, split);
+    const char *pos = rindex(str, (int)split);
     if (pos) {
         strncpy(save, pos+1, str + strlen(str) - pos -1);
     }
@@ -1095,5 +1134,18 @@ int cm_retgret(int orig) {
 		return orig & 0x000000ff;
 	}
 }
+
+#ifdef __MAIN_TEST_
+int main() {
+
+	int v1 = cm_retserrno(0, 228);
+	printf("1, %d, %x\n", v1, v1);
+	int v2 = cm_retgerrno(v1);
+	int v3 = cm_retgret(v1);
+	printf("2, %d, %x\n", v2, v2);
+	printf("3, %d, %x\n", v3, v3);
+	return 0;
+}
+#endif
 
 /*=============== End of file: cm_utils.c ==========================*/

@@ -2,12 +2,15 @@
 // Created by v on 18-6-21.
 //
 
+#include <errno.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <termios.h>
 
 #include "cm_uart.h"
+#include "cm_utils.h"
 
 int cm_uart_open(char * serial_port)
 {
@@ -15,17 +18,17 @@ int cm_uart_open(char * serial_port)
 
     fd = open(serial_port, O_RDWR|O_NOCTTY | O_NDELAY);
     if (fd < 0){
-        return(-1);
+        return cm_retserrno(-1, errno);
     }
 
     if(fcntl(fd, F_SETFL, 0) < 0){
         close(fd);
-        return(-1);
+        return cm_retserrno(-2, errno);
     }
 
     if(0 == isatty(STDIN_FILENO)){
         close(fd);
-        return(-1);
+        return cm_retserrno(-3, errno);
     }
 
     return fd;
@@ -185,4 +188,3 @@ int cm_uart_send(int fd, unsigned char *send_buf,int data_len)
         return -1;
     }
 }
-

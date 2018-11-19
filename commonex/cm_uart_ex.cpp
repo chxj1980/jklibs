@@ -17,7 +17,7 @@ CMUart::~CMUart() {
 int CMUart::init(const char *dev, int speed, int flow_ctrl, int databits, int stopbits, int parity) {
     iFD = cm_uart_open((char*)dev);
     if (iFD <= 0) {
-        return -1;
+        return iFD;
     }
     int ret = cm_uart_init(iFD, speed, flow_ctrl, databits, stopbits, parity);
     if (ret != 0) {

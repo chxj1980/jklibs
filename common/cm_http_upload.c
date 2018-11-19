@@ -87,14 +87,16 @@ int cm_http_send_file(char *filename, char *url, int subid)
   return ret;
 }
 
-/*
+#ifdef MAIN_TEST
 int main(int argc, char *argv[])  
 {  
   
   curl_global_init(CURL_GLOBAL_ALL);  
   
-  cm_http_send_file("cm_print.h", "192.168.5.138");
+  char *url = "106.14.61.92:8081/mbm-web/logs/uploadLog.html";
+  int ret = cm_http_send_file("/opt/data/output/mozart.log", url, 129);
+  printf("---------- %d\n", ret);
   
   return 0;  
 }
- */
+#endif

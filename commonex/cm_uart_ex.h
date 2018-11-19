@@ -5,7 +5,7 @@
 #ifndef SRC_CM_UART_EX_H
 #define SRC_CM_UART_EX_H
 
-#include "cm_uart.h"
+#include "cm/cm_uart.h"
 
 class CMUart {
 public:

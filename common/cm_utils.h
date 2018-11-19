@@ -129,6 +129,9 @@ int cm_clear_parenthesis(char *save, char *string);
 // Like up, be change @string.
 int cm_clear_parenthesis_self(char *string);
 
+// clear space prefix and postfix of one @str
+// for postfix, it will remove '\n' also
+int cm_remove_space(char *str);
 
 // Remote the last '\n' mark.
 int cm_remove_last_break(char *args);
@@ -285,6 +288,7 @@ int cm_wifi_signal_level(int signal);
 int cm_retserrno(int orig, int v);
 int cm_retgerrno(int orig);
 int cm_retgret(int orig);
+
 
 #ifdef __cplusplus
 }

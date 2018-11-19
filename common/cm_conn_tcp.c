@@ -27,19 +27,9 @@
 #endif
 #include <errno.h>
 #include <netdb.h>
-#include <pthread.h>
-#include <signal.h>
 
 #include "cm_conn_tcp.h"
 #include "cm_utils.h"
-
-/*
- * About getaddrinfo, we use thread to connect, and we shouldn't cancel the thread as the memory will not free.
- * So we let the thread exit by itself, but parent thread has exit.
- * Here, you known, if getaddrinfo thread has too many, the memory will be used so much, we need give count
- * for how many threads have, and wait if threads greater then some value(50).
- */
-static int tcp_addrinfo_count = 0;
 
 struct tagCMConnTCP {
     char        addr[64];
@@ -48,10 +38,6 @@ struct tagCMConnTCP {
     struct sockaddr_in   addr_in;
     
     int         status;
-    int         iTimeout;
-    int         iMainTimeout;
-    int         iSuccess; // for getaddrinfo
-    pthread_t         iMainThread;
 };
 
 int cm_conn_tcp_create(CMConnTCP *conn, const char *addr, int port)
@@ -86,75 +72,6 @@ int cm_conn_tcp_create(CMConnTCP *conn, const char *addr, int port)
     return 0;
 }
 
-#define TIME_DEBUG
-
-void* cm_conn_tcp_create_thread(void *args)
-{
-    CMConnTCP oconn = (CMConnTCP)args;
-    struct tagCMConnTCP conn;
-    memcpy(&conn, oconn, sizeof(struct tagCMConnTCP));
-
-    printf("-------------------------- thread created\n");
-    char strport[16] = {0};
-    sprintf(strport, "%d", conn.port);
-    struct addrinfo hints;
-    struct addrinfo *results = NULL, *rp = NULL;
-
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = 0;
-    hints.ai_protocol = 0;
-
-#ifdef TIME_DEBUG
-    unsigned long long t1 = cm_gettime_milli();
-#endif
-    int n = getaddrinfo(conn.addr, strport, &hints, &results);
-    if (n != 0) {
-        printf("get addrinfo failed [%d] errno [%d, %s]\n", n, errno, strerror(errno));
-        if (results) {
-            freeaddrinfo(results);
-        }
-        tcp_addrinfo_count --;
-        return NULL;
-    }
-#ifdef TIME_DEBUG
-    unsigned long long t2 = cm_gettime_milli();
-    printf("get addrinfo use time [%llu] ms\n", t2 - t1);
-#endif
-
-    for (rp = results; rp != NULL; rp = rp->ai_next) {
-        conn.sockFD = socket(rp->ai_family, rp->ai_socktype,
-                                rp->ai_protocol);
-        if (conn.sockFD == -1)
-            continue;
-//        fcntl(inConn->sockFD, F_SETFL, O_NONBLOCK);
-        if (connect(conn.sockFD, rp->ai_addr, rp->ai_addrlen) != -1)
-            break;
-        close(conn.sockFD);
-    }
-    freeaddrinfo(results);
-#ifdef TIME_DEBUG
-    unsigned long long t3 = cm_gettime_milli();
-    printf("try connect use time [%llu] ms\n", t3 - t2);
-#endif
-    if (rp == NULL) {
-        printf("get addrinfo connect failed\n");
-        tcp_addrinfo_count--;
-        return NULL;
-    }
-    int ret = pthread_kill(conn.iMainThread, 0);
-    if (ret == ESRCH) {
-    } else {
-        oconn->iSuccess = 1;
-        oconn->sockFD = conn.sockFD;
-        printf("thread getaddrinfo success\n");
-    }
-    tcp_addrinfo_count--;
-    printf("---------------------- thread done\n");
-    return NULL;
-}
-
 int cm_conn_tcp_create_new(CMConnTCP *conn, const char *addr, int port)
 {
     if (*conn != NULL || !addr || port <= 0 || port > 65535) return -1;
@@ -164,8 +81,10 @@ int cm_conn_tcp_create_new(CMConnTCP *conn, const char *addr, int port)
 
     sprintf(inConn->addr, "%s", addr);
     inConn->port = port;
+
     char strport[16] = {0};
     sprintf(strport, "%d", inConn->port);
+
     struct addrinfo hints;
     struct addrinfo *results, *rp;
 
@@ -179,12 +98,12 @@ int cm_conn_tcp_create_new(CMConnTCP *conn, const char *addr, int port)
     if (n != 0) {
 //        cmerror("Error get addrinfo [%d] [%s]\n", n, gai_strerror(n));
         cm_mem_free(inConn);
-        return -3;
+        return -2;
     }
 
     for (rp = results; rp != NULL; rp = rp->ai_next) {
         inConn->sockFD = socket(rp->ai_family, rp->ai_socktype,
-                              rp->ai_protocol);
+                rp->ai_protocol);
         if (inConn->sockFD == -1)
             continue;
 //        fcntl(inConn->sockFD, F_SETFL, O_NONBLOCK);
@@ -196,77 +115,7 @@ int cm_conn_tcp_create_new(CMConnTCP *conn, const char *addr, int port)
     if (rp == NULL) {
 //        cmerror("Failed connect to any address\n");
         cm_mem_free(inConn);
-        return -4;
-    }
-
-    if (conn) *conn = inConn;
-    return 0;
-}
-
-void *cm_conn_tcp_create_thread_wait(void *args)
-{
-    CMConnTCP conn = (CMConnTCP)args;
-
-    pthread_t ithread = 0;
-    int ret = pthread_create(&ithread, NULL, cm_conn_tcp_create_thread, conn);
-    if (ret < 0) {
-        cm_mem_free(conn);
-        return NULL;
-    }
-    tcp_addrinfo_count ++;
-    pthread_detach(ithread);
-    printf("[%p] thread wait for timeout [%d]\n", conn, conn->iTimeout);
-
-    int count = 0;
-    int btimeout = 1;
-    while (count++ < 20 * conn->iTimeout) {
-        ret = pthread_kill(ithread, 0);
-        if (ret == 0) {
-            usleep(50000);
-        } else if (ret == ESRCH) {
-            btimeout = 0;
-            break;
-        } else {
-            usleep(50000);
-        }
-    }
-    if (btimeout) {
-        conn->iMainTimeout = 1;
-    }
-    printf("[%p] thread wait exit with timeout [%d]\n", conn, btimeout);
-    return NULL;
-}
-
-int cm_conn_tcp_create_new_timeout(CMConnTCP *conn, const char *addr, int port, int timeout)
-{
-    if (*conn != NULL || !addr || port <= 0 || port > 65535) return -1;
-    if (tcp_addrinfo_count > 50) return -23;
-
-    CMConnTCP inConn = (CMConnTCP)cm_mem_malloc(sizeof(struct tagCMConnTCP));
-    if (!inConn) return -2;
-    inConn->iSuccess = 0;
-    inConn->iTimeout = timeout;
-    inConn->iMainTimeout = 0;
-    printf("[%p] create wait thread timeout original [%d] thread count[%d]\n", inConn, inConn->iTimeout, tcp_addrinfo_count);
-
-    sprintf(inConn->addr, "%s", addr);
-    inConn->port = port;
-
-    int ret = pthread_create(&inConn->iMainThread, NULL, cm_conn_tcp_create_thread_wait, inConn);
-    if (ret < 0) {
-        cm_mem_free(inConn);
         return -3;
-    }
-//    pthread_detach(inConn->iMainThread);
-    pthread_join(inConn->iMainThread, NULL);
-    printf("[%p] create thread exit timeout [%d], success [%d] \n", inConn, inConn->iMainTimeout, inConn->iSuccess);
-    if (inConn->iMainTimeout == 1) {
-        cm_mem_free(inConn);
-        return -4;
-    }
-    if (!inConn->iSuccess) {
-        cm_mem_free(inConn);
-        return -5;
     }
 
     if (conn) *conn = inConn;
