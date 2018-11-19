@@ -119,6 +119,9 @@ hi3518:
 hi3535:
 	@$(ECHO) "OS=hi3535" > config.mk
 
+rk3308:
+	@$(ECHO) "OS=rk3308" > config.mk
+
 mips:
 	@$(ECHO) "OS=mips" > config.mk
 
