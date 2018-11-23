@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
+#include "cm_logprint.h"
+
+CMLogPrint logPrint;
 
 int thread_exit = 0;
 

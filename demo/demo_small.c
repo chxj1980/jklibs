@@ -4,7 +4,10 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include <malloc.h>
+#include <malloc.h>
+#include "cm_logprint.h"
+
+CMLogPrint logPrint;
 
 void TestLongConvert() {
     struct tagNormal {

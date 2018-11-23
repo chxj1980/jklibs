@@ -1,6 +1,6 @@
 ############
 ### this file place the variable of will be change many times
-### author: yuwei.zhang@besovideo.com
+### author: jmdvirus@aliyun.com
 ##########
 
 #BASEDIR=`pwd`
@@ -41,6 +41,10 @@ ifeq ("$(RECORDSERVER)", "")
 RECORDSTREAM=n
 endif
 
+ifeq ("$(USE_LIBCURL)", "y")
+	CFLAGS += -DUSE_LIBCURL
+endif
+
 ECHO=echo -e
 
 VERSION=0.0.1
@@ -72,11 +76,6 @@ endif
 ### Constant args
 CFLAGS += $(DEBUG_OP) -fPIC -Wall
 CFLAGS += -Wno-unused-variable -Wno-unused-function -Wno-switch
-
-## the path when you use out lib
-## base position of libs
-LIBFLAGS+=-L$(HOME)/libs/opensource/$(OS)/lib
-LIBFLAGS+=-L$(HOME)/libs/bvlib/$(OS)/lib
 
 ## module function
 ifneq ($(OS), amd64)
@@ -123,16 +122,16 @@ CFLAGS += -I/opt/data/libs/$(OS)/include
 LINKPATH += -L/opt/data/libs/$(OS)/lib -lx265
 endif
 
-Q=@
+Q=
 
-ifeq (x$(V), xs)
-	Q=
+ifeq (x$(V), xn)
+	Q=@
 endif
 
 ## We allowed to compile.
 ## it will convert to filedirs-y instream the enviroument value.
 ## It will be converted to filedirs-n and other not -y if we don't want to compile it.
-filedirs-$(BVBASE) = common commonex
+filedirs-$(BVBASE) = common
 filedirs-$(VDEV) += vdev
 filedirs-$(KFMD5) += kfmd5
 filedirs-$(CODEC) += codec

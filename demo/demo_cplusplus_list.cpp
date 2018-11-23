@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string>
+#include "cm_logprint.h"
+CMLogPrint logPrint;
 
 typedef struct {
     int       iParam;
@@ -134,6 +136,7 @@ void TBase::output() {
 
 int TBase::test_args(int i, int j, bool value) {
     printf("-------- ok : %d, %d\n", i,j );
+	return 0;
 }
 
 TBase **gbase;
@@ -149,6 +152,7 @@ void *base_test(void *arges)
     sleep(4);
     printf("gbase %p\n", gbase);
     (*gbase)->output();
+	return NULL;
 }
 
 int main() {

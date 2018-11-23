@@ -12,6 +12,8 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include "cm_unixsocket.h"
+#include "cm_logprint.h"
+CMLogPrint logPrint;
 
 int main() {
 	unlink("/tmp/demo_ux");
@@ -22,9 +24,9 @@ int main() {
 		return -1;
 	}
 	fd_set fd_read;
-	struct timeval tv;
-	tv.tv_usec = 100000;
-	tv.tv_sec = 0;
+	//struct timeval tv;
+	//tv.tv_usec = 100000;
+	//tv.tv_sec = 0;
 	//cm_unixsocket_server_nonblock(h, 0);
 	while (1) {
 		printf("Start accept\n");

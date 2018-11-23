@@ -13,6 +13,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "cm_unixsocket.h"
+#include "cm_logprint.h"
+CMLogPrint logPrint;
 
 int main() {
     CMUnixSocketClientHandle h;

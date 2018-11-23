@@ -5,7 +5,9 @@
 #include <stdio.h>
 #include <malloc.h>
 
-#include "rt_print.h"
+#include "cm_print.h"
+
+CMLogPrint logPrint;
 
 char *base_demo_func_return()
 {
@@ -15,7 +17,7 @@ char *base_demo_func_return()
 
 int base_demo_size_func(char p1[100])
 {
-    printf("func sizeof(char p1) = %ld\n", sizeof(p1));
+    printf("func sizeof(char p1) = %ld\n", sizeof(*p1));
     return 0;
 }
 
