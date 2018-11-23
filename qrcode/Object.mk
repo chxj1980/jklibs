@@ -6,7 +6,7 @@ CFLAGS+= -I. -I../common -DHAVE_CONFIG_H=1
 
 LINKPATH += $(STATICLIBS)
 
-obj-y += bitstream.o  mask.o  mmask.o  mqrspec.o qrencode.o  qrinput.o  qrspec.o  rsecc.o  split.o
+obj-qrcode-$(QRCODE) += bitstream.o  mask.o  mmask.o  mqrspec.o qrencode.o  qrinput.o  qrspec.o  rsecc.o  split.o
 
-obj-demo-y += demo_qrcode qrenc
+obj-qrcode-demo-$(QRCODE) += demo_qrcode qrenc
 

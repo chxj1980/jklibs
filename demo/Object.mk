@@ -1,9 +1,9 @@
 
 #USECC=gcc
 
-DEMO_CFLAGS+=-I../common
+DEMO_CFLAGS+=-Icommon
 
-obj-dep-y=../common/$(OBJDIR)/build-in.o
+obj-dep-y=common/jk_bytes.o
 
 obj-demo-y = demo_small.c demo_jkbytes.c base_demo.c
 obj-demo-y += demo_thread.c

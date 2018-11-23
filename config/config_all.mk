@@ -78,10 +78,6 @@ CFLAGS += $(DEBUG_OP) -fPIC -Wall
 CFLAGS += -Wno-unused-variable -Wno-unused-function -Wno-switch
 
 ## module function
-ifneq ($(OS), amd64)
-PJFLAGS += -DPJ_IS_LITTLE_ENDIAN=0 -DPJ_IS_BIG_ENDIAN=1
-endif
-
 ifeq ($(GCC_HIGH), yes) 
 endif
 
@@ -89,7 +85,7 @@ ifeq ($(BVZLOG), no)
 CFLAGS += -DUNUSE_ZLOG
 endif
 
-LINKPATH+=-lpthread
+LDFLAGS+=-lpthread
 
 ifeq ($(JK_HISI), yes)
 LINKPATH += -lmpi -lhiaudio

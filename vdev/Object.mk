@@ -1,9 +1,11 @@
 
 USECC=gcc
 
+DEMO_CFLAGS += -Icommon
+
 obj-dep-$(VDEV)=../common/$(OBJDIR)/build-in.o
 
-obj-$(VDEV)=vdev.o operation.o
+obj-vdev-$(VDEV)=vdev.o operation.o
 
-obj-demo-$(VDEV) = demo.c
+obj-vdev-demo-$(VDEV) = demo.c
 

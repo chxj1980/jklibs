@@ -7,6 +7,7 @@
 #include <malloc.h>
 #include "cm_logprint.h"
 
+
 CMLogPrint logPrint;
 
 void TestLongConvert() {

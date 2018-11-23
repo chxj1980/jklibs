@@ -7,17 +7,108 @@ SHELL=/bin/bash
 
 BASEDIR=$(shell pwd)
 
+ECHO="echo -e"
+
 include include.mk
 
 sinclude config/config_all.mk
 
+include common/Object.mk
+obj-y += $(obj-cm-y:%=common/%)
 
-## this is defined in config/config_all.mk
-#filedirs-y=common disk stream
-.PHONY: $(filedirs-y)
+predirs += common/libconfig common/json common/crypto
+ifeq ("$(CMEX)", "y")
+predirs += common/ex
+ifeq ("$(CMEXJSON)", "y")
+predirs += common/ex/json/json
+endif
 
+obj-cpp-y += $(obj-cm-cpp-y:%=common/%)
 
-all: generate_config createdir filesbuild dep-before static dyn
+endif
+
+ifeq ("$(DEMO)", "y")
+	include demo/Object.mk
+	DEMOOBJS_y = $(obj-demo-y:%=demo/%)
+	CPPDEMOOBJS_y = $(obj-demo-cpp-y:%=demo/%)
+	predirs += demo
+endif
+
+ifeq ("$(VDEV)", "y")
+	include vdev/Object.mk
+	obj-y += $(obj-vdev-y:%=vdev/%)
+	DEMOOBJS_y += $(obj-vdev-demo-y:%=vdev/%)
+	predirs += vdev
+endif
+
+ifeq ("$(CODEC)", "y")
+	include codec/Object.mk
+	obj-y += $(obj-codec-y:%=codec/%)
+	DEMOOBJS_y += $(obj-codec-demo-y:%=codec/%)
+	predirs += codec
+endif
+
+ifeq ("$(QRCODE)", "y")
+	include qrcode/Object.mk
+	obj-y += $(obj-qrcode-y:%=qrcode/%)
+	DEMOOBJS_y += $(obj-qrcode-demo-y:%=qrcode/%)
+	predirs += qrcode
+endif
+
+ifeq ("$(RECORDSERVER)", "y")
+	include recordserver/Object.mk
+	obj-y += $(obj-recordserver-y:%=recordserver/%)
+	DEMOOBJS_y += $(obj-recordserver-demo-y:%=recordserver/%)
+	predirs += recordserver
+endif
+
+ifeq (x$(JKPROTOCOL), xy)
+	include jkprotocol/Object.mk
+	obj-y += $(obj-jkprotocol-y:%=jkprotocol/%)
+	DEMOOBJS_y += $(obj-jkprotocol-y:%=jkprotocol/%)
+	predirs += jkprotocol
+endif
+
+ifeq (x$(OPENAV), xy)
+	include openav/Object.mk
+	obj-y += $(obj-openav-y:%=openav/%)
+	DEMOOBJS_y += $(obj-openav-y:%=openav/%)
+	predirs += openav
+endif
+
+ifeq (x$(PROTOCOL), xy)
+	include protocol/Object.mk
+	obj-y += $(obj-protocol-y:%=protocol/%)
+	DEMOOBJS_y += $(obj-protocol-y:%=protocol/%)
+	predirs += protocol
+endif
+
+DEPS = $(obj-dep-y:%=$(OBJDIR)/%)
+DEMOOBJS = $(patsubst %.c,%,$(DEMOOBJS_y))
+CPPDEMOOBJS = $(patsubst %.cpp,%,$(CPPDEMOOBJS_y))
+DEMOS = $(patsubst %.c,%-$(OS),$(DEMOOBJS_y))
+CPPDEMOS = $(patsubst %.cpp,%-$(OS),$(CPPDEMOOBJS_y))
+
+OBJS = $(obj-y:%=$(OBJDIR)/%)
+CPPOBJS = $(obj-cpp-y:%=$(OBJDIR)/%)
+
+all: generate_config createdir $(OBJS) $(CPPOBJS) static dyn $(DEMOOBJS) $(CPPDEMOOBJS)
+
+$(OBJS):$(OBJDIR)/%.o:%.c
+	@$(ECHO) "\t $(CC) \t $^"
+	$(Q) $(CC) -o $@ -c $^ $(CFLAGS)
+
+$(CPPOBJS):$(OBJDIR)/%.o:%.cpp
+	@$(ECHO) "\t $(CXX) \t $^"
+	$(Q) $(CXX) -o $@ -c $^ $(CXXFLAGS)
+
+$(DEMOOBJS):%:%.c
+	@$(ECHO) "\t $(CC) \t $^"
+	$(Q) $(CC) -o $@-$(OS) $^ $(OBJS) $(DEMO_CFLAGS) $(LDFLAGS)
+
+$(CPPDEMOOBJS):%:%.cpp
+	@$(ECHO) "\t $(CXX) \t $^"
+	$(Q) $(CXX) -o $@-$(OS) $^ $(OBJS) $(CPPOBJS) $(CFLAGS) $(LDFLAGS)
 
 generate_config:
 	@ [ -f $(CONFIG_FILE) ] && rm -rf $(CONFIG_FILE); \
@@ -27,39 +118,15 @@ generate_config:
 		echo "# generated git version" >> $(CONFIG_FILE); \
 		echo "#define BUILD_GIT_VERSION $$BUILD_GIT_VERSION" >> $(CONFIG_FILE)
 
-filesbuild:
-	@for i in $(filedirs-y) $(filedirs-d-y); do \
-		$(ECHO) "\n\t Build $$i\n"; \
-		cd $$i; make; cd ..;\
-	done
-
-## check build-in files before make static and dyn
-dep-before:
-	@for i in $(buildin-files); do   \
-		fname=$$i ;   \
-		ffname=${fname%%/*} ; \
-		if [[ ! -f $$i ]] && [[ $$ffname != "demo" ]] ; then   \
-			$(ECHO) "\n\t[ $$i ] not exist, warning!\n";   \
-		fi;    \
-	done
-
-
 static:
 	@$(ECHO) " \t Generate \t $(STATIC_JKLIB)"
-	$(Q) $(AR) -r -o $(LIBDIR_PATH)/$(STATIC_JKLIB) $(buildin-files)
+	$(Q) $(AR) -r -o $(LIBDIR_PATH)/$(STATIC_JKLIB) $(OBJS) $(CPPOBJS)
 	$(Q) ln -sf $(LIBDIR_PATH)/$(STATIC_JKLIB) $(LIBDIR_PATH)/$(LINKSTATICJK)
 
 dyn:
 	@$(ECHO) " \t Generate \t $(DYNJKLIB)"
-	$(Q) $(CC) -fPIC -shared -o $(LIBDIR_PATH)/$(DYNJKLIB) $(buildin-files)
+	$(Q) $(CC) -fPIC -shared -o $(LIBDIR_PATH)/$(DYNJKLIB) $(OBJS)
 	$(Q) ln -sf $(LIBDIR_PATH)/$(DYNJKLIB) $(LIBDIR_PATH)/$(LINKJK)
-
-dep:
-	@if [ ! -d $(HOME)/libs ]; then   \
-	 $(ECHO) "No $(HOME)/libs directory, please svn co http://192.168.6.16/svn/application/binary/libs ${HOME}/libs";   \
-	 exit 1;   \
-	 fi
-
 
 createdir:
 	@if [ ! -f config.mk ]; then   \
@@ -67,27 +134,20 @@ createdir:
 		$(ECHO) "    make x86/hi3515/dm365/hi3535";  \
 		exit 1; \
 	fi
-	@mkdir -p $(INSTALL_DIRS)/lib
+	mkdir -p $(INSTALL_DIRS)/lib
+	$(foreach d,$(predirs),$(shell mkdir -p $(OBJDIR)/$(d)))
 
 install:
-	@for i in $(filedirs-y) ; do \
-		$(ECHO) "\n\t Install $$i\n"; \
-		cd $$i; make install; cd ..;\
-	done
 	@$(ECHO) "\t cp $(INSTALL_HEADERS) $(INSTALL_DIRS)/include/"
 	$(Q) cp -vrf $(INSTALL_HEADERS) $(INSTALL_DIRS)/include/
 	$(Q) cp -rvf $(INSTALL_LIBS) $(INSTALL_DIRS)/lib/
 
 clean:
-	@for i in $(filedirs-y) $(filedirs-d-y); do   \
-		echo ""; \
-		cd $$i; make clean; cd ..;   \
-		echo ""; \
-	done
+	rm -rf $(OBJS) $(CPPOBJS) $(DEMOS) $(CPPDEMOS)
 	rm outlib/$(OS)/lib/* -rf
 
 distclean: clean
-	$(Q)rm -rf `find . -name ".obj*"`
+	$(Q)rm -rf $(OBJDIR)
 
 help:
 	@$(ECHO) "\t make x86/dm6446/dm365/hi3515/hi3518/hi3535"
