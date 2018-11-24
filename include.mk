@@ -9,8 +9,9 @@ export CMFLASH=y
 export CMUART=y
 export NGXMD5=y
 export KFOPENSSL_AES=y
+export LLHTTP=y
 export CMEX=y
-export CMEXJSON=y
+export CMEXJSON=n
 
 export USE_LIBCURL=n
 #export CFLAGS += -Ixxxlibcurl include path

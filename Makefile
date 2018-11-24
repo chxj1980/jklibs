@@ -16,6 +16,10 @@ sinclude config/config_all.mk
 include common/Object.mk
 obj-y += $(obj-cm-y:%=common/%)
 
+CFLAGS += $(CFLAGS-y)
+LDFLAGS += $(LDFLAGS-y)
+
+predirs += $(predirs-y:%=common/%)
 predirs += common/libconfig common/json common/crypto
 ifeq ("$(CMEX)", "y")
 predirs += common/ex
