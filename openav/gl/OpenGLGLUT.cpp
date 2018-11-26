@@ -5,8 +5,23 @@ static FILE *m_file = NULL;
 static unsigned char *buf = NULL;
 static int s_width = 0;
 static int s_height = 0;
+// static char *format = "yuv420p";
+static char *format = "yuv422";
+static int loop = 0;
 
 static OpenGLBase *base_;
+
+int get_size(const char *format)
+{
+	if (strcmp(format, "yuv420p") == 0) {
+		return s_width * s_height * 3 / 2;
+	} else if (strcmp(format, "yuv422") == 0) {
+		return s_width * s_height * 2;
+	} else if (strcmp(format, "yuv444") == 0) {
+		return s_width * s_height * 3;
+	}
+	return 0;
+}
 
 OpenGLGLUT::OpenGLGLUT(int width, int height)
 {
@@ -14,7 +29,8 @@ OpenGLGLUT::OpenGLGLUT(int width, int height)
 	base_ = this;
 	s_width = width;
 	s_height = height;
-	buf = new unsigned char[s_width*s_height* 3 / 2];
+	int size = get_size(format);
+	buf = new unsigned char[size];
 }
 
 OpenGLGLUT::~OpenGLGLUT()
@@ -28,12 +44,13 @@ OpenGLGLUT::~OpenGLGLUT()
 void OpenGLGLUT::display(void)
 {
 	if (!m_file) return;
-	if (fread(buf, 1, s_width*s_height * 3 / 2, m_file) != s_width*s_height * 3 / 2) {
+	int size = get_size(format);
+	if (fread(buf, 1, size, m_file) != size && loop == 1) {
 		// Loop
 		fseek(m_file, 0, SEEK_SET);
-		fread(buf, 1, s_width*s_height * 3 / 2, m_file);
+		fread(buf, 1, size, m_file);
 	}
-	base_->play(buf, s_width, s_height);
+	base_->play(buf, s_width, s_height, format);
 }
 
 void OpenGLGLUT::timeFunc(int value)
@@ -54,8 +71,6 @@ int OpenGLGLUT::create_window(int width, int height)
 	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(width, height);
 	glutCreateWindow("Simplest Video Play OpenGL");
-	printf("Lei Xiaohua\n");
-	printf("http://blog.csdn.net/leixiaohua1020\n");
 	printf("Version: %s\n", glGetString(GL_VERSION));
 	GLenum l = glewInit();
 

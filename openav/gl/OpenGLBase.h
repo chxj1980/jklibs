@@ -51,7 +51,7 @@ public:
 	OpenGLBase();
 	virtual ~OpenGLBase();
 
-	void play(unsigned char *data, int width, int height);
+	void play(unsigned char *data, int width, int height, const char *format);
 
 protected:
 	int init();

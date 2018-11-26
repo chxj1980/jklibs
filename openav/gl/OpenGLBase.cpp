@@ -8,7 +8,7 @@
 //Select one of the Texture mode (Set '1'):
 #define TEXTURE_DEFAULT   1
 //Rotate the texture
-#define TEXTURE_ROTATE    1
+#define TEXTURE_ROTATE    0
 //Show half of the Texture
 #define TEXTURE_HALF      0
 
@@ -143,12 +143,22 @@ int OpenGLBase::init()
 }
 
 
-void OpenGLBase::play(unsigned char* data, int width, int height)
+void OpenGLBase::play(unsigned char* data, int width, int height, const char *format)
 {
 	//YUV Data
 	plane[0] = (unsigned char*)data;
 	plane[1] = plane[0] + width*height;
-	plane[2] = plane[1] + width*height / 4;
+	int uvx = width / 2;
+	int uvy = height / 2;
+	if (strcmp(format, "yuv420p") == 0) {
+		plane[2] = plane[1] + width*height / 4;
+	} else if (strcmp(format, "yuv422") == 0) {
+		plane[2] = plane[1] + width*height / 2;
+	} else if (strcmp(format, "yuv444") == 0) {
+		plane[2] = plane[1] + width*height;
+	} else {
+		return ;
+	}
 
 	//Clear
 	glClearColor(0.0, 255, 0.0, 0.0);
