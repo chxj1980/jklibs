@@ -19,9 +19,10 @@ export USE_LIBCURL=n
 
 export DISK=n
 export CODEC=n
-export VDEV=y
+export VDEV=n
 export BVSTREAM=n
-export DEMO=y
+export DEMO=n
 export RECORDSERVER=n
-export OPENAV=n
+export OPENAV=y
+export OPENGL=y
 export QRCODE=n

@@ -6,3 +6,9 @@ Debug/
 ipch
 *.o
 config.mk
+.vscode
+*_demo*
+*demo_*
+*demo-*
+outlib
+include.mk

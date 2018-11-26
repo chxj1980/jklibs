@@ -33,5 +33,5 @@ obj-openav-$(OPENGLQT) += \
 	gl/OpenGLQtWidget.o
 
 obj-openav-demo-$(OPENGL) += \
-	gl/main.cpp
+	gl/demo.cpp
 
