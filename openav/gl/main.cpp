@@ -62,6 +62,8 @@
 
 
 #include "OpenGLGLUT.h"
+#include "cm_logprint.h"
+CMLogPrint logPrint;
 
 #include "map"
 #ifdef __OPENGL_QT

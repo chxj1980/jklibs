@@ -75,9 +75,12 @@ endif
 
 ifeq (x$(OPENAV), xy)
 	include openav/Object.mk
-	obj-y += $(obj-openav-y:%=openav/%)
-	DEMOOBJS_y += $(obj-openav-y:%=openav/%)
+	obj-cpp-y += $(obj-openav-y:%=openav/%)
+	CPPDEMOOBJS_y += $(obj-openav-demo-y:%=openav/%)
 	predirs += openav
+ifeq (x$(OPENGL), xy)
+	predirs += openav/gl
+endif
 endif
 
 ifeq (x$(PROTOCOL), xy)

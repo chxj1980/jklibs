@@ -25,7 +25,7 @@
 #pragma comment(lib, "OpenGL32.lib")
 #endif
 #else
-#include <unisted.h>
+#include <unistd.h>
 #define sys_sleep(x)   usleep(x*1000);
 #endif
 
@@ -34,8 +34,8 @@
 #include <GL/glew.h>
 #include <glut.h>
 #else
-#include "glew.h"
-#include "glut.h"
+#include "GL/glew.h"
+#include "GL/glut.h"
 #endif
 
 #include <stdio.h>
