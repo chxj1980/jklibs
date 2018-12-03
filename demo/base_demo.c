@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 #include <malloc.h>
+#include <errno.h>
+#include <string.h>
 
 #include "cm_print.h"
 
@@ -78,7 +80,14 @@ int base_demo_shit_length()
     return 0;
 }
 
-int main() {
+int main(int argc, char **argv) {
+
+	if (argc > 1) {
+		char *a = argv[1];
+		int e = atoi(a);
+		printf("strerror(%d) = %s\n", e, strerror(e));
+	}
+
     base_demo_size();
     base_demo_size_o();
 

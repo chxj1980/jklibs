@@ -39,7 +39,7 @@ int OpenGLBase::init()
 	GLint vertCompiled, fragCompiled, linked;
 
 	GLint v, f;
-	const char *vs, *fs;
+	char *vs, *fs;
 
 	//Shader: step1
 	v = glCreateShader(GL_VERTEX_SHADER);
@@ -72,6 +72,15 @@ int OpenGLBase::init()
 	//Program: Step4
 	glUseProgram(p);
 
+	// we can free them when link done.
+	if (vs) {
+		free(vs);
+	}
+	if (fs) {
+		free(fs);
+	}
+	glDeleteShader(v);
+	glDeleteShader(f);
 
 	//Get Uniform Variables Location
 	textureUniformY = glGetUniformLocation(p, "tex_y");
