@@ -22,15 +22,20 @@ obj-openav-demo-$(OPENCV) += face_detect.cpp
 
 CFLAGS-$(OPENGL) += -Iopenav/gl
 CFLAGS-$(OPENGLQT) += -D__OPENGL_QT
-LDFLAGS-$(OPENGL) += -lGL -lGLEW -lglut
+CFLAGS-$(OPENGLUT) += -D__OPENGL_GLUT
+LDFLAGS-$(OPENGL) += -lGL -lGLEW -lglfw
+LDFLAGS-$(OPENGLUT) += -lglut
 
 obj-openav-$(OPENGL) += \
-	gl/OpenGLGLUT.o \
-	gl/OpenGLBase.o
+	gl/OpenGLBase.o \
+	gl/glbase.o
 
 obj-openav-$(OPENGLQT) += \
 	gl/OpenGLQt.o \
 	gl/OpenGLQtWidget.o
+
+obj-openav-$(OPENGLUT) += \
+	gl/OpenGLGLUT.o
 
 obj-openav-demo-$(OPENGL) += \
 	gl/demo.cpp

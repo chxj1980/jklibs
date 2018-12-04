@@ -196,7 +196,9 @@ void OpenGLBase::play(unsigned char* data, int width, int height, const char *fo
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	// Show
 	//Double
+#ifdef __OPENGL_GLUT
 	glutSwapBuffers();
+#endif
 	//Single
 	//glFlush();
 }

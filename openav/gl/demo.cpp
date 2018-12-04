@@ -69,6 +69,8 @@ CMLogPrint logPrint;
 #ifdef __OPENGL_QT
 #include "OpenGLQt.h"
 #endif
+
+#include "glbase.h"
 std::map<std::string, std::string> cfg_data;
 
 int read_config(const char *file, std::map<std::string, std::string> &data)
@@ -137,15 +139,20 @@ int main(int argc, char* argv[])
 		LOG("Usage: %s config_file\n", argv[0]);
 		return 1;
 	}
+	CM_LOG_PRINT_INIT("opengl");
 
+	cmdebug("config file is [%s]\n", argv[1]);
 	read_config(argv[1], cfg_data);
 	const char *cmd = cfg_data["cmd"].c_str();
+	cminfo("cmd = %s\n", cmd);
 
 	if (strcmp(cmd, "glut") == 0)
 	{
+#ifdef __OPENGL_GLUT
 		OpenGLGLUT *base = new OpenGLGLUT(atoi(cfg_data["yuv_width"].c_str()), atoi(cfg_data["yuv_height"].c_str()));
 		base->create_window(atoi(cfg_data["w_width"].c_str()), atoi(cfg_data["w_height"].c_str()));
 		base->read_file_start(cfg_data["yuv_file"].c_str());
+#endif
 	}
 	else if (strcmp(cmd, "qt") == 0)
 	{
@@ -154,6 +161,28 @@ int main(int argc, char* argv[])
 		base->create_window(atoi(cfg_data["w_width"].c_str()), atoi(cfg_data["w_height"].c_str()));
 		base->read_file_start(cfg_data["yuv_file"].c_str());
 #endif
+	} else if (strcmp(cmd, "base") == 0) {
+		CMGLBase b;
+		int ret = cm_gl_base_init(&b);
+		if (ret < 0) {
+			cmerror("init failed [%d]\n", ret);
+			return 125;
+		}
+		cm_gl_base_source_file(&b, "openav/gl/v.vsh", "openav/gl/f.fsh");
+
+		cm_gl_base_window(&b, atoi(cfg_data["w_width"].c_str()), atoi(cfg_data["w_height"].c_str()));
+
+		cm_gl_base_draw_init(&b);
+
+		while(1) {
+		    ret = cm_gl_base_run(&b);
+			if (ret < 0) break;
+			usleep(40000);
+		}
+
+		cm_gl_base_window_close(&b);
+
+		cm_gl_base_deinit(&b);
 	}
 
 	getchar();
