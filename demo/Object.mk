@@ -12,3 +12,7 @@ obj-demo-y += demo_unix_server.c demo_unix_client.c
 obj-demo-cpp-y += demo_cplusplus_list.cpp
 obj-demo-$(LLHTTP) += demo_llhttp.c
 
+DEMO_CFLAGS-$(CMMISC) +=\
+	-Icommon/misc
+obj-demo-$(CMMISC) += demo_debug_out.c
+

@@ -7,6 +7,7 @@
  *********************************************************/
 
 #include <stdio.h>
+#include <string.h>
 
 #include "llhttp.h"
 #include "cm_logprint.h"

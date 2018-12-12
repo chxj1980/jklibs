@@ -1,7 +1,7 @@
-export LIBCONFIG=y
+export LIBCONFIG=n
 export CMCONF=y
 export BASE64=y
-export LIBJSON=y
+export LIBJSON=n
 export KFCRYPTO=y
 export CMAPPS=y
 export CMNET=y
@@ -12,6 +12,8 @@ export KFOPENSSL_AES=y
 export LLHTTP=y
 export CMEX=y
 export CMEXJSON=n
+export JANSSON=y
+export CMMISC=y
 
 export USE_LIBCURL=n
 #export CFLAGS += -Ixxxlibcurl include path

@@ -35,6 +35,7 @@ ifeq ("$(DEMO)", "y")
 	include demo/Object.mk
 	DEMOOBJS_y = $(obj-demo-y:%=demo/%)
 	CPPDEMOOBJS_y = $(obj-demo-cpp-y:%=demo/%)
+	DEMO_CFLAGS += $(DEMO_CFLAGS-y)
 	predirs += demo
 endif
 
