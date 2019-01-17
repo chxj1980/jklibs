@@ -10,116 +10,66 @@ BASEDIR=$(shell pwd)
 ECHO="echo -e"
 
 include include.mk
-
 sinclude config/config_all.mk
 
-include common/Object.mk
-obj-y += $(obj-cm-y:%=common/%)
-
-predirs += $(predirs-y:%=common/%)
-predirs += common/libconfig common/json common/crypto
-ifeq ("$(CMEX)", "y")
-predirs += common/ex
-ifeq ("$(CMEXJSON)", "y")
-predirs += common/ex/json/json
-endif
-
-obj-cpp-y += $(obj-cm-cpp-y:%=common/%)
-
-endif
+file-dirs += common
+OBJS += common/$(OBJDIR)/build-in.o
 
 ifeq ("$(DEMO)", "y")
-	include demo/Object.mk
-	DEMOOBJS_y = $(obj-demo-y:%=demo/%)
-	CPPDEMOOBJS_y = $(obj-demo-cpp-y:%=demo/%)
-	DEMO_CFLAGS += $(DEMO_CFLAGS-y)
-	predirs += demo
+	file-dirs += demo
 endif
 
 ifeq ("$(VDEV)", "y")
-	include vdev/Object.mk
-	obj-y += $(obj-vdev-y:%=vdev/%)
-	DEMOOBJS_y += $(obj-vdev-demo-y:%=vdev/%)
-	predirs += vdev
+	file-dirs += vdev
+	OBJS += vdev/$(OBJDIR)/build-in.o
 endif
 
 ifeq ("$(CODEC)", "y")
-	include codec/Object.mk
-	obj-y += $(obj-codec-y:%=codec/%)
-	DEMOOBJS_y += $(obj-codec-demo-y:%=codec/%)
-	predirs += codec
+	file-dirs += codec
+	OBJS += codec/$(OBJDIR)/build-in.o
 endif
 
 ifeq ("$(QRCODE)", "y")
-	include qrcode/Object.mk
-	obj-y += $(obj-qrcode-y:%=qrcode/%)
-	DEMOOBJS_y += $(obj-qrcode-demo-y:%=qrcode/%)
-	predirs += qrcode
+	file-dirs += qrcodec
+	OBJS += qrcode/$(OBJDIR)/build-in.o
 endif
 
 ifeq ("$(RECORDSERVER)", "y")
-	include recordserver/Object.mk
-	obj-y += $(obj-recordserver-y:%=recordserver/%)
-	DEMOOBJS_y += $(obj-recordserver-demo-y:%=recordserver/%)
-	predirs += recordserver
+	file-dirs += recordserver
+	OBJS += recordserver/$(OBJDIR)/build-in.o
 endif
 
 ifeq (x$(JKPROTOCOL), xy)
-	include jkprotocol/Object.mk
-	obj-y += $(obj-jkprotocol-y:%=jkprotocol/%)
-	DEMOOBJS_y += $(obj-jkprotocol-y:%=jkprotocol/%)
-	predirs += jkprotocol
+	file-dirs += jkprotocol
+	OBJS += jkprotocol/$(OBJDIR)/build-in.o
 endif
 
 ifeq (x$(OPENAV), xy)
-	include openav/Object.mk
-	obj-cpp-y += $(obj-openav-y:%=openav/%)
-	CPPDEMOOBJS_y += $(obj-openav-demo-y:%=openav/%)
-	predirs += openav
-ifeq (x$(OPENGL), xy)
-	predirs += openav/gl
-endif
+	file-dirs += openav
+	OBJS += openav/$(OBJDIR)/build-in.o
 endif
 
 ifeq (x$(PROTOCOL), xy)
-	include protocol/Object.mk
-	obj-y += $(obj-protocol-y:%=protocol/%)
-	DEMOOBJS_y += $(obj-protocol-y:%=protocol/%)
-	predirs += protocol
+	file-dirs += protocol
+	OBJS += protocol/$(OBJDIR)/build-in.o
 endif
 
-CFLAGS += $(CFLAGS-y)
-CXXFLAGS += $(CXXFLAGS-y)
-LDFLAGS += $(LDFLAGS-y)
+all: generate_config dirs static dyn
 
-DEPS = $(obj-dep-y:%=$(OBJDIR)/%)
-DEMOOBJS = $(patsubst %.c,%,$(DEMOOBJS_y))
-CPPDEMOOBJS = $(patsubst %.cpp,%,$(CPPDEMOOBJS_y))
-DEMOS = $(patsubst %.c,%-$(OS),$(DEMOOBJS_y))
-CPPDEMOS = $(patsubst %.cpp,%-$(OS),$(CPPDEMOOBJS_y))
-
-OBJS = $(obj-y:%=$(OBJDIR)/%)
-CPPOBJS = $(obj-cpp-y:%=$(OBJDIR)/%)
-
-all: generate_config createdir $(OBJS) $(CPPOBJS) static dyn $(DEMOOBJS) $(CPPDEMOOBJS)
-
-$(OBJS):$(OBJDIR)/%.o:%.c
-	@$(ECHO) "\t $(CC) \t $^"
-	$(Q) $(CC) -o $@ -c $^ $(CFLAGS)
-
-$(CPPOBJS):$(OBJDIR)/%.o:%.cpp
-	@$(ECHO) "\t $(CXX) \t $^"
-	$(Q) $(CXX) -o $@ -c $^ $(CXXFLAGS)
-
-$(DEMOOBJS):%:%.c
-	@$(ECHO) "\t $(CC) \t $^"
-	$(Q) $(CC) -o $@-$(OS) $^ $(OBJS) $(DEMO_CFLAGS) $(LDFLAGS)
-
-$(CPPDEMOOBJS):%:%.cpp
-	@$(ECHO) "\t $(CXX) \t $^"
-	$(Q) $(CXX) -o $@-$(OS) $^ $(OBJS) $(CPPOBJS) $(CFLAGS) $(CXXFLAGS) $(LDFLAGS)
+dirs:
+	@$(ECHO) "All to Build: $(file-dirs)"
+	@for i in $(file-dirs); \
+		do \
+		$(ECHO) "\n==========================="; \
+		$(ECHO) "\tBuild $$i "; \
+		$(ECHO) "===========================\n"; \
+		cd $$i; \
+		make ; \
+		cd .. ; \
+		done
 
 generate_config:
+	@$(ECHO) "==== Generate Version ===="
 	@ [ -f $(CONFIG_FILE) ] && rm -rf $(CONFIG_FILE); \
 		DATA=`date +%Y%m%d%H%M%S`; \
 		GITVERSION=`./tools/setlocalversion`; \
@@ -128,12 +78,12 @@ generate_config:
 		echo "#define BUILD_GIT_VERSION $$BUILD_GIT_VERSION" >> $(CONFIG_FILE)
 
 static:
-	@$(ECHO) " \t Generate \t $(STATIC_JKLIB)"
+	@$(ECHO) " \n\t Generate \t $(STATIC_JKLIB)"
 	$(Q) $(AR) -r -o $(LIBDIR_PATH)/$(STATIC_JKLIB) $(OBJS) $(CPPOBJS)
 	$(Q) ln -sf $(LIBDIR_PATH)/$(STATIC_JKLIB) $(LIBDIR_PATH)/$(LINKSTATICJK)
 
 dyn:
-	@$(ECHO) " \t Generate \t $(DYNJKLIB)"
+	@$(ECHO) " \n\t Generate \t $(DYNJKLIB)"
 	$(Q) $(CC) -fPIC -shared -o $(LIBDIR_PATH)/$(DYNJKLIB) $(OBJS)
 	$(Q) ln -sf $(LIBDIR_PATH)/$(DYNJKLIB) $(LIBDIR_PATH)/$(LINKJK)
 
@@ -143,8 +93,6 @@ createdir:
 		$(ECHO) "    make x86/hi3515/dm365/hi3535";  \
 		exit 1; \
 	fi
-	mkdir -p $(INSTALL_DIRS)/lib
-	$(foreach d,$(predirs),$(shell mkdir -p $(OBJDIR)/$(d)))
 
 install:
 	@$(ECHO) "\t cp $(INSTALL_HEADERS) $(INSTALL_DIRS)/include/"
@@ -152,10 +100,23 @@ install:
 	$(Q) cp -rvf $(INSTALL_LIBS) $(INSTALL_DIRS)/lib/
 
 clean:
-	rm -rf $(OBJS) $(CPPOBJS) $(DEMOS) $(CPPDEMOS)
+	@for i in $(file-dirs); \
+		do \
+		$(ECHO) "\nClean $$i \n"; \
+		cd $$i; \
+		make clean; \
+		cd .. ; \
+		done
 	rm outlib/$(OS)/lib/* -rf
 
 distclean: clean
+	@for i in $(file-dirs); \
+		do \
+		$(ECHO) "\ndistclean $$i \n"; \
+		cd $$i; \
+		make distclean; \
+		cd .. ; \
+		done
 	$(Q)rm -rf $(OBJDIR)
 
 help:

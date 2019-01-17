@@ -77,6 +77,8 @@ endif
 CFLAGS += $(DEBUG_OP) -fPIC -Wall
 CFLAGS += -Wno-unused-variable -Wno-unused-function -Wno-switch
 
+CXXFLAGS += $(DEBUG_OP) -fPIC -Wall
+
 ## module function
 ifeq ($(GCC_HIGH), yes) 
 endif
