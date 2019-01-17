@@ -7,6 +7,10 @@
 
 #include "DrawSomething.h"
 
+#include "cm_logprint.h"
+
+CMLogPrint logPrint;
+
 /**
 * _NaluUnit
 * �ڲ��ṹ�塣�ýṹ����Ҫ���ڴ洢�ʹ���Nal��Ԫ�����͡���С������

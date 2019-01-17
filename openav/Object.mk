@@ -4,8 +4,8 @@ COMPILE=$(CXX)
 
 obj-dep-$(OPENAV)=../common/$(OBJDIR)/build-in.o
 
-CFLAGS-y+=-I. -I../common
-CFLAGS-$(OPENCV)+=-I${THIRD_BASEPATH}/opencv-3.1.0/$(OS)/include
+CXXFLAGS-y+=-I. -I../common
+CXXFLAGS-$(OPENCV)+=-I${THIRD_BASEPATH}/opencv-3.1.0/$(OS)/include
 
 LDFLAGS-$(OPENCV)+=-L${THIRD_BASEPATH}/opencv-3.1.0/$(OS)/lib
 LDFLAGS-$(OPENCV)+=-lopencv_objdetect -lopencv_imgproc -lopencv_imgcodecs 

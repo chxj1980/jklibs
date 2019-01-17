@@ -16,9 +16,6 @@ sinclude config/config_all.mk
 include common/Object.mk
 obj-y += $(obj-cm-y:%=common/%)
 
-CFLAGS += $(CFLAGS-y)
-LDFLAGS += $(LDFLAGS-y)
-
 predirs += $(predirs-y:%=common/%)
 predirs += common/libconfig common/json common/crypto
 ifeq ("$(CMEX)", "y")
@@ -91,6 +88,10 @@ ifeq (x$(PROTOCOL), xy)
 	predirs += protocol
 endif
 
+CFLAGS += $(CFLAGS-y)
+CXXFLAGS += $(CXXFLAGS-y)
+LDFLAGS += $(LDFLAGS-y)
+
 DEPS = $(obj-dep-y:%=$(OBJDIR)/%)
 DEMOOBJS = $(patsubst %.c,%,$(DEMOOBJS_y))
 CPPDEMOOBJS = $(patsubst %.cpp,%,$(CPPDEMOOBJS_y))
@@ -116,7 +117,7 @@ $(DEMOOBJS):%:%.c
 
 $(CPPDEMOOBJS):%:%.cpp
 	@$(ECHO) "\t $(CXX) \t $^"
-	$(Q) $(CXX) -o $@-$(OS) $^ $(OBJS) $(CPPOBJS) $(CFLAGS) $(LDFLAGS)
+	$(Q) $(CXX) -o $@-$(OS) $^ $(OBJS) $(CPPOBJS) $(CFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 generate_config:
 	@ [ -f $(CONFIG_FILE) ] && rm -rf $(CONFIG_FILE); \
