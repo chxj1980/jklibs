@@ -25,7 +25,6 @@ endif
 ifeq ("$(CODEC)", "y")
 X264=y
 X265=y
-CODEC=y
 CFLAGS+=-Icodec
 endif
 

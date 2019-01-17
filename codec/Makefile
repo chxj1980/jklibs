@@ -8,10 +8,10 @@ include $(CONFIG_FILE)
 sinclude Config.mk
 include Object.mk
 
-OBJS= $(obj-y:%=$(OBJDIR)/%)
+OBJS= $(obj-codec-y:%=$(OBJDIR)/%)
 OBJ_DEPS=$(obj-dep-y)
 ## form *.c to *(exec demo name)
-DEMO_EXEC=$(patsubst %.c,%,$(obj-demo-y))
+DEMO_EXEC=$(patsubst %.c,%,$(obj-codec-demo-y))
 DEMO_EXEC_GEN=$(DEMO_EXEC:%=%-$(OS))
 
 DEMO_CFLAGS += -I.
