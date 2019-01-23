@@ -36,7 +36,7 @@ $(BUILDIN): $(OBJS)
 
 $(DEMO_EXEC):$(BUILDIN) $(obj-demo-y)
 	@echo "\t $(COMPILE) \t $@"
-	$(Q) $(COMPILE) -o $@ $(patsubst %,%.cpp,$(@))  $(BUILDIN) $(OBJ_DEPS) $(CFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH)
+	$(Q) $(COMPILE) -o $@ $(patsubst %,%.cpp,$(@))  $(BUILDIN) $(OBJ_DEPS) $(CXXFLAGS) $(DEMO_CFLAGS) $(LINKFLAGS) $(LINKPATH) $(LDFLAGS)
 
 clean:
 	rm -rf $(OBJS) $(BUILDIN)
