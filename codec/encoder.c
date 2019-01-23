@@ -64,7 +64,7 @@ int enc_h264_set_format(CMEncoder *enc, int format)
 	return 0;
 }
 
-int set_solution(CMEncoder *enc, int h, int w) {
+int set_solution(CMEncoder *enc, int w, int h) {
 	EncH264 *en = (EncH264*)enc->szPrivate;
 	if (!en) return -1;
     en->param.i_width = w;
@@ -82,7 +82,7 @@ int open_yuv_h264(CMEncoder *enc) {
     en->pic_in.img.i_csp = en->codec_type;
     en->pic_in.img.i_plane = 3;
     en->pic_in.i_pts = 1;
-    int msize = en->param.i_width * en->param.i_height * 2;
+    int msize = en->param.i_width * en->param.i_height * 3/2;
     en->outdata = (unsigned char*)malloc(msize);
     en->outlength = 0;
 
@@ -131,8 +131,11 @@ static int encoder_yuv422_h264(EncH264 *en, unsigned char *data, unsigned int le
 static int encoder_yuv420_h264(EncH264 *en, unsigned char *data, unsigned int length) {
     int   iNals = 0;
 	en->pic_in.img.plane[0] = (uint8_t*)data;
-	en->pic_in.img.plane[1] = (uint8_t*)data + en->param.i_height;
-	en->pic_in.img.plane[2] = (uint8_t*)data + en->param.i_height*5/4;
+	en->pic_in.img.plane[1] = (uint8_t*)data + en->param.i_height*en->param.i_width;
+	en->pic_in.img.plane[2] = (uint8_t*)data + en->param.i_height*en->param.i_width + 
+		en->param.i_height*en->param.i_width /4;
+	//en->pic_in.img.plane[1] = (uint8_t*)data + en->param.i_height;
+	//en->pic_in.img.plane[2] = (uint8_t*)data + en->param.i_height*5/4;
     en->pic_in.i_pts ++;
     en->outlength = 0;
     int frame_size = x264_encoder_encode(en->handle, &en->nal, &iNals, &en->pic_in, &en->pic_out);

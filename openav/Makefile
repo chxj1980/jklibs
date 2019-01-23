@@ -10,7 +10,7 @@ include Object.mk
 OBJS= $(obj-openav-y:%=$(OBJDIR)/%)
 OBJ_DEPS=$(obj-dep-y)
 ## form *.c to *(exec demo name)
-DEMO_EXEC=$(patsubst %.cpp,%,$(obj-demo-y))
+DEMO_EXEC=$(patsubst %.cpp,%,$(obj-openav-demo-y))
 DEMO_EXEC_GEN=$(DEMO_EXEC:%=%-$(OS))
 
 DEMO_CFLAGS += -I.
