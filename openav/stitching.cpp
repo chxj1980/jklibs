@@ -67,19 +67,27 @@ int read_yuv_mat(const char *filename, vector<Mat> &saveimgs)
 	int len = 640 * 480 * 3/2;
 	char *data = (char *)calloc(1, len);
 
-	int frames = 3;
+	int frames = 2;
 	FILE *f = fopen(filename, "r");
+	int skip_frames = 1;
 	if (f) {
-		while (frames--) {
+		while (frames) {
 		    int ret = fread(data, 1, len, f);
 		    if (ret != len) {
 		    	printf("Read error of file \n");
 				break;
 		    }
-			Mat yuvImg;
-			yuvImg.create(480*3/2, 640, CV_8UC1);
-			memcpy(yuvImg.data, data, len);
+			if (--skip_frames) continue;
+			Mat yuvImgt, yuvImg;
+			yuvImgt.create(480*3/2, 640, CV_8UC1);
+			memcpy(yuvImgt.data, data, len);
+			cvtColor(yuvImgt, yuvImg, CV_YUV420p2RGB);
+			char name[32] = {0};
+			sprintf(name, "x-%d.jpg", frames);
+			imwrite(name, yuvImg);
 			saveimgs.push_back(yuvImg);
+			skip_frames = 10;
+			frames--;
 		}
 
 		fclose(f);
@@ -142,7 +150,8 @@ int parseCmdArgs(int argc, char** argv)
         else
         {
 #if 1
-			read_yuv_mat("/opt/data/output/x1.yuv", imgs);
+			char *file = argv[i];
+			read_yuv_mat(file, imgs);
 #else
             Mat img = imread(argv[i]);
             if (img.empty())
