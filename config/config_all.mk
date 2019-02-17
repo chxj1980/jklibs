@@ -78,6 +78,12 @@ CFLAGS += -Wno-unused-variable -Wno-unused-function -Wno-switch
 
 CXXFLAGS += $(DEBUG_OP) -fPIC -Wall
 
+ifeq (x$(OS), xmips)
+	CFLAGS += -EL
+	CXXFLAGS += -EL
+	LDFLAGS += -EL
+endif
+
 ## module function
 ifeq ($(GCC_HIGH), yes) 
 endif

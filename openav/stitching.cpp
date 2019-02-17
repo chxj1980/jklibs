@@ -4,6 +4,7 @@
 #include "opencv2/stitching.hpp"
 
 #include "cm_logprint.h"
+#include "cmyuv.h"
 
 #include <iostream>
 
@@ -64,10 +65,14 @@ void printUsage(char** argv)
 int read_yuv_mat(const char *filename, vector<Mat> &saveimgs)
 {
 	if (!filename) return -1;
-	int len = 640 * 480 * 3/2;
+	// yuv422
+	int len = 640 * 480 * 2;
 	char *data = (char *)calloc(1, len);
+	// yuv420
+	int dstlen = 640 * 480 * 3/2;
+	char *dstdata = (char*)calloc(1, dstlen);
 
-	int frames = 2;
+	int frames = 3;
 	FILE *f = fopen(filename, "r");
 	int skip_frames = 1;
 	if (f) {
@@ -78,9 +83,12 @@ int read_yuv_mat(const char *filename, vector<Mat> &saveimgs)
 				break;
 		    }
 			if (--skip_frames) continue;
+			printf("Read out data of len %d\n", len);
+			cm_yuy2_yuv420p(data, 640, 480, dstdata);
+			printf("Convert done of len [%d]\n", dstlen);
 			Mat yuvImgt, yuvImg;
 			yuvImgt.create(480*3/2, 640, CV_8UC1);
-			memcpy(yuvImgt.data, data, len);
+			memcpy(yuvImgt.data, dstdata, dstlen);
 			cvtColor(yuvImgt, yuvImg, CV_YUV420p2RGB);
 			char name[32] = {0};
 			sprintf(name, "x-%d.jpg", frames);
