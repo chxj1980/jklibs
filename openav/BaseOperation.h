@@ -3,6 +3,16 @@
 #ifndef __BASE_OPERATION_HEADER
 #define __BASE_OPERATION_HEADER
 
+#include "opencv2/core/core.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/objdetect/objdetect.hpp"
+
+#if CV_MAJOR_VERSION == 4
+#define CV_VERSION_4
+#else
+#define CV_VERSION_3
+#endif
 
 #define LOG(fmt, ...)  \
 	do {   \
@@ -27,11 +37,6 @@
 #pragma comment(lib, "opencv_objdetect320d.lib")
 #endif
 #endif
-
-#include "opencv2/core/core.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600

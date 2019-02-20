@@ -55,7 +55,10 @@ void BaseOperation::DrawPolygon(cv::Mat img)
 	const cv::Point *ppt[1] = { rookPoints[0] };
 	int npt[] = { 20 };
 
+#ifdef CV_VERSION_4
+#else
 	cv::fillPoly(img, ppt, npt, 1, cv::Scalar(255, 255, 255), lineType);
+#endif
 }
 
 void BaseOperation::DrawLine(cv::Mat img, cv::Point start, cv::Point end)

@@ -72,7 +72,7 @@ std::vector<cv::Rect> CVFaceDetect::detectFaces(cv::UMat img_gray){
     time_t start = get_time_ms();
 #endif
     faces_cascade.detectMultiScale(img_gray,detect_face_rects_,1.2, 2,
-		0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
+		0|cv::CASCADE_SCALE_IMAGE, cv::Size(30, 30) );
 #ifdef DEBUG_DURATION
     time_t end = get_time_ms();
     LOG_DEBUG("detect multi scale time %ld ms (%ld, %ld)\n", end - start, end, start);
@@ -92,7 +92,7 @@ std::vector<cv::Rect> CVFaceDetect::detectFaces2(cv::Mat img_gray) {
 #ifdef DEBUG_DURATION
 	time_t start = get_time_ms();
 #endif
-	faces_cascade.detectMultiScale(img_gray, detect_face_rects_, 1.1, 2, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
+	faces_cascade.detectMultiScale(img_gray, detect_face_rects_, 1.1, 2, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(30, 30));
 #ifdef DEBUG_DURATION
 	time_t end = get_time_ms();
 	LOG_DEBUG("detect multi scale time %ld ms (%ld, %ld)\n", end - start, end, start);
@@ -121,15 +121,16 @@ std::vector<cv::Rect> CVFaceDetect::detect_face_h264(cv::UMat frame) {
 }
 
 std::vector<cv::Rect> CVFaceDetect::detect_face_image(const char *filename) {
-    IplImage* image = cvLoadImage( filename, 1 );
+    //IplImage* image = cvLoadImage( filename, 1 );
 
-    cv::Mat l_image = cv::cvarrToMat(image, false);
+    //cv::Mat l_image = cv::cvarrToMat(image, false);
+	cv::Mat l_image = cv::imread(filename);
     cv::UMat l_img_gray;
     cv::cvtColor(l_image, l_img_gray, cv::COLOR_BGR2GRAY);
     cv::equalizeHist(l_img_gray, l_img_gray);
     vector<cv::Rect> faces = detectFaces(l_img_gray);
 
-    cvReleaseImage(&image);
+    //cvReleaseImage(&image);
     return faces;
 }
 
@@ -138,23 +139,24 @@ int CVFaceDetect::face_detect_draw_image(const char *filename) {
     cv::namedWindow("face detect");
 #endif
 
-    IplImage* image = cvLoadImage( filename, 1);
+    //IplImage* image = cvLoadImage( filename, 1);
+	cv::Mat image = cv::imread(filename);
 
-    static CvScalar colors(100, 100, 100);
+    static cv::Scalar colors(100, 100, 100);
     std::vector<cv::Rect> ret = detect_face_image(filename);
     for (int i = 0; i < ret.size(); i++) {
         cv::Rect dr = ret[i];
-        CvRect cr(dr.x, dr.y, dr.width, dr.height);
+		cv::Rect cr(dr.x, dr.y, dr.width, dr.height);
         LOG_DEBUG("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
-        cvRectangleR(image, cr, colors);
+		cv::rectangle(image, cr, colors);
     }
 #ifndef __NO_HIGHGUI
-    cvShowImage("face detect", image);
+	cv::imshow("face detect", image);
     cv::waitKey(0);
 #endif
-    cvReleaseImage(&image);
+    //cvReleaseImage(&image);
 #ifndef __NO_HIGHGUI
-    cvDestroyWindow("face detect");
+	cv::destroyWindow("face detect");
 #endif
 
     return 0;
@@ -172,7 +174,7 @@ int CVFaceDetect::face_detect_draw_video(const char *filename, cv::Size size) {
 #endif
     if (!file) return -1;
 
-    static CvScalar colors(100, 100, 100);
+    static cv::Scalar colors(100, 100, 100);
 #ifndef __NO_HIGHGUI
     cv::namedWindow("video");
 #endif
@@ -184,23 +186,25 @@ int CVFaceDetect::face_detect_draw_video(const char *filename, cv::Size size) {
             break;
         }
         cv::Mat l_image(size.height + size.height/2, size.width, CV_8UC1, (char*)frame);
-        IplImage *do_image = cvCreateImage(size, IPL_DEPTH_8U, 1);
-        do_image->imageData = (char *) l_image.data;
+		cv::Mat do_image = l_image.clone();
+		do_image.data = l_image.data;
+        //IplImage *do_image = cvCreateImage(size, IPL_DEPTH_8U, 1);
+        //do_image->imageData = (char *) l_image.data;
         std::vector<cv::Rect> ret = detect_face(frame, frame_size, size);
         for (int i = 0; i < ret.size(); i++) {
             cv::Rect dr = ret[i];
-            CvRect cr(dr.x, dr.y, dr.width, dr.height);
+			cv::Rect cr(dr.x, dr.y, dr.width, dr.height);
             LOG_DEBUG("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
-            cvRectangleR(do_image, cr, colors);
+			cv::rectangle(do_image, cr, colors);
         }
 #ifndef __NO_HIGHGUI
-        cv::imshow("video", cv::cvarrToMat(do_image));
-        cvWaitKey(10);
+        cv::imshow("video", do_image);
+		cv::waitKey(10);
 #endif
-        cvReleaseImage(&do_image);
+		//cv::ReleaseImage(&do_image);
     }
 #ifndef __NO_HIGHGUI
-    cvDestroyWindow("video");
+	cv::destroyWindow("video");
 #endif
     delete []frame;
     fclose(file);
@@ -220,7 +224,7 @@ int CVFaceDetect::face_detect_draw_video_h264(const char *filename, cv::Size siz
 #endif
 	if (!file) return -1;
 
-	static CvScalar colors(100, 100, 100);
+	static cv::Scalar colors(100, 100, 100);
 #ifndef __NO_HIGHGUI
 	cv::namedWindow("video");
 #endif
@@ -232,23 +236,26 @@ int CVFaceDetect::face_detect_draw_video_h264(const char *filename, cv::Size siz
 			break;
 		}
 		cv::Mat l_image(size.height + size.height / 2, size.width, CV_8UC1, (char*)frame);
-		IplImage *do_image = cvCreateImage(size, IPL_DEPTH_8U, 1);
-		do_image->imageData = (char *)l_image.data;
+		cv::Mat do_image = l_image.clone();
+		do_image.data = l_image.data;
+		//IplImage *do_image = cvCreateImage(size, IPL_DEPTH_8U, 1);
+		//do_image->imageData = (char *)l_image.data;
 		std::vector<cv::Rect> ret = detect_face(frame, frame_size, size);
 		for (int i = 0; i < ret.size(); i++) {
 			cv::Rect dr = ret[i];
-			CvRect cr(dr.x, dr.y, dr.width, dr.height);
+			cv::Rect cr(dr.x, dr.y, dr.width, dr.height);
 			LOG_DEBUG("Out index [%d] [%d, %d, %d, %d]\n", i, dr.x, dr.y, dr.width, dr.height);
-			cvRectangleR(do_image, cr, colors);
+			cv::rectangle(do_image, cr, colors);
+			//cvRectangleR(do_image, cr, colors);
 		}
 #ifndef __NO_HIGHGUI
-		cv::imshow("video", cv::cvarrToMat(do_image));
-		cvWaitKey(10);
+		cv::imshow("video", do_image);
+		cv::waitKey(10);
 #endif
-		cvReleaseImage(&do_image);
+		//cv::releaseImage(&do_image);
 	}
 #ifndef __NO_HIGHGUI
-	cvDestroyWindow("video");
+	cv::destroyWindow("video");
 #endif
 	delete[]frame;
 	fclose(file);

@@ -92,7 +92,7 @@ ifeq ($(BVZLOG), no)
 CFLAGS += -DUNUSE_ZLOG
 endif
 
-LDFLAGS+=-lpthread
+LIBS+=-lpthread
 
 ifeq ($(JK_HISI), yes)
 LINKPATH += -lmpi -lhiaudio

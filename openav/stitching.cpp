@@ -25,21 +25,21 @@ int parseCmdArgs(int argc, char** argv);
 int main(int argc, char* argv[])
 {
     int retval = parseCmdArgs(argc, argv);
-    if (retval) return -1;
+    if (retval) return EXIT_FAILURE;
 
     Mat pano;
-    Ptr<Stitcher> stitcher = Stitcher::create(mode, try_use_gpu);
+    Ptr<Stitcher> stitcher = Stitcher::create(mode);
     Stitcher::Status status = stitcher->stitch(imgs, pano);
 
     if (status != Stitcher::OK)
     {
         cout << "Can't stitch images, error code = " << int(status) << endl;
-        return -1;
+        return EXIT_FAILURE;
     }
 
     imwrite(result_name, pano);
     cout << "stitching completed successfully\n" << result_name << " saved!";
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 
@@ -89,7 +89,7 @@ int read_yuv_mat(const char *filename, vector<Mat> &saveimgs)
 			Mat yuvImgt, yuvImg;
 			yuvImgt.create(480*3/2, 640, CV_8UC1);
 			memcpy(yuvImgt.data, dstdata, dstlen);
-			cvtColor(yuvImgt, yuvImg, CV_YUV420p2RGB);
+			cvtColor(yuvImgt, yuvImg, cv::COLOR_YUV420p2RGB);
 			char name[32] = {0};
 			sprintf(name, "x-%d.jpg", frames);
 			imwrite(name, yuvImg);
@@ -118,7 +118,7 @@ int parseCmdArgs(int argc, char** argv)
         if (string(argv[i]) == "--help" || string(argv[i]) == "/?")
         {
             printUsage(argv);
-            return -1;
+            return EXIT_FAILURE;
         }
         else if (string(argv[i]) == "--try_use_gpu")
         {
@@ -151,7 +151,7 @@ int parseCmdArgs(int argc, char** argv)
             else
             {
                 cout << "Bad --mode flag value\n";
-                return -1;
+                return EXIT_FAILURE;
             }
             i++;
         }
@@ -165,7 +165,7 @@ int parseCmdArgs(int argc, char** argv)
             if (img.empty())
             {
                 cout << "Can't read image '" << argv[i] << "'\n";
-                return -1;
+                return EXIT_FAILURE;
             }
 
             if (divide_images)
@@ -182,5 +182,5 @@ int parseCmdArgs(int argc, char** argv)
 #endif
         }
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
