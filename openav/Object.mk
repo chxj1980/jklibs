@@ -28,11 +28,15 @@ endif
 obj-openavc-$(OPENCV) += ../codec/cmyuv.o
 obj-openav-$(OPENCV) += BaseOperation.o  CVFaceDetect.o  DrawSomething.o
 obj-openav-demo-$(OPENCV) += \
+	catch_imgs.cpp \
 	face_detect.cpp \
 	stitching.cpp
 
 obj-openav-demo-$(OPENCV) += \
 	stitching_detailed.cpp
+
+obj-openav-demo-$(OPENCV) += \
+	facedetect.cpp
 
 CFLAGS-$(OPENGL) += -Iopenav/gl
 CFLAGS-$(OPENGLQT) += -D__OPENGL_QT

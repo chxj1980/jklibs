@@ -344,6 +344,7 @@ static int parseCmdArgs(int argc, char** argv)
         else
             img_names.push_back(argv[i]);
     }
+	LOGLN("Now image size [%d]\n" << img_names.size());
     if (preview)
     {
         compose_megapix = 0.6;

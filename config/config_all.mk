@@ -65,6 +65,8 @@ endif
 
 sinclude $(BASEDIR)/config/config_$(OS).mk
 
+DEBUG_M=y
+
 ifeq (x$(DEBUG_M), xy)
 DEBUG_OP= -g
 else

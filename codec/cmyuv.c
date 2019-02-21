@@ -31,6 +31,7 @@ int cm_yuy2_yuv420p(const char *data, int width, int height, char *outdata)
 		*pu++ = yv;
 		p += 4;
 		//printf("now [i=%d]\n", i);
+		//printf("[%x, %x, %x,%x]\n", yp1, yp2, yu, yv);
 	}
 
 	return 0;
