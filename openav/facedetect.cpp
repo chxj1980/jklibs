@@ -304,6 +304,6 @@ void detectAndDraw( Mat& img, CascadeClassifier& cascade,
             circle( img, center, radius, color, 3, 8, 0 );
         }
     }
-	imwrite("result.jpg", img);
+	//imwrite("result.jpg", img);
     //imshow( "result", img );
 }
