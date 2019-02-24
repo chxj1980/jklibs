@@ -114,7 +114,8 @@ static int encoder_yuv422_h264(EncH264 *en, unsigned char *data, unsigned int le
     int index_u = 0;
     int index_v = 0;
     int num = en->param.i_width * en->param.i_height * 2 - 4;
-    for (int i = 0; i < num; i = i + 4) {
+	int i;
+    for (i = 0; i < num; i = i + 4) {
          *(y + (index_y++)) = *(data+i);
          *(u + (index_u++)) = *(data + i + 1);
          *(y + (index_y++)) = *(data + i + 2);
@@ -156,7 +157,8 @@ int encoder_yuv_h264(CMEncoder *enc, unsigned char *data, unsigned int length) {
 	}
 	if (iNals < 0) return -1;
 
-    for (int i = 0; i < iNals; i++) {
+	int i = 0; 
+    for (i = 0; i < iNals; i++) {
          memcpy(en->outdata + en->outlength, en->nal[i].p_payload, en->nal[i].i_payload);
          en->outlength += en->nal[i].i_payload;
     }
