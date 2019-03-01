@@ -6,10 +6,13 @@ include_directories(common)
 include_directories(storage)
 include_directories(codec)
 
-include_directories(/opt/data/libs/x264/amd64/include)
-include_directories(/opt/data/libs/x265/amd64/include)
-link_directories(/opt/data/libs/x264/amd64/lib)
-link_directories(/opt/data/libs/x265/amd64/lib)
+include_directories(${X264_PATH}/include)
+include_directories(${X265_PATH}/include)
+include_directories(${OPENCV_PATH}/include)
+include_directories(${OPENCV_PATH}/include/opencv4)
+link_directories(${X264_PATH}/lib)
+link_directories(${X265_PATH}/lib)
+link_directories(${OPENCV_PATH}/lib)
 
 set(COMMON_FILES
         common/cm_utils.c
@@ -27,11 +30,15 @@ set(STORAGE_FILES
 set(RECORDSERVER_FILES
         recordserver/cm_avprocess.c)
 
+set(OPENAV_FILES
+		openav/stitching.cpp)
+
 add_library(jklibs
         ${STORAGE_FILES}
         ${COMMON_FILES}
         ${RECORDSERVER_FILES}
-        ${CODEC_FILES})
+        ${CODEC_FILES}
+		)
 
 add_executable(avstorage_test
         storage/avstorage_test.c
@@ -48,3 +55,19 @@ add_executable(avprocess_test
 target_link_libraries(avprocess_test
         x264
         x265)
+
+add_executable(cmstitch
+		openav/stitching.cpp
+		codec/cmyuv.c
+		)
+
+target_link_libraries(cmstitch
+		opencv_stitching
+		opencv_features2d
+		opencv_calib3d
+		opencv_flann
+		opencv_imgproc
+		opencv_imgcodecs
+		opencv_core
+		)
+
