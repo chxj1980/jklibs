@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#ARCH=amd64
-ARCH=mips32
+ARCH=amd64
+#ARCH=mips32
 
 dirpath=b$ARCH
 

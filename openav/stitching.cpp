@@ -20,6 +20,34 @@ string result_name = "result.jpg";
 void printUsage(char** argv);
 int parseCmdArgs(int argc, char** argv);
 
+void yuyv_to_yuv420P(char *in, char*out,int width,int height) 
+{
+	char *p_in, *p_out, *y, *u, *v;
+	int index_y, index_u, index_v;
+	int i, j, in_len;
+ 
+	y = out;
+	u = out + (width * height);
+	v = out + (width * height * 5/4);
+ 
+	index_y = 0;
+	index_u = 0;
+	index_v = 0;
+	for(j=0; j< height*2; j++)
+	{
+		for(i=0; i<width; i=i+4)
+		{
+			*(y + (index_y++)) = *(in + width * j + i);
+			*(y + (index_y++)) = *(in + width * j + i + 2);
+			if(j%2 == 0)
+			{
+				*(u + (index_u++)) = *(in + width * j + i + 1);
+				*(v + (index_v++)) = *(in + width * j + i + 3);
+			}
+		}
+	}
+}
+
 int stitch_whole_yuv(const char *file, int width, int height) 
 {
 	FILE *f = fopen(file, "r");
@@ -57,10 +85,11 @@ int stitch_whole_yuv(const char *file, int width, int height)
 
 			break;
 		}
+		//yuyv_to_yuv420P((char*)tmpdata, (char*)yuvdata, width, height);
 		cm_yuy2_yuv420p((const char*)tmpdata, width, height, (char*)yuvdata);
 
 		Mat yuvImg;
-		memcpy(yuvImgt.data, yuvdata, yuvlen);
+		memcpy(yuvImgt.data, yuvdata, yuvlen*sizeof(unsigned char));
 		cvtColor(yuvImgt, yuvImg, cv::COLOR_YUV420p2RGB);
 		saveimgs.push_back(yuvImg);
 		printf("saveimgs.length= %d, %d\n", saveimgs.size(), ret);
@@ -91,7 +120,8 @@ int main(int argc, char* argv[])
 {
 	if (argv[1][0] == 'x') {
 		const char *file = argv[2];
-        stitch_whole_yuv(file, 640, 480);
+        stitch_whole_yuv(file, 320, 240);
+        //stitch_whole_yuv(file, 640, 480);
 		return 0;
 	}
     int retval = parseCmdArgs(argc, argv);
