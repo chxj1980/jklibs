@@ -71,3 +71,14 @@ target_link_libraries(cmstitch
 		opencv_core
 		)
 
+add_executable(catch_img
+		openav/catch_imgs.cpp
+		codec/cmyuv.c
+		)
+
+target_link_libraries(catch_img
+		opencv_imgproc
+		opencv_imgcodecs
+		opencv_core
+		)
+

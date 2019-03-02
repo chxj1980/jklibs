@@ -22,8 +22,8 @@ using namespace cv;
 
 CMLogPrint logPrint;
 
-static int width = 640;
-static int height = 480;
+static int width = 176;
+static int height = 144;
 static char *yuvformat = "yuy2";
 
 int catch_pictures(const char *filename)
@@ -94,7 +94,7 @@ int catch_pictures(const char *filename)
 
 int main(int argc, char **args) {
 	if (argc < 2) {
-		printf("Usage: %s filename\n", argc);
+		printf("Usage: %s filename\n", args[0]);
 		printf("  take out frame and convert to pictures from yuv files\n");
 		printf("  support yuy2 only now\n");
 		printf("  save to o, remember mkdir o\n");

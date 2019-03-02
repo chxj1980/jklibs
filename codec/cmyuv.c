@@ -32,7 +32,7 @@ int cm_yuy2_yuv420p(const char *data, int width, int height, char *outdata)
 			flag = 1;
 		    *pu++ = yu;
 		    *pv++ = yv;
-		} else flag = 1;
+		} else flag = 0;
 		p += 4;
 		//printf("now [i=%d]\n", i);
 		//printf("[%x, %x, %x,%x]\n", yp1, yp2, yu, yv);

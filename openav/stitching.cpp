@@ -74,6 +74,8 @@ int stitch_whole_yuv(const char *file, int width, int height)
 	int imgcount = 0;
 	int frames = 0;
 	int first = 1;
+	int ok = 0;
+	char tmpf[32] = {0};
 	while (1) {
 		int ret = fread(tmpdata, 1, tmplen, f);
 		if (ret <= 0) {
@@ -91,6 +93,8 @@ int stitch_whole_yuv(const char *file, int width, int height)
 		Mat yuvImg;
 		memcpy(yuvImgt.data, yuvdata, yuvlen*sizeof(unsigned char));
 		cvtColor(yuvImgt, yuvImg, cv::COLOR_YUV420p2RGB);
+		sprintf(tmpf, "o-%d.jpg", frames);
+		imwrite(tmpf, yuvImg);
 		saveimgs.push_back(yuvImg);
 		printf("saveimgs.length= %d, %d\n", saveimgs.size(), ret);
         if (saveimgs.size() >= 2) {
@@ -102,6 +106,7 @@ int stitch_whole_yuv(const char *file, int width, int height)
 			} else {
 				printf("stitch success [%d]\n", frames);
 				first = 0;
+				ok = 1;
 			    saveimgs.clear();
 				saveimgs.push_back(pano);
 			}
@@ -109,7 +114,9 @@ int stitch_whole_yuv(const char *file, int width, int height)
 		}
 	}
 
-	imwrite("result.jpg", pano);
+	if (ok) {
+	    imwrite("result.jpg", pano);
+	}
 
 	fclose(f);
 
@@ -120,7 +127,10 @@ int main(int argc, char* argv[])
 {
 	if (argv[1][0] == 'x') {
 		const char *file = argv[2];
-        stitch_whole_yuv(file, 320, 240);
+		int width = (int)strtol(argv[3], NULL, 10);
+		int height = (int)strtol(argv[4], NULL, 10);
+		printf("Do with [%s][%d,%d]\n", file, width, height);
+        stitch_whole_yuv(file, width, height);
         //stitch_whole_yuv(file, 640, 480);
 		return 0;
 	}
