@@ -40,6 +40,23 @@ add_library(jklibs
         ${CODEC_FILES}
 		)
 
+add_executable(cmcodec
+		codec/cmcodec.c
+		codec/cmyuv.c
+		${CODEC_FILES}
+		${COMMON_FILES}
+		)
+target_link_libraries(cmcodec
+		x264 x265)
+
+add_executable(cmyuvtools
+		codec/cmyuvtools.c
+		codec/cmyuv.c
+		${COMMON_FILES}
+		)
+target_link_libraries(cmyuvtools
+		x264 x265)
+
 add_executable(avstorage_test
         storage/avstorage_test.c
         ${STORAGE_FILES}
