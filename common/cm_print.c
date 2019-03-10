@@ -17,7 +17,9 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 #include <errno.h>
 #include <sys/stat.h>
 
@@ -105,6 +107,7 @@
   }while(0)
 
 
+#ifndef _WIN32
 #define RTTIMEMORE(l)                                            \
   do{                                                                        \
     struct timeval _tNow; struct tm _tmNow;                                  \
@@ -114,6 +117,9 @@
         _tmNow.tm_year+1900, _tmNow.tm_mon+1, _tmNow.tm_mday,                \
         _tmNow.tm_hour, _tmNow.tm_min, _tmNow.tm_sec, _tNow.tv_usec/1000);   \
   }while(0)
+#else
+#define RTTIMEMORE(l)
+#endif
 
 #define RTTIME(l) RTTIMEMORE(l)
 

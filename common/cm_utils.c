@@ -28,11 +28,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#include <unistd.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
-
 // 
 // Common functions
 //
@@ -193,6 +194,7 @@ int cm_parse_data(unsigned char *data, char *string)
 int cm_parse_data_string(char *string, char *save, int arrsize, int maxlen, const char sign)
 {
     if (string == NULL || save == NULL || arrsize < 0 || maxlen < 0) return -1;
+#ifndef _WIN32
     int      i = 0, j = 0;
     int      counts = 0;
     char    *pos = index(string, sign);
@@ -218,6 +220,9 @@ int cm_parse_data_string(char *string, char *save, int arrsize, int maxlen, cons
         }   
     }
     return i;    // return what we realy deal, maybe not maxlen
+#else
+	return 0;
+#endif
 }
 
 int cm_parse_data_char(unsigned char *data, char *string, int maxlen, const char *sign)
@@ -392,17 +397,20 @@ int cm_clear_string_char(char *origin, char *save, char c)
 ///////////////   Network
 /////////////////////////////////////////////////////////////////////////////////
 #include <sys/types.h>
+#include <errno.h>
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
-#include <errno.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <netdb.h>
+#endif
 
 int cm_get_ip_dev(const char *dev, char *ipaddr)
 {
+#ifndef _WIN32
     int sock_get_ip;  
   
     struct   sockaddr_in *sin;  
@@ -424,6 +432,7 @@ int cm_get_ip_dev(const char *dev, char *ipaddr)
     strcpy(ipaddr,inet_ntoa(sin->sin_addr));         
       
     close( sock_get_ip );  
+#endif
       
     return  0;
 }
@@ -431,6 +440,7 @@ int cm_get_ip_dev(const char *dev, char *ipaddr)
 #define h_addr h_addr_list[0]
 char *cm_get_ip(char *dn_or_ip, const char *eth)
 {
+#ifndef _WIN32
    struct hostent *host;
    struct ifreq req;
    int sock;
@@ -458,10 +468,14 @@ char *cm_get_ip(char *dn_or_ip, const char *eth)
 	  dn_or_ip = (char *)inet_ntoa(*(struct in_addr *)(host->h_addr));
    }
    return dn_or_ip;
+#else
+	return NULL;
+#endif
 }
 
 int cm_get_mac(char * mac, int len_limit, char *dev)    //返回值是实际写入char * mac的字符个数（不包括'\0'）
 {
+#ifndef _WIN32
     struct ifreq ifreq;
     int sock;
 
@@ -478,7 +492,13 @@ int cm_get_mac(char * mac, int len_limit, char *dev)    //返回值是实际写�
 
     close(sock);
 
-    return snprintf (mac, len_limit, "%02X:%02X:%02X:%02X:%02X:%02X", (unsigned char) ifreq.ifr_hwaddr.sa_data[0], (unsigned char) ifreq.ifr_hwaddr.sa_data[1], (unsigned char) ifreq.ifr_hwaddr.sa_data[2], (unsigned char) ifreq.ifr_hwaddr.sa_data[3], (unsigned char) ifreq.ifr_hwaddr.sa_data[4], (unsigned char) ifreq.ifr_hwaddr.sa_data[5]);
+    return snprintf (mac, len_limit, "%02X:%02X:%02X:%02X:%02X:%02X", (unsigned char) ifreq.ifr_hwaddr.sa_data[0],
+		(unsigned char) ifreq.ifr_hwaddr.sa_data[1], (unsigned char) ifreq.ifr_hwaddr.sa_data[2],
+		(unsigned char) ifreq.ifr_hwaddr.sa_data[3], (unsigned char) ifreq.ifr_hwaddr.sa_data[4],
+		(unsigned char) ifreq.ifr_hwaddr.sa_data[5]);
+#else
+	return -1;
+#endif
 }
 
 int cm_get_flow(const char *interface, unsigned long long *recv,unsigned long long *send, unsigned long long *total)
@@ -553,6 +573,7 @@ int cm_generate_mac_with_char(const char *mac, char *save, char c)
 int cm_seperate_filename(char *orig, char *path, char *name)
 {
     if (!orig) return -1;
+#ifndef _WIN32
 
     char *p = rindex(orig, '/');
     // Has no path. Just save to name.
@@ -573,6 +594,7 @@ int cm_seperate_filename(char *orig, char *path, char *name)
             sprintf(name, "%s", p+1);
         }
     }
+#endif
 
     return 0;
 }
@@ -702,15 +724,18 @@ int hexToByte(char *str, int ilen, char *save) {
     return 0;
 }
 
+#ifndef _WIN32
 #include <dirent.h>
+#endif
 #include <string.h>
 
 int is_program_running(int cnts, const char *prog[]) {
+	int ret = 0;
+#ifndef _WIN32
     struct dirent *d = NULL;
     DIR *dir = opendir("/proc");
     if (!dir) { return -1; }
 
-    int ret = 0;
     while((d = readdir(dir)) != NULL) {
         char cmdname[288] = {0};
         if (d->d_type != DT_DIR) continue;
@@ -755,6 +780,7 @@ int is_program_running(int cnts, const char *prog[]) {
             }
         }
     }
+#endif
     
     return ret;
 }
@@ -794,6 +820,7 @@ int cm_write_file_data(const char *filename, char *data, int len) {
 
 int cm_files_remove(const char *dir, int rdir)
 {
+#ifndef _WIN32
     struct dirent **dirent;
     int ret = scandir(dir, &dirent, NULL, NULL);
     if (ret < 0) {
@@ -824,6 +851,7 @@ int cm_files_remove(const char *dir, int rdir)
         if (rdir) rmdir(dir);
     }
     free(dirent);
+#endif
     return 0;
 }
 
@@ -840,32 +868,44 @@ const char *cm_time_string(time_t tm)
 
 unsigned int cm_gettime_only_micro()
 {
+#ifndef _WIN32
     struct timeval tv;
     int ret = gettimeofday(&tv, NULL);
     if (ret != 0) {
         return 0;
     }
     return tv.tv_usec;
+#else
+	return 0;
+#endif
 }
 
 unsigned long long cm_gettime_micro()
 {
+#ifndef _WIN32
     struct timeval tv;
     int ret = gettimeofday(&tv, NULL);
     if (ret != 0) {
         return 0;
     }
     return tv.tv_sec * 1000000 + tv.tv_usec;
+#else
+	return 0;
+#endif
 }
 
 unsigned long long cm_gettime_milli()
 {
+#ifndef _WIN32
     struct timeval tv;
     int ret = gettimeofday(&tv, NULL);
     if (ret != 0) {
         return 0;
     }
     return ((unsigned long long )tv.tv_sec) * 1000 + (unsigned long long) tv.tv_usec / 1000;
+#else
+	return 0;
+#endif
 }
 
 int cm_format_time(char *save, int max, char *format)
@@ -916,7 +956,11 @@ int cm_string_compare(const char *src, const char *dst)
     size_t slen = strlen(src);
     size_t dlen = strlen(dst);
     size_t clen = slen > dlen ? slen : dlen;
+#ifdef _WIN32
+	return strnicmp(src, dst, clen);
+#else
     return strncasecmp(src, dst, clen);
+#endif
 }
 
 int _cm_isxdigit (int c)
@@ -1009,37 +1053,49 @@ int cm_get_wifi_signal(const char *dev)
 
     return signal;
 }
-
+#ifndef _WIN32
 #include <sys/statvfs.h>
-
+#endif
 unsigned long long cm_get_ubi_size(const char *dev)
 {
+#ifndef _WIN32
     struct statvfs st;
     int ret = statvfs(dev, &st);
     if (ret < 0) {
         return 0;
     }
     return (unsigned long long)st.f_bsize * st.f_blocks;
+#else
+	return 0;
+#endif
 }
 
 unsigned long long cm_get_ubi_available(const char *dev)
 {
+#ifndef _WIN32
     struct statvfs st;
     int ret = statvfs(dev, &st);
     if (ret < 0) {
         return 0;
     }
     return st.f_bsize * st.f_bavail;
+#else
+	return 0;
+#endif
 }
 
 unsigned long long cm_get_ubi_free(const char *dev)
 {
+#ifndef _WIN32
     struct statvfs st;
     int ret = statvfs(dev, &st);
     if (ret < 0) {
         return ret;
     }
     return st.f_bsize * st.f_ffree;
+#else
+	return 0;
+#endif
 }
 
 unsigned short cm_litte_to_big(unsigned short v)
@@ -1063,10 +1119,12 @@ unsigned short cm_big_to_little(unsigned short v)
 // you must sure save big enough
 int cm_take_out_last_string(const char *str, char split, char *save)
 {
+#ifndef _WIN32
     const char *pos = rindex(str, (int)split);
     if (pos) {
         strncpy(save, pos+1, str + strlen(str) - pos -1);
     }
+#endif
     return 0;
 }
 
@@ -1132,13 +1190,18 @@ int cm_retgret(int orig) {
 	}
 }
 
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
+
 int cm_path_is_mounted(const char *path)
 {
     if (!path)
         return -1;
 
     char *key = malloc(strlen("on ") + strlen(path) + 1); 
-    char buffer[512] = {}; 
+    char buffer[512] = {0}; 
     sprintf(key, "on %s", path);
 
     FILE *file = popen("mount", "r");

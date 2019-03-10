@@ -223,10 +223,10 @@ CM_EXTERN_C_FUNC void cm_print_error_string(CMLogPrint *cm_p, int errno);
 // force to console
 #define cmerrno(l, no)   cm_print_error_string(l, no);
 
-#define CMVERSION(fmt, args...)                                                 \
+#define CMVERSION(fmt, ...)                                                 \
     do{	printf("\033[01;31;31m");                                              \
 	printf(" Build time: %s, %s. \033[0m", __DATE__, __TIME__);           \
-	printf(fmt, ##args);                                                   \
+	printf(fmt, __VAR_ARGS__);                                                   \
     }while(0)
 
 #endif

@@ -14,6 +14,15 @@ link_directories(${X264_PATH}/lib)
 link_directories(${X265_PATH}/lib)
 link_directories(${OPENCV_PATH}/lib)
 
+option(WINDOWS "windows platform" OFF)
+option(LINUX "linux platform" OFF)
+
+MESSAGE(STATUS "System is ${CMAKE_SYSTEM_NAME}")
+
+IF (LINUX)
+message(STATUS "This is linux platform")
+ENDIF()
+
 set(COMMON_FILES
         common/cm_utils.c
         common/cm_print.c)
@@ -33,13 +42,16 @@ set(RECORDSERVER_FILES
 set(OPENAV_FILES
 		openav/stitching.cpp)
 
+if (LINUX)
 add_library(jklibs
         ${STORAGE_FILES}
         ${COMMON_FILES}
         ${RECORDSERVER_FILES}
         ${CODEC_FILES}
 		)
+endif()
 
+IF (LINUX)
 add_executable(cmcodec
 		codec/cmcodec.c
 		codec/cmyuv.c
@@ -48,20 +60,20 @@ add_executable(cmcodec
 		)
 target_link_libraries(cmcodec
 		x264 x265)
+ENDIF()
 
 add_executable(cmyuvtools
 		codec/cmyuvtools.c
 		codec/cmyuv.c
 		${COMMON_FILES}
 		)
-target_link_libraries(cmyuvtools
-		x264 x265)
 
 add_executable(avstorage_test
         storage/avstorage_test.c
         ${STORAGE_FILES}
         ${COMMON_FILES})
 
+IF (LINUX)
 add_executable(avprocess_test
         recordserver/cm_avprocess_test.c
         ${RECORDSERVER_FILES}
@@ -72,7 +84,9 @@ add_executable(avprocess_test
 target_link_libraries(avprocess_test
         x264
         x265)
+ENDIF()
 
+IF (LINUX)
 add_executable(cmstitch
 		openav/stitching.cpp
 		codec/cmyuv.c
@@ -87,7 +101,9 @@ target_link_libraries(cmstitch
 		opencv_imgcodecs
 		opencv_core
 		)
+ENDIF()
 
+IF (LINUX)
 add_executable(catch_img
 		openav/catch_imgs.cpp
 		codec/cmyuv.c
@@ -98,4 +114,4 @@ target_link_libraries(catch_img
 		opencv_imgcodecs
 		opencv_core
 		)
-
+ENDIF()
