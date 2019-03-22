@@ -55,22 +55,22 @@ int base_demo_size()
     unsigned long ul;
     unsigned  long long ull;
 
-    printf("size_t = %ld\n", sizeof(t));
-    printf("int = %ld\n", sizeof(i));
-    printf("short = %ld\n", sizeof(s));
-    printf("unsigned int = %ld\n", sizeof(ui));
-    printf("unsigned short = %ld\n", sizeof(us));
-    printf("char = %ld\n", sizeof(c));
-    printf("unsigned char = %ld\n", sizeof(uc));
-    printf("float = %ld\n", sizeof(f));
-    printf("long = %ld\n", sizeof(l));
-    printf("long long = %ld\n", sizeof(ll));
-    printf("unsigned long = %ld\n", sizeof(ul));
-    printf("unsigned long long = %ld\n", sizeof(ull));
-    printf("short* = %ld\n", sizeof(short*));
-    printf("unsigned short * = %ld\n", sizeof(unsigned short *));
-    printf("char * = %ld\n", sizeof(char*));
-    printf("float * = %ld\n", sizeof(float*));
+    printf("sizeof size_t = %ld\n", sizeof(t));
+    printf("sizeof int = %ld\n", sizeof(i));
+    printf("sizeof short = %ld\n", sizeof(s));
+    printf("sizeof unsigned int = %ld\n", sizeof(ui));
+    printf("sizeof unsigned short = %ld\n", sizeof(us));
+    printf("sizeof char = %ld\n", sizeof(c));
+    printf("sizeof unsigned char = %ld\n", sizeof(uc));
+    printf("sizeof float = %ld\n", sizeof(f));
+    printf("sizeof long = %ld\n", sizeof(l));
+    printf("sizeof long long = %ld\n", sizeof(ll));
+    printf("sizeof unsigned long = %ld\n", sizeof(ul));
+    printf("sizeof unsigned long long = %ld\n", sizeof(ull));
+    printf("sizeof short* = %ld\n", sizeof(short*));
+    printf("sizeof unsigned short * = %ld\n", sizeof(unsigned short *));
+    printf("sizeof char * = %ld\n", sizeof(char*));
+    printf("sizeof float * = %ld\n", sizeof(float*));
     return 0;
 }
 
@@ -78,6 +78,14 @@ int base_demo_shit_length()
 {
     printf("1<<31 = %d\n", (1<<31)-1);
     return 0;
+}
+
+int base_demo_priority()
+{
+	int x = 6, y = 2, z = 3;
+	printf("6/2*3=%d\n", x/y*z);
+	printf("(6/2)*3 = %d\n", (x/y)*z);
+	return 0;
 }
 
 int main(int argc, char **argv) {
@@ -98,5 +106,7 @@ int main(int argc, char **argv) {
     printf("p = %s\n", p);
 
     base_demo_shit_length();
+
+	base_demo_priority();
     return 0;
 }

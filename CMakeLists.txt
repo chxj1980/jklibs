@@ -16,8 +16,13 @@ link_directories(${OPENCV_PATH}/lib)
 
 option(WINDOWS "windows platform" OFF)
 option(LINUX "linux platform" OFF)
+option(OPENCV "opencv need 4.0" OFF)
 
 MESSAGE(STATUS "System is ${CMAKE_SYSTEM_NAME}")
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+	set(LINUX ON)
+endif()
 
 IF (LINUX)
 message(STATUS "This is linux platform")
@@ -86,7 +91,7 @@ target_link_libraries(avprocess_test
         x265)
 ENDIF()
 
-IF (LINUX)
+IF (LINUX AND OPENCV)
 add_executable(cmstitch
 		openav/stitching.cpp
 		codec/cmyuv.c
@@ -103,7 +108,7 @@ target_link_libraries(cmstitch
 		)
 ENDIF()
 
-IF (LINUX)
+IF (LINUX AND OPENCV)
 add_executable(catch_img
 		openav/catch_imgs.cpp
 		codec/cmyuv.c
@@ -115,3 +120,6 @@ target_link_libraries(catch_img
 		opencv_core
 		)
 ENDIF()
+
+add_subdirectory(demo)
+
