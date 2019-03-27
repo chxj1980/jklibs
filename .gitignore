@@ -12,3 +12,4 @@ config.mk
 *demo-*
 outlib
 include.mk
+build-*

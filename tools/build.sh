@@ -3,7 +3,7 @@
 ARCH=amd64
 #ARCH=mips32
 
-dirpath=b$ARCH
+dirpath=build-$ARCH
 
 mkdir $dirpath
 
