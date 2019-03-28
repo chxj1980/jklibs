@@ -121,5 +121,22 @@ target_link_libraries(catch_img
 		)
 ENDIF()
 
+add_executable(fiforead
+		common/misc/cm_fifo.c
+		common/misc/cm_fifo.h
+		common/cm_print.c
+		common/cm_print.h
+		common/cm_logprint.h
+		)
+
+set_target_properties(fiforead
+		PROPERTIES
+		COMPILE_FLAGS    -D__MAINTEST
+		)
+
+target_link_libraries(fiforead
+		pthread
+		)
+
 add_subdirectory(demo)
 
