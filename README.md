@@ -4,6 +4,7 @@
 ## dir
 ```
 common - base functions
+commonex - base cpp functions
 codec - yuv to h264 encoder with libx264
 openav - demo of opencv 
 vdev - get video with v4l2

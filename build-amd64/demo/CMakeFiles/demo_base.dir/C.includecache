@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../common/cm_print.h
+stdio.h
+-
+zlog/zlog.h
+../common/zlog/zlog.h
+
+/opt/data/proj/dev/jklibs/demo/base_demo.c
+stdio.h
+-
+malloc.h
+-
+errno.h
+-
+string.h
+-
+math.h
+-
+cm_print.h
+/opt/data/proj/dev/jklibs/demo/cm_print.h
+

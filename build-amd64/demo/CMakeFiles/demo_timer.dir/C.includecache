@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/opt/data/proj/dev/jklibs/demo/base_timer.c
+stdio.h
+-
+stdlib.h
+-
+unistd.h
+-
+stdio.h
+-
+signal.h
+-
+time.h
+-
+

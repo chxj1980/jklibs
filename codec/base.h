@@ -2,30 +2,44 @@
  * Create: 2017-11-10
  * Author: jmdvirus
  */
+#ifndef __CODEC_BASE_H
+#define __CODEC_BASE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
+#include "codec.h"
 #include "x264.h"
 
 typedef struct {
-    x264_t      *handle;
-    x264_param_t   param;
-    x264_picture_t   pic_in;
-    x264_picture_t   pic_out;
-    x264_nal_t       *nal;
-
-    char            *outdata;
-    unsigned int     outlength;
-} CEncoder;
+	void          *szPrivate;
+} CMEncoder;
 
 typedef struct {
-} CDecoder;
+	int (*init)(CMEncoder *enc);
+	int (*set_format)(CMEncoder *enc, int format);
+	int (*set_size)(CMEncoder *enc, int w, int h);
+	int (*start)(CMEncoder *enc);
+	int (*stop)(CMEncoder *enc);
 
-int init_yuv_h264(CEncoder *en);
+    // push one frame to encode
+	int (*push)(CMEncoder *enc, unsigned char *data, unsigned int len);
 
-int set_solution(CEncoder *en, int h, int w);
+	// Get pointer of the data, you must push out,
+	// It will free when call stop and deinit
+    // return 0: success, data len will put in *len
+	int (*pop)(CMEncoder *enc, unsigned char **data, unsigned int *len);
+	int (*deinit)(CMEncoder *enc);
+} CMEncoderHandle;
 
-int open_yuv_h264(CEncoder *en);
+extern CMEncoderHandle CMEncoderH264;
+extern CMEncoderHandle CMEncoderH265;
 
-int close_yuv_h264(CEncoder *en);
+#ifdef __cplusplus
+}
+#endif
 
-int encoder_yuv_h264(CEncoder *en, char *data, unsigned int length);
+#endif
+

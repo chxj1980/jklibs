@@ -224,7 +224,7 @@ void DrawSomething::make_dft(const char *img)
 	q2.copyTo(q1);
 	tmp.copyTo(q2);
 
-	cv::normalize(magnitudeImage, magnitudeImage, 0, 1, CV_MINMAX);
+	cv::normalize(magnitudeImage, magnitudeImage, 0, 1, cv::NORM_MINMAX);
 
 	cv::imshow("origin image", image);
 	cv::imshow("phase image", magnitudeImage);

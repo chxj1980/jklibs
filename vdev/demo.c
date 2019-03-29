@@ -8,12 +8,15 @@
 #include <time.h>
 #include "vdev.h"
 #include "base.h"
+#include "cm_logprint.h"
+
+CMLogPrint logPrint;
 
 int main(int argc, char **args) {
     VDevHandle dev;
     int ret = VDevOpen(&dev, args[1]);
     if (ret < 0) {
-        printf("Error: open device [%s] , %d\n", args[1], ret);
+        cmerror("Error: open device [%s] , %d\n", args[1], ret);
         return -1;
     }
 

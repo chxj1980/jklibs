@@ -7,6 +7,17 @@
 
 #include "DrawSomething.h"
 
+#include "cm_logprint.h"
+
+#ifdef CV_VERSION_4
+#include "opencv2/core/types_c.h"
+#include "opencv2/core/core_c.h"
+#include "opencv2/highgui/highgui_c.h"
+#include "opencv2/imgcodecs/legacy/constants_c.h"
+#endif
+
+CMLogPrint logPrint;
+
 /**
 * _NaluUnit
 * �ڲ��ṹ�塣�ýṹ����Ҫ���ڴ洢�ʹ���Nal��Ԫ�����͡���С������

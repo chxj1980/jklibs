@@ -1,6 +1,6 @@
 ############
 ### this file place the variable of will be change many times
-### author: yuwei.zhang@besovideo.com
+### author: jmdvirus@aliyun.com
 ##########
 
 #BASEDIR=`pwd`
@@ -16,13 +16,15 @@ BVBASE=y
 ## outside zlog
 BVZLOG=no
 
+CONFIG_FILE=common/config.h
+
 ifeq ("$(DISK)", "")
 DISK=n
 endif
 
 ifeq ("$(CODEC)", "y")
 X264=y
-CODEC=y
+X265=y
 CFLAGS+=-Icodec
 endif
 
@@ -38,6 +40,10 @@ ifeq ("$(RECORDSERVER)", "")
 RECORDSTREAM=n
 endif
 
+ifeq ("$(USE_LIBCURL)", "y")
+	CFLAGS += -DUSE_LIBCURL
+endif
+
 ECHO=echo -e
 
 VERSION=0.0.1
@@ -48,6 +54,8 @@ LIBSNAME=jk-v1
 
 export THIRD_BASEPATH=/opt/data/libs/
 
+export THIRD_BASE=third
+
 sinclude $(BASEDIR)/config.mk
 
 ## If the command from command line, use it instead others
@@ -57,22 +65,28 @@ endif
 
 sinclude $(BASEDIR)/config/config_$(OS).mk
 
+DEBUG_M=y
+
+ifeq (x$(DEBUG_M), xy)
+DEBUG_OP= -g
+else
+DEBUG_OP= -O2
+endif
 
 ######################################
 ### Constant args
-CFLAGS += -O2 -fPIC -Wall
+CFLAGS += $(DEBUG_OP) -fPIC -Wall
 CFLAGS += -Wno-unused-variable -Wno-unused-function -Wno-switch
 
-## the path when you use out lib
-## base position of libs
-LIBFLAGS+=-L$(HOME)/libs/opensource/$(OS)/lib
-LIBFLAGS+=-L$(HOME)/libs/bvlib/$(OS)/lib
+CXXFLAGS += $(DEBUG_OP) -fPIC -Wall
 
-## module function
-ifneq ($(OS), amd64)
-PJFLAGS += -DPJ_IS_LITTLE_ENDIAN=0 -DPJ_IS_BIG_ENDIAN=1
+ifeq (x$(OS), xmips)
+	CFLAGS += -EL
+	CXXFLAGS += -EL
+	LDFLAGS += -EL
 endif
 
+## module function
 ifeq ($(GCC_HIGH), yes) 
 endif
 
@@ -80,7 +94,7 @@ ifeq ($(BVZLOG), no)
 CFLAGS += -DUNUSE_ZLOG
 endif
 
-LINKPATH+=-lpthread
+LIBS+=-lpthread
 
 ifeq ($(JK_HISI), yes)
 LINKPATH += -lmpi -lhiaudio
@@ -108,10 +122,15 @@ CFLAGS += -I/opt/data/libs/$(OS)/include
 LINKPATH += -L/opt/data/libs/$(OS)/lib -lx264
 endif
 
-Q=@
+ifeq ($(X265), y)
+CFLAGS += -I/opt/data/libs/$(OS)/include
+LINKPATH += -L/opt/data/libs/$(OS)/lib -lx265
+endif
 
-ifeq (x$(V), xs)
-	Q=
+Q=
+
+ifeq (x$(V), xn)
+	Q=@
 endif
 
 ## We allowed to compile.
@@ -119,12 +138,14 @@ endif
 ## It will be converted to filedirs-n and other not -y if we don't want to compile it.
 filedirs-$(BVBASE) = common
 filedirs-$(VDEV) += vdev
+filedirs-$(KFMD5) += kfmd5
 filedirs-$(CODEC) += codec
 filedirs-$(DISK) += disk
 filedirs-$(BVSTREAM) += stream
 filedirs-$(RECORDSERVER) += recordserver
 filedirs-$(OPENAV) += openav
 filedirs-$(QRCODE) += qrcode
+filedirs-$(AITING) += aiting
 
 ## all linked in build-in.o files in each directory
 buildin-files = $(patsubst %,%/$(OBJDIR)/build-in.o,$(filedirs-y))
@@ -132,6 +153,10 @@ filedirs-d-$(DEMO) += demo
 
 OBJDIR=.obj$(OS)
 #OBJS=$(OBJS_y:%=$(OBJDIR)/%)
+
+export DEP_COMMON=common/$(OBJDIR)/build-in.o
+export DEP_COMMONEX=commonex/$(OBJDIR)/build-in.o
+export DEP_KFMD5=kfmd5/$(OBJDIR)/build-in.o
 
 #####################################
 ### set args for diff platform

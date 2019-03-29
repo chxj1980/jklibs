@@ -3534,6 +3534,7 @@ static void version(const char *arg0, FILE *fp) {
 
 static int lex_main(const char *);
 
+#ifdef MAIN_TEST
 int main(int argc, char **argv) {
 	extern int optind;
 	char *arg0 = (argc)? argv[0] : "json";
@@ -3825,6 +3826,7 @@ static int lex_main(const char *file) {
 
 	return 0;
 } /* lex_main() */
+#endif
 
 #endif /* JSON_MAIN */
 

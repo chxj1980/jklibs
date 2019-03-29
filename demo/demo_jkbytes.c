@@ -3,6 +3,9 @@
  */
 
 #include "jkbytes.h"
+#include "cm_logprint.h"
+
+CMLogPrint logPrint;
 
 int main(int argc, char **args) 
 {

@@ -7,50 +7,85 @@ SHELL=/bin/bash
 
 BASEDIR=$(shell pwd)
 
-include include.mk
+ECHO="echo -e"
 
+include include.mk
 sinclude config/config_all.mk
 
+file-dirs += common
+OBJS += common/$(OBJDIR)/build-in.o
 
-## this is defined in config/config_all.mk
-#filedirs-y=common disk stream
-.PHONY: $(filedirs-y)
+ifeq ("$(DEMO)", "y")
+	file-dirs += demo
+endif
 
-all: createdir filesbuild dep-before static dyn
+ifeq ("$(VDEV)", "y")
+	file-dirs += vdev
+	OBJS += vdev/$(OBJDIR)/build-in.o
+endif
 
-filesbuild:
-	@for i in $(filedirs-y) $(filedirs-d-y); do \
-        $(ECHO) "\n\t Build $$i\n"; \
-        cd $$i; make; cd ..;\
-    done
+ifeq ("$(CODEC)", "y")
+	file-dirs += codec
+	OBJS += codec/$(OBJDIR)/build-in.o
+endif
 
-## check build-in files before make static and dyn
-dep-before:
-	@for i in $(buildin-files); do   \
-		fname=$$i ;   \
-		ffname=${fname%%/*} ; \
-		if [[ ! -f $$i ]] && [[ $$ffname != "demo" ]] ; then   \
-			$(ECHO) "\n\t[ $$i ] not exist, warning!\n";   \
-		fi;    \
-	done
+ifeq ("$(QRCODE)", "y")
+	file-dirs += qrcodec
+	OBJS += qrcode/$(OBJDIR)/build-in.o
+endif
 
+ifeq ("$(RECORDSERVER)", "y")
+	file-dirs += recordserver
+	OBJS += recordserver/$(OBJDIR)/build-in.o
+endif
+
+ifeq (x$(JKPROTOCOL), xy)
+	file-dirs += jkprotocol
+	OBJS += jkprotocol/$(OBJDIR)/build-in.o
+endif
+
+ifeq (x$(OPENAV), xy)
+	file-dirs += openav
+	OBJS += openav/$(OBJDIR)/build-in.o
+endif
+
+ifeq (x$(PROTOCOL), xy)
+	file-dirs += protocol
+	OBJS += protocol/$(OBJDIR)/build-in.o
+endif
+
+all: generate_config dirs static dyn
+
+dirs:
+	@$(ECHO) "All to Build: $(file-dirs)"
+	@for i in $(file-dirs); \
+		do \
+		$(ECHO) "\n==========================="; \
+		$(ECHO) "\tBuild $$i "; \
+		$(ECHO) "===========================\n"; \
+		cd $$i; \
+		make ; \
+		cd .. ; \
+		done
+
+generate_config:
+	@$(ECHO) "==== Generate Version ===="
+	@ [ -f $(CONFIG_FILE) ] && rm -rf $(CONFIG_FILE); \
+		DATA=`date +%Y%m%d%H%M%S`; \
+		GITVERSION=`./tools/setlocalversion`; \
+		BUILD_GIT_VERSION=$$DATA.git-$$GITVERSION; \
+		echo "# generated git version" >> $(CONFIG_FILE); \
+		echo "#define BUILD_GIT_VERSION $$BUILD_GIT_VERSION" >> $(CONFIG_FILE)
 
 static:
-	@$(ECHO) " \t Generate \t $(STATIC_JKLIB)"
-	$(Q) $(AR) -r -o $(LIBDIR_PATH)/$(STATIC_JKLIB) $(buildin-files)
+	@$(ECHO) " \n\t Generate \t $(STATIC_JKLIB)"
+	$(Q) $(AR) -r -o $(LIBDIR_PATH)/$(STATIC_JKLIB) $(OBJS) $(CPPOBJS)
 	$(Q) ln -sf $(LIBDIR_PATH)/$(STATIC_JKLIB) $(LIBDIR_PATH)/$(LINKSTATICJK)
 
 dyn:
-	@$(ECHO) " \t Generate \t $(DYNJKLIB)"
-	$(Q) $(CC) -fPIC -shared -o $(LIBDIR_PATH)/$(DYNJKLIB) $(buildin-files)
+	@$(ECHO) " \n\t Generate \t $(DYNJKLIB)"
+	$(Q) $(CC) -fPIC -shared -o $(LIBDIR_PATH)/$(DYNJKLIB) $(OBJS)
 	$(Q) ln -sf $(LIBDIR_PATH)/$(DYNJKLIB) $(LIBDIR_PATH)/$(LINKJK)
-
-dep:
-	@if [ ! -d $(HOME)/libs ]; then   \
-	 $(ECHO) "No $(HOME)/libs directory, please svn co http://192.168.6.16/svn/application/binary/libs ${HOME}/libs";   \
-	 exit 1;   \
-	 fi
-
 
 createdir:
 	@if [ ! -f config.mk ]; then   \
@@ -58,23 +93,31 @@ createdir:
 		$(ECHO) "    make x86/hi3515/dm365/hi3535";  \
 		exit 1; \
 	fi
-	@mkdir -p $(INSTALL_DIRS)/lib
 
 install:
 	@$(ECHO) "\t cp $(INSTALL_HEADERS) $(INSTALL_DIRS)/include/"
-	$(Q) cp $(INSTALL_HEADERS) $(INSTALL_DIRS)/include/
-	$(Q) cp $(INSTALL_LIBS) $(INSTALL_DIRS)/lib/
+	$(Q) cp -vrf $(INSTALL_HEADERS) $(INSTALL_DIRS)/include/
+	$(Q) cp -rvf $(INSTALL_LIBS) $(INSTALL_DIRS)/lib/
 
 clean:
-	@for i in $(filedirs-y); do   \
-		echo ""; \
-		cd $$i; make clean; cd ..;   \
-		echo ""; \
-	done
+	@for i in $(file-dirs); \
+		do \
+		$(ECHO) "\nClean $$i \n"; \
+		cd $$i; \
+		make clean; \
+		cd .. ; \
+		done
 	rm outlib/$(OS)/lib/* -rf
 
 distclean: clean
-	$(Q)rm -rf `find . -name ".obj*"`
+	@for i in $(file-dirs); \
+		do \
+		$(ECHO) "\ndistclean $$i \n"; \
+		cd $$i; \
+		make distclean; \
+		cd .. ; \
+		done
+	$(Q)rm -rf $(OBJDIR)
 
 help:
 	@$(ECHO) "\t make x86/dm6446/dm365/hi3515/hi3518/hi3535"
@@ -105,6 +148,12 @@ hi3518:
 
 hi3535:
 	@$(ECHO) "OS=hi3535" > config.mk
+
+rk3308:
+	@$(ECHO) "OS=rk3308" > config.mk
+
+mips:
+	@$(ECHO) "OS=mips" > config.mk
 
 DEBUG:
 	@$(ECHO) "BVDEBUG=yes" >> config.mk

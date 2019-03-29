@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/fiforead.dir/common/misc/cm_fifo.c.o CMakeFiles/fiforead.dir/common/cm_print.c.o  -o fiforead  -L/opt/data/libs/x264/amd64/lib  -L/opt/data/libs/x265/amd64/lib  -L/opt/data/libs/opencv-4.0.1/amd64/lib -Wl,-rpath,/opt/data/libs/x264/amd64/lib:/opt/data/libs/x265/amd64/lib:/opt/data/libs/opencv-4.0.1/amd64/lib -lpthread 

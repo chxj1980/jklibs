@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/demo_timer.dir/base_timer.c.o  -o demo_timer  -L/opt/data/libs/x264/amd64/lib  -L/opt/data/libs/x265/amd64/lib  -L/opt/data/libs/opencv-4.0.1/amd64/lib -Wl,-rpath,/opt/data/libs/x264/amd64/lib:/opt/data/libs/x265/amd64/lib:/opt/data/libs/opencv-4.0.1/amd64/lib -lrt 
