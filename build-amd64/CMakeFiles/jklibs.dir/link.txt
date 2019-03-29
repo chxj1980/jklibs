@@ -1,2 +1,0 @@
-/usr/bin/ar qc libjklibs.a  CMakeFiles/jklibs.dir/storage/avstorage.c.o CMakeFiles/jklibs.dir/common/cm_utils.c.o CMakeFiles/jklibs.dir/common/cm_print.c.o CMakeFiles/jklibs.dir/recordserver/cm_avprocess.c.o CMakeFiles/jklibs.dir/codec/codec.c.o CMakeFiles/jklibs.dir/codec/encoder.c.o CMakeFiles/jklibs.dir/codec/enc_h265.c.o CMakeFiles/jklibs.dir/codec/cmyuv.c.o
-/usr/bin/ranlib libjklibs.a

@@ -1,1 +1,0 @@
-/usr/bin/cc   -rdynamic CMakeFiles/demo_base.dir/base_demo.c.o  -o demo_base  -L/opt/data/libs/x264/amd64/lib  -L/opt/data/libs/x265/amd64/lib  -L/opt/data/libs/opencv-4.0.1/amd64/lib -Wl,-rpath,/opt/data/libs/x264/amd64/lib:/opt/data/libs/x265/amd64/lib:/opt/data/libs/opencv-4.0.1/amd64/lib -lm 

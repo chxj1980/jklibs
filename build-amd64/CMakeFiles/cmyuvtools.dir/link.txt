@@ -1,1 +1,0 @@
-/usr/bin/cc   -rdynamic CMakeFiles/cmyuvtools.dir/codec/cmyuvtools.c.o CMakeFiles/cmyuvtools.dir/codec/cmyuv.c.o CMakeFiles/cmyuvtools.dir/common/cm_utils.c.o CMakeFiles/cmyuvtools.dir/common/cm_print.c.o  -o cmyuvtools  -L/opt/data/libs/x264/amd64/lib  -L/opt/data/libs/x265/amd64/lib  -L/opt/data/libs/opencv-4.0.1/amd64/lib 
