@@ -6,6 +6,10 @@ add_executable(demo_base
 	base_demo.c
 	)
 
+target_link_libraries(demo_base
+	m
+	)
+
 add_executable(demo_timer
 	base_timer.c
 	)

@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <errno.h>
 #include <string.h>
+#include <math.h>
 
 #include "cm_print.h"
 
@@ -88,6 +89,19 @@ int base_demo_priority()
 	return 0;
 }
 
+int base_one()
+{
+	int i;
+	for (i = 0; i <= 12; i++) {
+		int result = i * 2.5;
+		//int result = ceil(i * 2.5);
+		printf("%d*2.5 = %d\n", i, result);
+	}
+
+	printf("\n");
+	return 0;
+}
+
 int main(int argc, char **argv) {
 
 	if (argc > 1) {
@@ -108,5 +122,7 @@ int main(int argc, char **argv) {
     base_demo_shit_length();
 
 	base_demo_priority();
+
+	base_one();
     return 0;
 }
