@@ -14,5 +14,7 @@ recordserver - concolude codec and vdev
 ## 编译
 ```
 make xxx/xxx - with different platform
+./tools/build.sh - build
+  Change build.sh for ARCH
 ```
 
